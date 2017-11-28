@@ -1,0 +1,15 @@
+[Unit]
+Description=Run hciattach when HCI UART device becomes available
+ConditionPathExists=/dev/ttymxc3
+After=getty.target bluetooth.service generic-board-startup.service
+ConditionPathExists=/dev/ttymxc3
+
+[Service]
+User=root
+ExecStart=/usr/bin/hummingboard_btattach.sh
+ExecStop=-/usr/bin/pkill hciattach
+#Restart=always
+#RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
