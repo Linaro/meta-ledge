@@ -1,0 +1,30 @@
+Bluetooth with Solidrun HummingBoard2 v1.5
+-------------------------------------------
+
+The Hummingboard2 have a combo wifi/bluetooth TI wl18xx module.
+
+To enable the bluetooth part you need to attach the bluettoh stack to the
+serial port associated to bluetooth component:
+	/usr/bin/hciattach /dev/ttymxc3 texas 3000000 flow
+
+NOTE: the hciattach does not work all time you need to call it several time to
+have the bluetooth functionnal.
+
+With systemd, the task to attach bluetooth are made by the service hummingboard_btattach.service
+.
+This serrvice take some time at startup to statu the bluetooth.
+The Bluetooth must be operational when you see the following kernel traces on
+console:
+[   47.052408] Bluetooth: HCI UART driver ver 2.3
+[   47.056889] Bluetooth: HCI UART protocol H4 registered
+[   47.062115] Bluetooth: HCI UART protocol BCSP registered
+[   47.067569] Bluetooth: HCI UART protocol LL registered
+[   47.072793] Bluetooth: HCI UART protocol ATH3K registered
+[   47.078205] Bluetooth: HCI UART protocol Three-wire (H5) registered
+[   47.084824] Bluetooth: HCI UART protocol Intel registered
+[   47.090684] Bluetooth: HCI UART protocol Broadcom registered
+[   47.096369] Bluetooth: HCI UART protocol QCA registered
+[   47.246807] Bluetooth: BNEP (Ethernet Emulation) ver 1.3
+[   47.252197] Bluetooth: BNEP filters: protocol multicast
+[   47.257445] Bluetooth: BNEP socket layer initialized
+
