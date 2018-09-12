@@ -19,11 +19,10 @@ PV = "4.17"
 S = "${WORKDIR}/linux-4.17.2"
 
 KERNEL_DEFCONFIG        = "multi_v7_defconfig"
-KERNEL_CONFIG_FRAGMENTS = " ${WORKDIR}/fragment-02-systemd.config "
-KERNEL_CONFIG_FRAGMENTS = " ${WORKDIR}/fragment-10-ledge.config "
+KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-02-systemd.config "
+KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-10-ledge.config "
 
-SRC_URI += "file://fragment-02-systemd.config"
-SRC_URI += "file://fragment-10-ledge.config"
+SRC_URI_append = " file://fragment-10-ledge.config "
 
 COMPATIBLE_MACHINE = "(ledge-hummingboard2|ledge-ti-am572x)"
 
@@ -34,12 +33,12 @@ do_configure() {
 
     if [ ! -z ${KERNEL_DEFCONFIG} ];
     then
-        bbnote "Kernel customized: configuration of linux STI by using DEFCONFIG: ${KERNEL_DEFCONFIG}"
+        bbnote "Kernel customized: configuration of linux by using DEFCONFIG: ${KERNEL_DEFCONFIG}"
         oe_runmake ${PARALLEL_MAKE} -C ${S} O=${B} CC="${KERNEL_CC}" LD="${KERNEL_LD}" ${KERNEL_DEFCONFIG}
     else
         if [ ! -z ${KERNEL_EXTERNAL_DEFCONFIG} ];
         then
-            bbnote "Kernel customized: configuration of linux STI by using external DEFCONFIG"
+            bbnote "Kernel customized: configuration of linux by using external DEFCONFIG"
             install -m 0644 ${WORKDIR}/${KERNEL_EXTERNAL_DEFCONFIG} ${B}/.config
             oe_runmake -C ${S} O=${B} CC="${KERNEL_CC}" LD="${KERNEL_LD}" oldconfig
         else
