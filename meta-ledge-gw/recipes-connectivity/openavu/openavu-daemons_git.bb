@@ -9,42 +9,44 @@ LIC_FILES_CHKSUM = " \
     file://avdecc-lib/LICENSE;md5=89e9087cf8523e423297c8e41541ac39 \
     "
 
-PR = "r0"
+PV = "1.1+git${SRCPV}"
 
-DEPENDS_append = " libpcap alsa-lib glib-2.0 libsndfile1 cmake-native jack"
-DEPENDS_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'gstreamer', 'gstreamer1.0 gstreamer1.0-plugins-base', '', d)} "
+DEPENDS = " libpcap alsa-lib glib-2.0 libsndfile1 cmake-native jack \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'gstreamer', 'gstreamer1.0 gstreamer1.0-plugins-base', '', d)} \
+    "
 
-SRC_URI = "gitsm://github.com/AVnu/OpenAvnu.git;protocol=https"
 SRCREV = "df587b7509a4dee7fa79a40eec5d6327310c472b"
-
-SRC_URI += " \
+SRC_URI = "gitsm://github.com/AVnu/OpenAvnu.git;protocol=https \
     file://0001-MAKEFILE-disable-igb-for-arm-platform.patch \
     file://0002-CMAKE-pcap-support-through-openembedded.patch \
+    file://0003-add-GNU_HASH-in-the-elf-binary.patch \
     file://run_openavu_daemon.sh \
     "
 
 # to force the usage only with arm
-COMPATIBLE_MACHINE = "arm*"
+COMPATIBLE_MACHINE = "(arm*|aarch64)"
 
-S = "${WORKDIR}/git/"
+S = "${WORKDIR}/git"
 
-EXTRA_OEMAKE += " \
+EXTRA_OEMAKE = " \
     AVB_FEATURE_IGB=0 \
     ${@bb.utils.contains('DISTRO_FEATURES','gstreamer','AVB_FEATURE_GSTREAMER=1','AVB_FEATURE_GSTREAMER=0',d)} \
     IGB_LAUNCHTIME_ENABLED=0 \
     "
 
 do_compile() {
+    # Variables used via several makefile/cmake layers
     export PCAPDIR=${RECIPE_SYSROOT}/usr/
     export PCAP_INCLUDE_DIR=${RECIPE_SYSROOT}/usr/include
+
     # compile mprd, maap, shaper, gptp
-    oe_runmake -C ${S}/ daemons_all
+    oe_runmake -C ${S} daemons_all
     # compile avdecc library
-    oe_runmake -C ${S}/ avtp_avdecc
-    oe_runmake -C ${S}/ avtp_pipeline
+    oe_runmake -C ${S} avtp_avdecc
+    oe_runmake -C ${S} avtp_pipeline
     # examples
-    oe_runmake -C ${S}/ examples_common
-    oe_runmake -C ${S}/ simple_listener mrp_client jackd-listener
+    oe_runmake -C ${S} examples_common
+    oe_runmake -C ${S} simple_listener mrp_client jackd-listener
 }
 
 do_install() {
@@ -82,6 +84,7 @@ do_install() {
     #install script as example
     install -m 0755 ${WORKDIR}/run_openavu_daemon.sh ${D}${datadir}/openavu/
 }
-PROVIDES += "openavu-examples"
+
+PACKAGES =+ "openavu-examples"
 FILES_${PN} += "${datadir}/openavu/"
 FILES_openavu-examples = "${datadir}/openavu/examples/"
