@@ -22,10 +22,10 @@ KERNEL_DEFCONFIG        = "multi_v7_defconfig"
 KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-02-systemd.config "
 KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-10-ledge.config "
 
+SRC_URI_append = " file://fragment-02-systemd.config "
 SRC_URI_append = " file://fragment-10-ledge.config "
 
 COMPATIBLE_MACHINE = "(ledge-hummingboard2|ledge-ti-am572x)"
-
 
 KERNEL_CONFIG_COMMAND = "oe_runmake -C ${S} O=${B} ${KERNEL_DEFCONFIG}"
 do_configure() {
@@ -72,10 +72,7 @@ do_configure() {
     cp -a ${B}/defconfig ${DEPLOYDIR}
 }
 
-
-
 # ledge-ti-am572x specific
 KERNEL_EXTRA_ARGS_append_ledge-ti-am572x += "LOADADDR=${UBOOT_ENTRYPOINT}"
 RDEPENDS_${KERNEL_PACKAGE_NAME}-base_append_ledge-ti-am572x = " prueth-fw"
 FILES_${KERNEL_PACKAGE_NAME}-devicetree_append_ledge-ti-am572x += "/${KERNEL_IMAGEDEST}/*.itb"
-
