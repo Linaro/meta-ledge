@@ -1,7 +1,7 @@
 # Copyright (C) 2018, STMicroelectronics - All Rights Reserved
 # Released under the MIT license (see COPYING.MIT for the terms)
 
-DESCRIPTION = "OpenAVU daemon: mprd, maap, shaper, gptp"
+DESCRIPTION = "OpenAVNU daemon: mprd, maap, shaper, gptp"
 HOMEPAGE = "https://github.com/AVnu/OpenAvnu"
 LICENSE = "BSD & GPLv2"
 LIC_FILES_CHKSUM = " \
@@ -20,7 +20,7 @@ SRC_URI = "gitsm://github.com/AVnu/OpenAvnu.git;protocol=https \
     file://0001-MAKEFILE-disable-igb-for-arm-platform.patch \
     file://0002-CMAKE-pcap-support-through-openembedded.patch \
     file://0003-add-GNU_HASH-in-the-elf-binary.patch \
-    file://run_openavu_daemon.sh \
+    file://run_openavnu_daemon.sh \
     "
 
 # to force the usage only with arm
@@ -51,8 +51,8 @@ do_compile() {
 
 do_install() {
     install -d ${D}${bindir}
-    install -d ${D}${datadir}/openavu
-    install -d ${D}${datadir}/openavu/examples
+    install -d ${D}${datadir}/openavnu
+    install -d ${D}${datadir}/openavnu/examples
 
     # install gptp
     install -m 0755 ${S}/daemons/gptp/linux/build/obj/daemon_cl ${D}${bindir}/gptp
@@ -72,19 +72,19 @@ do_install() {
     install -m 0755 ${S}/lib/avtp_pipeline/build/bin/openavb_harness ${D}${bindir}/
     install -m 0755 ${S}/lib/avtp_pipeline/build/bin/openavb_host ${D}${bindir}/
 
-    install -m 0755 ${S}/lib/avtp_pipeline/build/bin/avdecc.ini ${D}${datadir}/openavu/
+    install -m 0755 ${S}/lib/avtp_pipeline/build/bin/avdecc.ini ${D}${datadir}/openavnu/
 
     # install examples
-    install -m 0755 ${S}/examples/simple_listener/simple_listener ${D}${datadir}/openavu/examples/
-    install -m 0755 ${S}/examples/mrp_client/mrpl ${D}${datadir}/openavu/examples/
-    install -m 0755 ${S}/examples/mrp_client/mrpq ${D}${datadir}/openavu/examples/
-    install -m 0755 ${S}/examples/mrp_client/mrpValidate ${D}${datadir}/openavu/examples/
-    install -m 0755 ${S}/examples/jackd-listener/jack_listener ${D}${datadir}/openavu/examples/
+    install -m 0755 ${S}/examples/simple_listener/simple_listener ${D}${datadir}/openavnu/examples/
+    install -m 0755 ${S}/examples/mrp_client/mrpl ${D}${datadir}/openavnu/examples/
+    install -m 0755 ${S}/examples/mrp_client/mrpq ${D}${datadir}/openavnu/examples/
+    install -m 0755 ${S}/examples/mrp_client/mrpValidate ${D}${datadir}/openavnu/examples/
+    install -m 0755 ${S}/examples/jackd-listener/jack_listener ${D}${datadir}/openavnu/examples/
 
     #install script as example
-    install -m 0755 ${WORKDIR}/run_openavu_daemon.sh ${D}${datadir}/openavu/
+    install -m 0755 ${WORKDIR}/run_openavnu_daemon.sh ${D}${datadir}/openavnu/
 }
 
-PACKAGES =+ "openavu-examples"
-FILES_${PN} += "${datadir}/openavu/"
-FILES_openavu-examples = "${datadir}/openavu/examples/"
+PACKAGES =+ "openavnu-examples"
+FILES_${PN} += "${datadir}/openavnu/"
+FILES_openavnu-examples = "${datadir}/openavnu/examples/"
