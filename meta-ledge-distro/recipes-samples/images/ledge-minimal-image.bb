@@ -4,7 +4,7 @@ SUMMARY = "Basic console image"
 
 # For development, use ssh-server-dropbear instead of ssh-server-openssh which
 # allow root login via ssh.
-IMAGE_FEATURES += "package-management ssh-server-openssh hwcodecs \
+IMAGE_FEATURES += "package-management hwcodecs \
         ssh-server-dropbear allow-empty-password"
 
 CORE_IMAGE_BASE_INSTALL += " \

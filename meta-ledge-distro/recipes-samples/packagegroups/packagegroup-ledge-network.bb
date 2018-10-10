@@ -8,6 +8,13 @@ RDEPENDS_packagegroup-ledge-network = "\
     \
     ethtool \
     linuxptp \
+    tcpdump \
+    iputils \
+    iputils-arping \
+    iputils-clockdiff \
+    iputils-ping \
+    iputils-tracepath \
+    iputils-traceroute6 \
     \
     open62541 \
     open62541-examples \
