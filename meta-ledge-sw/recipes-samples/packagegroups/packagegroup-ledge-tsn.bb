@@ -6,4 +6,6 @@ inherit packagegroup
 RDEPENDS_packagegroup-ledge-tsn = "\
     openavnu-daemons \
     linuxptp \
+    open62541 \
+    open62541-examples \
     "
