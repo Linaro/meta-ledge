@@ -11,6 +11,7 @@ CORE_IMAGE_BASE_INSTALL += "\
     cpufrequtils \
     bluez5-noinst-tools \
     docker \
+    ostree \
     pciutils \
     packagegroup-ledge-network \
     ${@bb.utils.contains("MACHINE_FEATURES", "optee", "packagegroup-ledge-optee", "", d)} \
