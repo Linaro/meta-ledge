@@ -26,7 +26,7 @@ KERNEL_CONFIG_COMMAND = "oe_runmake -C ${S} O=${B} ${KERNEL_DEFCONFIG}"
 SRC_URI_append = " file://fragment-02-systemd.config "
 SRC_URI_append = " file://fragment-10-ledge.config "
 
-COMPATIBLE_MACHINE = "(armada37xx|armada38x|armada70xx|armada80xx)"
+COMPATIBLE_MACHINE = "(ledge-espressobin)"
 
 do_configure() {
     touch ${B}/.scmversion ${S}/.scmversion
