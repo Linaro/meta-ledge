@@ -3,7 +3,6 @@ HOMEPAGE = "www.kernel.org"
 LICENSE = "GPLv2"
 SECTION = "kernel"
 DEPENDS = ""
-PR = "r0"
 
 LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 
