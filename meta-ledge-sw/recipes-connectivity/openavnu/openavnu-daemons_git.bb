@@ -15,8 +15,14 @@ DEPENDS = " libpcap alsa-lib glib-2.0 libsndfile1 cmake-native jack \
     ${@bb.utils.contains('DISTRO_FEATURES', 'gstreamer', 'gstreamer1.0 gstreamer1.0-plugins-base', '', d)} \
     "
 
-SRCREV = "df587b7509a4dee7fa79a40eec5d6327310c472b"
-SRC_URI = "gitsm://github.com/AVnu/OpenAvnu.git;protocol=https \
+SRCREV_openavnu = "df587b7509a4dee7fa79a40eec5d6327310c472b"
+SRCREV_cpputest = "1d95a3905413d99fddb5bcbd30be35a16dbf9119"
+SRCREV_avdecc = "a04fef499f843b8a7f596bc15441a847b9a18b7a"
+
+SRCREV_FORMAT = "openavnu-cpputest"
+SRC_URI = "git://github.com/AVnu/OpenAvnu.git;protocol=https;name=openavnu \
+    git://github.com/AVnu/cpputest.git;protocol=https;name=cpputest;nobranch=1;destsuffix=git/thirdparty/cpputest \
+    git://github.com/AVnu/avdecc-lib.git;protocol=https;name=avdecc;nobranch=1;destsuffix=git/avdecc-lib \
     file://0001-MAKEFILE-disable-igb-for-arm-platform.patch \
     file://0002-CMAKE-pcap-support-through-openembedded.patch \
     file://0003-add-GNU_HASH-in-the-elf-binary.patch \

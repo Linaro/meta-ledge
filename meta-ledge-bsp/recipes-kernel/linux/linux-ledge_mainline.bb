@@ -3,7 +3,6 @@ HOMEPAGE = "www.kernel.org"
 LICENSE = "GPLv2"
 SECTION = "kernel"
 DEPENDS = ""
-PR = "r0"
 
 LIC_FILES_CHKSUM = "file://COPYING;md5=bbea815ee2795b2f4230826c0c6b8814"
 
@@ -15,7 +14,7 @@ SRC_URI = "https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-${LEDGE_KVERSION}.
 SRC_URI[kernel.md5sum] = "6de5f0c6c0eb5d27386579894fcf31ab"
 SRC_URI[kernel.sha256sum] = "64d637c65c0b210659ff1719bcc9e34c5576fc3a4df9aa67087fa00bc2e08829"
 
-PV = "4.19.1"
+PV = "mainline-4.19.1"
 S = "${WORKDIR}/linux-4.19.1"
 
 KERNEL_DEFCONFIG = "defconfig"
