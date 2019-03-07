@@ -14,6 +14,9 @@ CORE_IMAGE_BASE_INSTALL += "\
     ostree \
     pciutils \
     packagegroup-ledge-network \
+    packagegroup-ledge-containers \
+    packagegroup-ledge-python3 \
+    packagegroup-core-selinux \
     ${@bb.utils.contains("MACHINE_FEATURES", "optee", "packagegroup-ledge-optee", "", d)} \
     ${@bb.utils.contains("MACHINE_FEATURES", "tsn", "packagegroup-ledge-tsn", "", d)} \
     "
