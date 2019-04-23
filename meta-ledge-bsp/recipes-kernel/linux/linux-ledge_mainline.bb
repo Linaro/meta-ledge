@@ -8,14 +8,20 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=bbea815ee2795b2f4230826c0c6b8814"
 
 inherit kernel siteinfo
 
-LEDGE_KVERSION = "4.19.1"
+LEDGE_KVERSION = "5.1-rc5"
 
-SRC_URI = "https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-${LEDGE_KVERSION}.tar.xz;name=kernel"
-SRC_URI[kernel.md5sum] = "6de5f0c6c0eb5d27386579894fcf31ab"
-SRC_URI[kernel.sha256sum] = "64d637c65c0b210659ff1719bcc9e34c5576fc3a4df9aa67087fa00bc2e08829"
+# Stable kernel URL
+# SRC_URI = "https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-${LEDGE_KVERSION}.tar.xz;name=kernel"
 
-PV = "mainline-4.19.1"
-S = "${WORKDIR}/linux-4.19.1"
+# RC kernel URL
+SRC_URI = "https://git.kernel.org/torvalds/t/linux-${LEDGE_KVERSION}.tar.gz;name=kernel"
+SRC_URI[kernel.md5sum] = "fb95f2fd96a41ca70021058fe724d184"
+SRC_URI[kernel.sha256sum] = "8778d4872556c7eb0e2529443b965113b022b62649854188085de68f9c522c9c"
+
+SRC_URI_append_ledge-stm32mp157c-dk2 = " file://0001-stm32mp1-support-of-board-dk1-and-dk2.patch "
+
+PV = "mainline-5.1-rc5"
+S = "${WORKDIR}/linux-5.1-rc5"
 
 KERNEL_DEFCONFIG = "defconfig"
 KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-02-systemd.config "
