@@ -72,3 +72,42 @@ do_configure() {
     oe_runmake -C ${B} savedefconfig
     cp -a ${B}/defconfig ${DEPLOYDIR}
 }
+
+# -----------------------------------------------------
+#             EFI
+# Determine the target arch for kernel as EFI firmware
+python __anonymous () {
+    import re
+    target = d.getVar('TARGET_ARCH')
+    if target == "x86_64":
+        kernel_efi_image = "bootx64.efi"
+    elif re.match('i.86', target):
+        kernel_efi_image = "bootia32.efi"
+    elif re.match('aarch64', target):
+        kernel_efi_image = "bootaa64.efi"
+    elif re.match('arm', target):
+        kernel_efi_image = "bootarm.efi"
+    else:
+        raise bb.parse.SkipRecipe("kernel efi is incompatible with target %s" % target)
+    d.setVar("KERNEL_EFI_IMAGE", kernel_efi_image)
+}
+
+do_install_append() {
+#    if [ "${@bb.utils.contains('DISTRO_FEATURES', 'efi', '1', '0', d)}" = "1" ]; then
+        for t in ${KERNEL_IMAGETYPE} ${KERNEL_ALT_IMAGETYPE}; do
+            if [ "$t" = "zImage" ]; then
+                install -d ${D}/boot/efi/boot
+                ln -s ../../zImage ${D}/boot/efi/boot/${KERNEL_EFI_IMAGE}
+            fi
+        done
+
+#    fi
+}
+python __anonymous () {
+    types = d.getVar('KERNEL_IMAGETYPES') or ""
+    kname = d.getVar('KERNEL_PACKAGE_NAME') or "kernel"
+    for type in types.split():
+        typelower = type.lower()
+        if typelower == 'zimage':
+            d.appendVar('FILES_' + kname + '-image-' + typelower, ' /boot/efi/boot ')
+}
