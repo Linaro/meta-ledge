@@ -1,0 +1,21 @@
+# SDCARD mapping
+# =========================================================================================================
+# =            =            =            =            =            =            =            =            =
+# =     fsbl1  =     fsbl2  =      ssbl  =      teeh  =      teed  =      teex  =    bootfs  =   rootfs   =
+# =            =            =            =            =            =            =            =            =
+# = mmcblk0p1  = mmcblk0p2  = mmcblk0p3  = mmcblk0p4  = mmcblk0p5  = mmcblk0p6  = mmcblk0p7  = mmcblk0p8  =
+# =    (1 )    =    (2 )    =    (3 )    =    (4 )    =    (5 )    =    (6 )    =    (7 )    =    (8 )    =
+# =            =            =            =            =            =            =            =            =
+# =========================================================================================================
+#Opt: P=Populate, E=Empty
+#Type: Binary=raw partition, FileSystem=fs partition(ext4, fat)
+#Ofsset on hexa
+#Opt	Name	Type	Offset	Binary
+P	fsbl1	Binary	0x00004400	spl/u-boot-spl.stm32-basic
+P	fsbl2	Binary	0x00044400	spl/u-boot-spl.stm32-basic
+P	ssbl	Binary	0x00084400	u-boot-basic.img
+E	teeh	Binary	0x00284400	optee/tee-header_v2.stm32
+E	teed	Binary	0x002C4400	optee/tee-pageable_v2.stm32
+E	teex	Binary	0x00304400	optee/tee-pager_v2.stm32
+P	bootfs	FileSystem	0x00344400	ledge-image-bootfs-ledge-stm32mp157c-dk2.ext4
+P	rootfs	FileSystem	0x04344400	ledge-gateway-ledge-stm32mp157c-dk2.ext4
