@@ -51,7 +51,7 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	e2fsprogs \
 	e2fsprogs-libs \
 	ebtables \
-	efibootmgr
+	efibootmgr \
 	efi-filesystem \
 	efivar-libs \
 	elfutils-default-yama-scope \
