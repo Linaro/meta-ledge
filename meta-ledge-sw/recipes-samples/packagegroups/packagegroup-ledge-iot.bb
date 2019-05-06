@@ -56,7 +56,7 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	efivar-libs \
 	elfutils-default-yama-scope \
 	elfutils-libelf \
-	elfutils-libs
+	elfutils-libs \
 	expat \
 	file \
 	file-libs \
@@ -142,12 +142,12 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	pam \
 	parted \
 	passwd \
-	pciutils-libs
+	pciutils-libs \
 	pcre \
 	pcre2 \
 	pinentry \
 	pkgconf \
-	pkgconf-m4
+	pkgconf-m4 \
 	pkgconf-pkg-config \
 	podman \
 	policycoreutils \
@@ -262,7 +262,7 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	usbguard \
 	usermode \
 	util-linux \
-	vim-minimal
+	vim-minimal \
 	which \
 	wpan-tools \
 	wpa_supplicant \
