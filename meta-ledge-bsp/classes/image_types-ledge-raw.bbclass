@@ -13,7 +13,6 @@ do_image_ledgeraw[depends] += " \
         gptfdisk-native:do_populate_sysroot \
         dosfstools-native:do_populate_sysroot \
         coreutils-native:do_populate_sysroot \
-        virtual/kernel:do_deploy \
         virtual/bootloader:do_deploy \
         raw-tools-native:do_deploy \
         ledge-flashlayout:do_deploy \

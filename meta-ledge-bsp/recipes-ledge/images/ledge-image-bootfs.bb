@@ -6,6 +6,7 @@ LICENSE = "MIT"
 inherit core-image
 
 IMAGE_FSTYPES_remove = "wic"
+IMAGE_FSTYPES_remove = "ledgeraw"
 
 IMAGE_NAME_SUFFIX = ".bootfs"
 
