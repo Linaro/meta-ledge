@@ -159,7 +159,6 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	procps-ng \
 	protobuf \
 	protobuf-c \
-	publicsuffix-list-dafsa \
 	python3 \
 	python3-asn1crypto \
 	python3-audit \
@@ -450,6 +449,7 @@ RDEPENDS_packagegroup-ledge-iot = "\
 #rpm-ostree-libs
 #rpm-plugin-selinux
 #rpm-sign-libs
+#publicsuffix-list-dafsa
 #tpm2-tools
 #tpm2-tss
 #shim-x64 
