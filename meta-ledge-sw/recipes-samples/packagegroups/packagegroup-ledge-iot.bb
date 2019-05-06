@@ -39,9 +39,9 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	device-mapper \
 	device-mapper-event \
 	device-mapper-persistent-data \
-	dhcp-client
-	dhcp-common
-	dhcp-libs
+	dhcp-client \
+	dhcp-common \
+	dhcp-libs \
 	diffutils \
 	dnf-data \
 	dnsmasq \
@@ -72,9 +72,9 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	gawk \
 	gettext \
 	gettext-libs \
-	glib2
-	glibc
-	glibc-common
+	glib2 \
+	glibc \
+	glibc-common \
 	gmp \
 	gnupg2 \
 	gnutls \
