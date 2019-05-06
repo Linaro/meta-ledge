@@ -23,7 +23,6 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	dnsmasq \
 	e2fsprogs \
 	ebtables \
-	efibootmgr \
 	expat \
 	file \
 	findutils \
@@ -52,7 +51,6 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	lz4 \
 	mpfr \
 	ncurses \
-	ncurses-libs \
 	nettle \
 	net-tools \
 	nftables \
@@ -455,3 +453,5 @@ RDEPENDS_packagegroup-ledge-iot = "\
 #xmlrpc-c-client
 #xz-libs
 #zchunk-libs
+#ncurses-libs
+#efibootmgr
