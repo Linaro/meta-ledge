@@ -42,6 +42,7 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	grub-bootconf \
 	info \
 	ipcalc \
+	iproute2 \
 	iptables \
 	iputils \
 	jansson \
@@ -174,7 +175,6 @@ RDEPENDS_packagegroup-ledge-iot = "\
 #hostname
 #ima-evm-utils
 #initial-setup
-#iproute
 #ipset
 #ipset-libs
 #iptables-libs
