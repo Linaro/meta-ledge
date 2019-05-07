@@ -33,6 +33,7 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	gettext \
 	gmp \
 	gnutls \
+	gnupg \
 	gobject-introspection \
 	gpgme \
 	grep \
@@ -169,8 +170,6 @@ RDEPENDS_packagegroup-ledge-iot = "\
 #glibc
 #glibc-common
 #glibc-langpack-en
-#gnupg2
-#gnupg2
 #gomtree
 #hostname
 #ima-evm-utils
