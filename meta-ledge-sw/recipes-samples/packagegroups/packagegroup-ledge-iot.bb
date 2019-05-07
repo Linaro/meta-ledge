@@ -67,7 +67,6 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	libpcre2 \
 	pinentry \
 	packagegroup-security-tpm2 \
-	pkgconf \
 	policycoreutils \
 	polkit \
 	popt \
@@ -335,6 +334,7 @@ RDEPENDS_packagegroup-ledge-iot = "\
 #p11-kit-trust
 #passwd
 #pciutils-libs
+#pkgconf
 #pkgconf-m4
 #pkgconf-pkg-config
 #podman
