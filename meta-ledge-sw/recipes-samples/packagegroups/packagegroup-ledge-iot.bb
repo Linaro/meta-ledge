@@ -37,6 +37,9 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	gpgme \
 	grep \
 	gzip \
+	grub \
+	grub-efi \
+	grub-bootconf \
 	info \
 	ipcalc \
 	iptables \
@@ -168,13 +171,6 @@ RDEPENDS_packagegroup-ledge-iot = "\
 #gnupg2
 #gnupg2
 #gomtree
-#grub2-common
-#grub2-efi-x64
-#grub2-pc
-#grub2-pc-modules
-#grub2-tools
-#grub2-tools-extra
-#grub2-tools-minimal
 #hostname
 #ima-evm-utils
 #initial-setup
