@@ -74,6 +74,7 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	readline \
 	rng-tools \
 	rsync \
+	runc-docker \
 	satyr \
 	screen \
 	sed \
@@ -430,7 +431,6 @@ RDEPENDS_packagegroup-ledge-iot = "\
 #rpm-ostree-libs
 #rpm-plugin-selinux
 #rpm-sign-libs
-#runc
 #selinux-policy
 #selinux-policy-targeted
 #setup
