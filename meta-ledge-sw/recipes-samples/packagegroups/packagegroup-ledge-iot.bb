@@ -38,9 +38,6 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	gpgme \
 	grep \
 	gzip \
-	grub \
-	grub-efi \
-	grub-bootconf \
 	info \
 	ipcalc \
 	iproute2 \
@@ -69,6 +66,7 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	libpcre \
 	libpcre2 \
 	pinentry \
+	packagegroup-security-tpm2 \
 	pkgconf \
 	policycoreutils \
 	polkit \
@@ -437,8 +435,6 @@ RDEPENDS_packagegroup-ledge-iot = "\
 #systemd-libs
 #systemd-udev
 #teamd
-#tpm2-tools
-#tpm2-tss
 #usbguard
 #usermode
 #vim-minimal
@@ -448,3 +444,6 @@ RDEPENDS_packagegroup-ledge-iot = "\
 #zchunk-libs
 #ncurses-libs
 #efibootmgr
+#grub
+#grub-efi
+#grub-bootconf
