@@ -11,6 +11,7 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	bash-completion \
 	brotli \
 	ca-certificates \
+	cloud-init \
 	checkpolicy \
 	chkconfig \
 	chrony \
@@ -110,7 +111,6 @@ RDEPENDS_packagegroup-ledge-iot = "\
 #clevis-dracut
 #clevis-luks
 #clevis-systemd
-#cloud-init
 #cloud-utils-growpart
 #containernetworking-plugins
 #containers-common
