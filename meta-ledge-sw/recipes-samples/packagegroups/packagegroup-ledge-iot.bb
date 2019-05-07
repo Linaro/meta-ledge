@@ -7,23 +7,34 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	acl \
 	attr \
 	audit \
+	augeas \
 	bash \
 	bash-completion \
+	bluez5 \
+	bluez5-noinst-tools \
 	brotli \
+	bzip2 \
 	ca-certificates \
 	cloud-init \
 	checkpolicy \
 	chkconfig \
 	chrony \
+	coreutils \
 	cpio \
 	cracklib \
 	criu \
 	cryptsetup \
 	curl \
 	diffutils \
+	dnf \
 	dnsmasq \
+	dracut \
 	e2fsprogs \
 	ebtables \
+	efibootmgr \
+	efivar \
+	elfutils \
+	elfutils-binutils \
 	expat \
 	file \
 	findutils \
@@ -31,9 +42,11 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	fuse \
 	gawk \
 	gettext \
+	gdbm \
+	glib-2.0 \
 	gmp \
-	gnutls \
 	gnupg \
+	gnutls \
 	gobject-introspection \
 	gpgme \
 	grep \
@@ -45,34 +58,99 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	iputils \
 	jansson \
 	json-c \
+	json-glib \
 	kbd \
+	kbd-keymaps \
 	kmod \
+	krb5 \
 	less \
-	libselinux \
+	libbytesize \
+	libpcre \
+	libpcre2 \
+	libblockdev \
+	libpwquality \
 	libpam \
+	libselinux \
 	lsof \
+	lua \
 	lvm2 \
+	lvm2-scripts \
+	lvm2-udevrules \
 	lz4 \
+	modemmanager \
+	mozjs \
 	mpfr \
 	ncurses \
 	nettle \
 	net-tools \
 	nftables \
+	nmap \
 	npth \
+	nss \
 	openldap \
 	openssl \
 	ostree \
+	p11-kit \
 	parted \
-	libpcre \
-	libpcre2 \
+	pciutils \
 	pinentry \
+	packagegroup-core-ssh-dropbear \
 	packagegroup-security-tpm2 \
 	policycoreutils \
-	polkit \
 	popt \
+	procps \
 	protobuf \
 	protobuf-c \
 	python3 \
+	python3-asn1crypto \
+	python3-babel \
+	python3-blivet \
+	python3-cffi \
+	python3-chardet \
+	python3-coverage \
+	python3-cryptography \
+	python3-dateutil \
+	python3-dbus \
+	python3-decorator \
+	python3-docker \
+	python3-docker-pycreds \
+	python3-pygobject \
+	python3-gpg \
+	python3-idna \
+	python3-iniparse \
+	python3-jinja2 \
+	python3-jsonpatch \
+	python3-jsonpointer \
+	python3-jsonschema \
+	python3-pykickstart \
+	python3-langtable \
+	python3-libreport \
+	python3-markupsafe \
+	python3-meh \
+	python3-ntplib \
+	python3-oauthlib \
+	python3-ordered-set \
+	python3-pid \
+	python3-ply \
+	python3-pycparser \
+	python3-pydbus \
+	python3-pyparted \
+	python3-pyserial \
+	python3-pysocks \
+	python3-pytz \
+	python3-pyudev \
+	python3-pyyaml \
+	python3-requests \
+	python3-requests-file \
+	python3-requests-ftp \
+	python3-rpm \
+	python3-setuptools \
+	python3-six \
+	python3-systemd \
+	python3-urllib3 \
+	python3-websocket-client \
+	python-setuptools \
+	qrencode \
 	readline \
 	rng-tools \
 	rsync \
@@ -80,7 +158,9 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	satyr \
 	screen \
 	sed \
-	setools-console \
+	setools \
+	shadow \
+	sqlite3 \
 	sudo \
 	systemd \
 	tar \
@@ -88,127 +168,91 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	traceroute \
 	tzdata \
 	util-linux \
+	vim-tiny \
 	which \
 	wpan-tools \
+	wpa-supplicant \
 	xfsprogs \
-	xmlrpc-c \
 	xz \
 	zlib \
 	zram \
 	"
 
 # Missing packages for Fedora-IoT sync
-#anaconda-tui
-#atomic
-#atomic-devmode
-#audit-libs
-#augeas-libs
-#authconfig
-#basesyste m
-#bind-export-libs
-#blivet-data
-#bluez
-#bluez-libs
-#bubblewrap
-#bzip2-libs
-#clevis
-#clevis-dracut
-#clevis-luks
-#clevis-systemd
-#cloud-utils-growpart
-#containernetworking-plugins
-#containers-common
-#container-selinux
-#coreutils-common
-#cracklib-dicts
-#crypto-policies
-#cryptsetup-libs
-#cyrus-sasl-lib
-#dbus
-#dbus-common
-#dbus-daemon
-#dbus-libs
-#dbus-tools
-#dbxtool
-#device-mapper
-#device-mapper-event
-#device-mapper-persistent-data
-#dhcp-client
-#dhcp-common
-#dhcp-libs
-#dnf-data
-#dracut
-#dracut-config-generic
-#dracut-network
-#e2fsprogs-libs
-#efi-filesystem
-#efivar-libs
-#elfutils-default-yama-scope
-#elfutils-libelf
-#elfutils-libs
-#fedora-gpg-keys
-#fedora-release
-#fedora-release-iot
-#fedora-repos
-#file-libs
-#filesystem
-#fipscheck
-#fipscheck-lib
-#firewalld
-#firewalld-filesystem
-#fuse-common
-#fuse-libs
-#fwupdate
-#fwupdate-efi
-#fwupdate-libs
-#gdbm-libs
-#gettext-libs
-#glib2
-#glibc
-#glibc-common
-#glibc-langpack-en
-#gomtree
-#hostname
-#ima-evm-utils
-#initial-setup
-#ipset
-#ipset-libs
-#iptables-libs
-#iptables-services
-#iwl1000-firmware
-#iwl100-firmware
-#iwl105-firmware
-#iwl135-firmware
-#iwl2000-firmware
-#iwl2030-firmware
-#iwl3160-firmware
-#iwl5000-firmware
-#iwl5150-firmware
-#iwl6000-firmware
-#iwl6050-firmware
-#iwl7260-firmware
-#jose
-#json-glib
-#kbd-legacy
-#kbd-misc
-#kernel
-#kernel-core
-#kernel-modules
-#kernel-tools
-#kernel-tools-libs
-#keyutils-libs
-#kmod-libs
-#krb5-libs
-#langtable
-#langtable-data
-#libacl
-#libaio
-#libarchive
-#libargon2
-#libassuan
-#libattr
-#libblkid
-#libblockdev
+# INFO about rpm fedora package: https://rpmfind.net/linux/rpm2html/search.php
+# anaconda see https://git.yoctoproject.org/git/meta-anaconda
+#
+# atomic : Tool for managing ProjectAtomic systems and containers
+# atomic-devmode
+# authconfig : Command line tool for setting up authentication from network services
+# basesystem : Skeleton package which defines a simple Mandriva Linux system	Mandriva devel cooker for i586
+# bind-export-libs : ISC libs for DHCP application
+# bubblewrap : Core execution tool for unprivileged containers
+# clevis : Automated decryption framework
+# clevis-dracut
+# clevis-luks
+# clevis-systemd
+# cloud-utils-growpart : Script for growing a partition
+# containernetworking-plugins : Some CNI network plugins, maintained by the containernetworking team.
+# containers-common : Configuration files for working with image signatures
+# container-selinux : SELinux policies for container runtimes
+# crypto-policies : Systemwide crypto policies
+# cyrus-sasl-lib : Shared libraries needed by applications which use Cyrus SASL
+# dbxtool : Secure Boot DBX updater
+# efi-filesystem : The basic directory layout for EFI machines
+# fedora-gpg-keys : Fedora RPM keys
+# fedora-release : Fedora release files
+# fedora-release-iot : Base package for Fedora IoT specific default configurations
+# fedora-repos : Fedora package repositories
+# filesystem : Basic Directory Layout
+# fipscheck : A library for integrity verification of FIPS validated modules
+# fipscheck-lib :  A library for integrity verification of FIPS validated modules
+# firewalld : A firewall daemon with D-Bus interface providing a dynamic firewall
+# firewalld-filesystem ! Firewalld directory layout and rpm macros
+# fwupdate : Tools to manage UEFI firmware updates
+# fwupdate-efi : UEFI binaries used by libfwup
+# fwupdate-libs : Library to manage UEFI firmware updates
+# gdbm-libs : Libraries files for gdbm
+# gomtree : Go CLI tool for mtree support
+# grub2-common : Provides files common to both grub2 and grub2-efi
+# grub2-efi : Boot-loader with support for EFI
+# grub2-pc : Bootloader with support for Linux, Multiboot, and more
+# grub2-pc-modules : Modules used to build custom grub images
+# grub2-tools : Support tools for GRUB.
+# grub2-tools-extra : Support tools for GRUB.
+# grub2-tools-minimal : Support tools for GRUB.
+# ostree-grub2 : GRUB2 integration for OSTree
+# ima-evm-utils : IMA/EVM support utilities
+# initial-setup : Initial system configuration utility
+# ipset : Netfilter ipset administration utility
+# ipset-libs : Shared library providing the IP sets functionality
+# iptables-services : iptables and ip6tables services for iptables
+# iwl1000-firmware : Firmware for Intel® PRO/Wireless 1000 B/G/N network adaptors
+# iwl100-firmware :
+# iwl105-firmware :
+# iwl135-firmware :
+# iwl2000-firmware :
+# iwl2030-firmware :
+# iwl3160-firmware :
+# iwl5000-firmware :
+# iwl5150-firmware :
+# iwl6000-firmware :
+# iwl6050-firmware :
+# iwl7260-firmware :
+# jose : Tools for JSON Object Signing and Encryption (JOSE)
+# kernel-tools : Assortment of tools for the Linux kernel
+# kernel-tools-libs : Libraries for the kernels-tools
+# keyutils-libs : Key utilities library
+# langtable : Guessing reasonable defaults for locale, keyboard layout, territory, and language.
+#langtable-data : Data files for langtable
+#libacl : Dynamic library for access control list support
+#libaio : 
+#libarchive : 
+#libargon2 : 
+#libassuan : 
+#libattr : 
+#libblkid : 
+#libblockdev : 
 #libblockdev-utils
 #libbytesize
 #libcap
@@ -260,7 +304,6 @@ RDEPENDS_packagegroup-ledge-iot = "\
 #libpng
 #libproxy
 #libpsl
-#libpwquality
 #libqb
 #libqmi
 #libqmi-utils
@@ -274,7 +317,6 @@ RDEPENDS_packagegroup-ledge-iot = "\
 #libreport-web
 #libseccomp
 #libsecret
-#libselinux-utils
 #libsemanage
 #libsepol
 #libsigsegv
@@ -303,46 +345,20 @@ RDEPENDS_packagegroup-ledge-iot = "\
 #libyaml
 #libzstd
 #linux-firmware
-#linux-firmware-whence 
-#lua-libs
-#luksmeta
-#lvm2-libs
-#lz4-libs
+# luksmeta : Utility for storing small metadata in the LUKSv1 header
 #meta-core-anaconda
-#microcode_ctl
-#ModemManager
-#ModemManager-glib
-#mokutil
-#mozjs52
-#ncurses-base
-#NetworkManager
-#NetworkManager-libnm
-#NetworkManager-team
-#NetworkManager-wifi
-#NetworkManager-wwan
-#nmap-ncat
-#nss-altfiles
-#openssh
-#openssh-clients
-#openssh-clients
-#openssh-server
-#openssl-libs
-#os-prober 
-#ostree-grub2 
-#ostree-libs
-#p11-kit
-#p11-kit-trust
-#passwd
-#pciutils-libs
-#pkgconf
-#pkgconf-m4
-#pkgconf-pkg-config
-#podman
-#policycoreutils-python-utils
-#polkit-libs
-#polkit-pkla-compat
-#procps-ng
-#publicsuffix-list-dafsa
+# microcode_ctl : Tool to transform and deploy CPU microcode update for x86.
+# mokutil: Utilities for managing Secure Boot/MoK keys.
+# NetworkManager : Network connection manager and user applications
+# NetworkManager-libnm : Libraries for adding NetworkManager support to applications (new API).
+# NetworkManager-team : Team device plugin for NetworkManager
+# NetworkManager-wifi : Wifi plugin for NetworkManager
+# NetworkManager-wwan : Mobile broadband device plugin for NetworkManager
+# os-prober: Probes disks on the system for installed operating systems
+# ostree-grub2 : GRUB2 integration for OSTree
+# ostree-libs : Development headers for ostree
+# pkgconf
+# podman : Manage Pods, Containers and Container Images
 #python3-asn1crypto
 #python3-audit
 #python3-babel
@@ -409,41 +425,29 @@ RDEPENDS_packagegroup-ledge-iot = "\
 #python3-six
 #python3-slip
 #python3-slip-dbus
-#python3-sssdconfig
+# python3-sssdconfig
 #python3-systemd
 #python3-urllib3
 #python3-websocket-client
 #python-pip-wheel
 #python-setuptools-wheel
-#qrencode-libs
-#rootfiles
-#rpm
-#rpm-build-libs
-#rpm-libs
-#rpm-ostree
-#rpm-ostree-libs
-#rpm-plugin-selinux
-#rpm-sign-libs
-#selinux-policy
-#selinux-policy-targeted
-#setup
-#shadow-utils
-#shim-x64
-#skopeo
-#sqlite-libs
-#sssd-client
-#systemd-libs
-#systemd-udev
-#teamd
-#usbguard
-#usermode
-#vim-minimal
-#wpa_supplicant
-#xmlrpc-c-client
-#xz-libs
-#zchunk-libs
-#ncurses-libs
-#efibootmgr
-#grub
-#grub-efi
-#grub-bootconf
+# skopeo : Inspect Docker images and repositories on registries
+# rootfiles : The basic required files for the root user's directory
+# rpm : The RPM package management system
+# rpm-build-libs : Libraries for building RPM packages
+# rpm-libs : Libraries for manipulating RPM packages
+# rpm-ostree : Hybrid image/package system
+# rpm-ostree-libs : Shared library for rpm-ostree
+# rpm-plugin-selinux : Rpm plugin for SELinux functionality
+# rpm-sign-libs : Libraries for signing RPM packages
+# selinux-policy : SELinux policy configuration
+# selinux-policy-targeted : SELinux targeted base policy
+# setup : A set of system configuration and setup files
+# shim-x64 : UEFI shim loader
+# teamd : Team network device control daemon
+# usbguard: A tool for implementing USB device usage policy
+# usermode (OE: provided via meta-openembedded/meta-gnome)
+# xmlrpc-c : Programming library for writing an XML-RPC server or client in C or C++ (OE available on native only)
+# xmlrpc-c-client
+# zchunk-libs: Zchunk library
+
