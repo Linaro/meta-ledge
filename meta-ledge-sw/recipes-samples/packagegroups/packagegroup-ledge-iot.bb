@@ -47,6 +47,7 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	kmod \
 	less \
 	libselinux \
+	libpam \
 	lsof \
 	lvm2 \
 	lz4 \
@@ -338,8 +339,6 @@ RDEPENDS_packagegroup-ledge-iot = "\
 #ostree-libs
 #p11-kit
 #p11-kit-trust
-#pam
-#pam
 #passwd
 #pciutils-libs
 #pkgconf-m4
@@ -441,7 +440,6 @@ RDEPENDS_packagegroup-ledge-iot = "\
 #sqlite-libs
 #sssd-client
 #systemd-libs
-#systemd-pam
 #systemd-udev
 #teamd
 #tpm2-tools
