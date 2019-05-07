@@ -5,7 +5,7 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=815ca599c9df247a0c7f619bab123dad"
 DEPENDS = "openssl python-six-native"
 
 SRC_URI = "git://github.com/open62541/open62541.git;protocol=https;branch=0.3"
-SRCREV = "d2735ff51b5fbd97f49c7c69eac70f666cea4f9b"
+SRCREV = "101e167135422f87224d4bd804894d39b3b0d165"
 
 PV= "0.3+git${SRCPV}"
 
