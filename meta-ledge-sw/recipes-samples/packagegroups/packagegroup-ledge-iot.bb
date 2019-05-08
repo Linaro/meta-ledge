@@ -22,7 +22,7 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	coreutils \
 	cpio \
 	cracklib \
-	criu \
+	${@bb.utils.contains_any("TUNE_ARCH", [ "x86_64", "arm" ] , "criu", "", d)} \
 	cryptsetup \
 	curl \
 	diffutils \
