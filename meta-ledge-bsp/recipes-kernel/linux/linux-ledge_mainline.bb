@@ -26,10 +26,12 @@ S = "${WORKDIR}/linux-5.1-rc5"
 KERNEL_DEFCONFIG = "defconfig"
 KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-02-systemd.config "
 KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-10-ledge.config "
+KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-11-virtio.config "
 KERNEL_CONFIG_COMMAND = "oe_runmake -C ${S} O=${B} ${KERNEL_DEFCONFIG}"
 
 SRC_URI_append = " file://fragment-02-systemd.config "
 SRC_URI_append = " file://fragment-10-ledge.config "
+SRC_URI_append = " file://fragment-11-virtio.config "
 
 COMPATIBLE_MACHINE = "(ledge-espressobin|ledge-stm32mp157c-dk2|ledge-qemux86-64|ledge-qemuarm|ledge-qemuarm64)"
 
