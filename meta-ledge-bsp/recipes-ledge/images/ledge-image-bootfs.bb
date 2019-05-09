@@ -3,10 +3,11 @@
 SUMMARY = "Ledge bootfs Image"
 LICENSE = "MIT"
 
-inherit core-image
-
-IMAGE_FSTYPES_remove = "wic"
+# force bootfs image type
+IMAGE_FSTYPES = "tar.xz ext4"
 IMAGE_FSTYPES_remove = "ledgeraw"
+
+inherit core-image
 
 IMAGE_NAME_SUFFIX = ".bootfs"
 
@@ -47,7 +48,7 @@ IMAGE_PREPROCESS_COMMAND_append = "reformat_rootfs;"
 reformat_rootfs() {
     if [ -d ${IMAGE_ROOTFS}/boot ]; then
         # Keep only /boot folder
-        for f in $(ls -d ${IMAGE_ROOTFS}/*/ | grep -v /boot/)
+        for f in $(ls -1 ${IMAGE_ROOTFS}/* | grep -v /boot/)
         do
             rm -rf $f
         done
