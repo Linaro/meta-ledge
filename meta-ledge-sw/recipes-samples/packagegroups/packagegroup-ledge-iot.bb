@@ -96,7 +96,7 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	pinentry \
 	packagegroup-core-ssh-dropbear \
 	packagegroup-security-tpm2 \
-	policycoreutils \
+	packagegroup-core-selinux \
 	popt \
 	procps \
 	protobuf \
