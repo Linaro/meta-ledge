@@ -17,6 +17,10 @@ SRC_URI_append_ledge-stm32mp157c-dk2 = " \
         file://ledge_stm32mp157c_dk2_trusted_defconfig \
     "
 
+SRC_URI_append_ledge-stm32mp157c-dk2 = " \
+        file://0001-Devicetree-align-with-kernel-5.1.patch \
+    "
+
 S = "${WORKDIR}/git"
 
 require recipes-bsp/u-boot/u-boot.inc
