@@ -7,6 +7,5 @@ SUMMARY = "Basic console image for LEDGE IoT"
 IMAGE_FEATURES += "package-management ssh-server-dropbear allow-empty-password"
 
 CORE_IMAGE_BASE_INSTALL += "\
-    coreutils \
     packagegroup-ledge-iot \
     "
