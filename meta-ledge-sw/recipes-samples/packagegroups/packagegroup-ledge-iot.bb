@@ -15,7 +15,6 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	brotli \
 	bzip2 \
 	ca-certificates \
-	cloud-init \
 	checkpolicy \
 	chkconfig \
 	chrony \
@@ -193,6 +192,7 @@ RDEPENDS_packagegroup-ledge-iot = "\
 # clevis-luks
 # clevis-systemd
 # cloud-utils-growpart : Script for growing a partition
+# cloud-init
 # containernetworking-plugins : Some CNI network plugins, maintained by the containernetworking team.
 # containers-common : Configuration files for working with image signatures
 # container-selinux : SELinux policies for container runtimes
