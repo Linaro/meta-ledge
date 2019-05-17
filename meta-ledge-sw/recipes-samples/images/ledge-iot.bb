@@ -4,7 +4,7 @@ SUMMARY = "Basic console image for LEDGE IoT"
 
 # For development, use ssh-server-dropbear instead of ssh-server-openssh which
 # allow root login via ssh.
-IMAGE_FEATURES += "package-management ssh-server-dropbear allow-empty-password"
+IMAGE_FEATURES += "package-management ssh-server-openssh allow-empty-password"
 
 CORE_IMAGE_BASE_INSTALL += "\
     packagegroup-ledge-iot \
