@@ -93,7 +93,7 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	parted \
 	pciutils \
 	pinentry \
-	packagegroup-core-ssh-dropbear \
+	packagegroup-core-ssh-openssh \
 	packagegroup-security-tpm2 \
 	packagegroup-core-selinux \
 	popt \
