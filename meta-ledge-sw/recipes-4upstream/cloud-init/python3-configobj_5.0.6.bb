@@ -3,7 +3,7 @@ LICENSE = "BSD"
 
 LIC_FILES_CHKSUM = "file://PKG-INFO;beginline=8;endline=8;md5=23f9ad5cad3d8cc0336e2a5d8a87e1fa"
 
-SRC_URI = "http://pypi.python.org/packages/source/C/ConfigObj/configobj-${PV}.tar.gz"
+SRC_URI = "https://pypi.python.org/packages/source/C/ConfigObj/configobj-${PV}.tar.gz"
 
 inherit setuptools3
 
