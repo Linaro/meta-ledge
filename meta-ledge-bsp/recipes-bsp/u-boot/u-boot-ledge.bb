@@ -8,7 +8,7 @@ PE = "1"
 
 # We use the revision in order to avoid having to fetch it from the
 # repo during parse
-SRCREV = "7d994067424776b6184872b82fcaf4c0b95528f9"
+SRCREV = "fc6c0e29a28f6b71dfb728b7f78e9e770f2cd218"
 
 SRC_URI = "git://git.denx.de/u-boot.git"
 
@@ -18,7 +18,8 @@ SRC_URI_append_ledge-stm32mp157c-dk2 = " \
     "
 
 SRC_URI_append_ledge-stm32mp157c-dk2 = " \
-        file://0001-Devicetree-align-with-kernel-5.1.patch \
+        file://0001-u-boot-stm32-watchdog-spi-ethernet.patch \
+        file://0002-stm32mp157-add-network-and-sdmmc-support-for-kernel-.patch \
     "
 
 S = "${WORKDIR}/git"
