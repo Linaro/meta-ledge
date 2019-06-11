@@ -48,9 +48,9 @@ IMAGE_PREPROCESS_COMMAND_append = "reformat_rootfs;"
 reformat_rootfs() {
     if [ -d ${IMAGE_ROOTFS}/boot ]; then
         # Keep only /boot folder
-        for f in $(ls -1 ${IMAGE_ROOTFS}/* | grep -v /boot/)
+        for f in $(ls -1 ${IMAGE_ROOTFS} | grep -v boot)
         do
-            rm -rf $f
+            rm -rf ${IMAGE_ROOTFS}/${f}
         done
 
         # Move all expected files in /rootfs
