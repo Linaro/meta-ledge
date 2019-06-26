@@ -15,7 +15,7 @@ SRC_URI = "https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-${LEDGE_KVERSION}.
 SRC_URI[kernel.md5sum] = "15fbdff95ff98483069ac6e215b9f4f9"
 SRC_URI[kernel.sha256sum] = "d06a7be6e73f97d1350677ad3bae0ce7daecb79c2c2902aaabe806f7fa94f041"
 # force SOURCE_DATE_EPOCH for build reproductible
-SOURCE_DATE_EPOCH = "1557103378"
+# SOURCE_DATE_EPOCH = "1557103378"
 
 # RC kernel URL
 #SRC_URI = "https://git.kernel.org/torvalds/t/linux-${LEDGE_KVERSION}.tar.gz;name=kernel"
