@@ -24,6 +24,13 @@ IMAGE_TYPEDEP_ledgeraw_append = " ext4 "
 
 IMAGE_CMD_ledgeraw () {
     cd ${DEPLOY_DIR_IMAGE};
+
+    for f in ${LEDGE_RAW_FLASHER_TSV};
+    do
+        name=$(echo $f | sed "s/tsv\.template/${IMAGE_LINK_NAME}\.tsv/")
+        sed "s/%%IMAGE%/${IMAGE_LINK_NAME}.ext4/" $f > $name
+    done
+
     for f in ${LEDGE_RAW_FLASHLAYOUTS};
     do
         yes 'yes' | ${DEPLOY_DIR_IMAGE}/scripts/create_raw_from_flashlayout.sh $f
