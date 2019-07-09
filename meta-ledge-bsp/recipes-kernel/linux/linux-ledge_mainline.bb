@@ -8,22 +8,24 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=bbea815ee2795b2f4230826c0c6b8814"
 
 inherit kernel siteinfo
 
-LEDGE_KVERSION = "5.1"
+DEPENDS += "coreutils-native"
+LEDGE_KVERSION = "5.2"
 
 # Stable kernel URL
 SRC_URI = "https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-${LEDGE_KVERSION}.tar.xz;name=kernel"
-SRC_URI[kernel.md5sum] = "15fbdff95ff98483069ac6e215b9f4f9"
-SRC_URI[kernel.sha256sum] = "d06a7be6e73f97d1350677ad3bae0ce7daecb79c2c2902aaabe806f7fa94f041"
+
+SRC_URI[kernel.md5sum] = "ddf994de00d7b18395886dd9b30b9262"
+SRC_URI[kernel.sha256sum] = "54ad66f672e1a831b574f5e704e8a05f1e6180a8245d4bdd811208a6cb0ac1e7"
 # force SOURCE_DATE_EPOCH for build reproductible
 # SOURCE_DATE_EPOCH = "1557103378"
 
 # RC kernel URL
 #SRC_URI = "https://git.kernel.org/torvalds/t/linux-${LEDGE_KVERSION}.tar.gz;name=kernel"
 
-SRC_URI_append_ledge-stm32mp157c-dk2 = " file://0001-stm32mp1-support-of-board-dk1-and-dk2.patch "
+SRC_URI_append_ledge-stm32mp157c-dk2 = " file://0001-STM32mp157c-dk2-optee-and-ethernet-support.patch "
 
-PV = "mainline-5.1"
-S = "${WORKDIR}/linux-5.1"
+PV = "mainline-5.2"
+S = "${WORKDIR}/linux-5.2"
 
 KERNEL_DEFCONFIG = "defconfig"
 KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-01-core.config "
@@ -119,3 +121,4 @@ python __anonymous () {
         if typelower == 'zimage':
             d.appendVar('FILES_' + kname + '-image-' + typelower, ' /boot/efi/boot ')
 }
+FILES_${KERNEL_PACKAGE_NAME}-base += "${nonarch_base_libdir}/modules/${KERNEL_VERSION}/modules.builtin.modinfo "
