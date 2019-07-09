@@ -1,0 +1,61 @@
+From e58b6a34b7e164f432a7a2f5b7afc9b48c5d21c9 Mon Sep 17 00:00:00 2001
+From: Christophe Priouzeau <christophe.priouzeau@linaro.org>
+Date: Mon, 8 Jul 2019 17:55:18 +0200
+Subject: [PATCH] STM32mp157c-dk2: optee and ethernet support
+
+Signed-off-by: Christophe Priouzeau <christophe.priouzeau@linaro.org>
+---
+ arch/arm/boot/dts/stm32mp157a-dk1.dts | 12 +++++++++++-
+ arch/arm/boot/dts/stm32mp157c.dtsi    |  8 ++++++++
+ 2 files changed, 19 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/boot/dts/stm32mp157a-dk1.dts b/arch/arm/boot/dts/stm32mp157a-dk1.dts
+index 098dbfb06..dfedf738d 100644
+--- a/arch/arm/boot/dts/stm32mp157a-dk1.dts
++++ b/arch/arm/boot/dts/stm32mp157a-dk1.dts
+@@ -27,6 +27,16 @@
+ 	memory@c0000000 {
+ 		reg = <0xc0000000 0x20000000>;
+ 	};
++	reserved-memory {
++		#address-cells = <1>;
++		#size-cells = <1>;
++		ranges;
++
++		optee_reserved: optee@dc000000 {
++			reg = <0xde000000 0x02000000>;
++			no-map;
++		};
++	};
+ 
+ 	led {
+ 		compatible = "gpio-leds";
+@@ -51,7 +61,7 @@
+ 	pinctrl-0 = <&ethernet0_rgmii_pins_a>;
+ 	pinctrl-1 = <&ethernet0_rgmii_pins_sleep_a>;
+ 	pinctrl-names = "default", "sleep";
+-	phy-mode = "rgmii";
++	phy-mode = "rgmii-id";
+ 	max-speed = <1000>;
+ 	phy-handle = <&phy0>;
+ 
+diff --git a/arch/arm/boot/dts/stm32mp157c.dtsi b/arch/arm/boot/dts/stm32mp157c.dtsi
+index 2afeee65c..2808eb7ac 100644
+--- a/arch/arm/boot/dts/stm32mp157c.dtsi
++++ b/arch/arm/boot/dts/stm32mp157c.dtsi
+@@ -1268,4 +1268,12 @@
+ 			status = "disabled";
+ 		};
+ 	};
++
++	firmware {
++		optee {
++			compatible = "linaro,optee-tz";
++			method = "smc";
++		};
++	};
++
+ };
+-- 
+2.17.1
+
