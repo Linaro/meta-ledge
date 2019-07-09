@@ -1,4 +1,4 @@
-From 322eb76a8c39bc8c2e255fc863a08a6734c6453c Mon Sep 17 00:00:00 2001
+From 9159343d9d7c34cbe15c12fc4a59d8cfab4baa6c Mon Sep 17 00:00:00 2001
 From: Christophe Priouzeau <christophe.priouzeau@linaro.org>
 Date: Tue, 2 Jul 2019 13:26:00 +0200
 Subject: [PATCH] STM32mp157 upstream for 2019.10
@@ -6,13 +6,12 @@ Subject: [PATCH] STM32mp157 upstream for 2019.10
 Signed-off-by: Christophe Priouzeau <christophe.priouzeau@linaro.org>
 ---
  arch/arm/Kconfig                              |   1 +
- arch/arm/dts/Makefile                         |   1 -
  arch/arm/dts/stm32mp15-ddr.dtsi               |   2 +-
  arch/arm/dts/stm32mp157-pinctrl.dtsi          | 276 ++++++++++++++-
  arch/arm/dts/stm32mp157-u-boot.dtsi           |  68 ++--
  arch/arm/dts/stm32mp157a-dk1-u-boot.dtsi      |   3 -
- arch/arm/dts/stm32mp157a-dk1.dts              |  30 +-
- arch/arm/dts/stm32mp157c-dk2.dts              |   1 +
+ arch/arm/dts/stm32mp157a-dk1.dts              |  41 ++-
+ arch/arm/dts/stm32mp157c-dk2.dts              |   3 +-
  arch/arm/dts/stm32mp157c-ed1-u-boot.dtsi      |  15 +-
  arch/arm/dts/stm32mp157c-ed1.dts              | 205 +++--------
  arch/arm/dts/stm32mp157c-ev1-u-boot.dtsi      |   3 -
@@ -40,10 +39,10 @@ Signed-off-by: Christophe Priouzeau <christophe.priouzeau@linaro.org>
  drivers/clk/clk_stm32mp1.c                    |  12 +-
  drivers/rtc/Kconfig                           |   6 +
  drivers/rtc/Makefile                          |   1 +
- drivers/rtc/stm32_rtc.c                       | 321 ++++++++++++++++++
- include/configs/stm32mp1.h                    |   6 +-
+ drivers/rtc/stm32_rtc.c                       | 323 ++++++++++++++++++
+ include/configs/stm32mp1.h                    |  21 +-
  include/dt-bindings/pinctrl/stm32-pinfunc.h   |   6 +
- 38 files changed, 1618 insertions(+), 327 deletions(-)
+ 37 files changed, 1638 insertions(+), 336 deletions(-)
  create mode 100644 arch/arm/mach-stm32mp/cmd_stm32key.c
  create mode 100644 arch/arm/mach-stm32mp/fdt.c
  create mode 100644 board/st/stm32mp1/cmd_stboard.c
@@ -62,18 +61,6 @@ index f5a7630e4f..6f9c2010ba 100644
  	select PINCTRL
  	select REGMAP
  	select SUPPORT_SPL
-diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
-index 7fbd0a1d06..d37882f094 100644
---- a/arch/arm/dts/Makefile
-+++ b/arch/arm/dts/Makefile
-@@ -760,7 +760,6 @@ dtb-$(CONFIG_ARCH_STI) += stih410-b2260.dtb
- 
- dtb-$(CONFIG_TARGET_STM32MP1) += \
- 	stm32mp157a-dk1.dtb \
--	stm32mp157a-avenger96.dtb \
- 	stm32mp157c-dk2.dtb \
- 	stm32mp157c-ed1.dtb \
- 	stm32mp157c-ev1.dtb
 diff --git a/arch/arm/dts/stm32mp15-ddr.dtsi b/arch/arm/dts/stm32mp15-ddr.dtsi
 index 4172c02f0a..0164e34216 100644
 --- a/arch/arm/dts/stm32mp15-ddr.dtsi
@@ -586,10 +573,28 @@ index 0f32a38dc9..ac1640f292 100644
 -	regulator-always-on;
 -};
 diff --git a/arch/arm/dts/stm32mp157a-dk1.dts b/arch/arm/dts/stm32mp157a-dk1.dts
-index e36773dde9..3925be2751 100644
+index e36773dde9..50b4f96e11 100644
 --- a/arch/arm/dts/stm32mp157a-dk1.dts
 +++ b/arch/arm/dts/stm32mp157a-dk1.dts
-@@ -39,12 +39,19 @@
+@@ -28,6 +28,17 @@
+ 		reg = <0xc0000000 0x20000000>;
+ 	};
+ 
++	reserved-memory {
++		#address-cells = <1>;
++		#size-cells = <1>;
++		ranges;
++
++		optee_reserved: optee@dc000000 {
++			reg = <0xde000000 0x02000000>;
++			no-map;
++		};
++	};
++
+ 	led {
+ 		compatible = "gpio-leds";
+ 		blue {
+@@ -39,12 +50,19 @@
  	};
  };
  
@@ -610,7 +615,7 @@ index e36773dde9..3925be2751 100644
  	max-speed = <1000>;
  	phy-handle = <&phy0>;
  
-@@ -64,6 +71,7 @@
+@@ -64,6 +82,7 @@
  	i2c-scl-rising-time-ns = <185>;
  	i2c-scl-falling-time-ns = <20>;
  	status = "okay";
@@ -618,7 +623,7 @@ index e36773dde9..3925be2751 100644
  	/delete-property/dmas;
  	/delete-property/dma-names;
  
-@@ -88,14 +96,11 @@
+@@ -88,14 +107,11 @@
  	pmic: stpmic@33 {
  		compatible = "st,stpmic1";
  		reg = <0x33>;
@@ -634,7 +639,7 @@ index e36773dde9..3925be2751 100644
  		regulators {
  			compatible = "st,stpmic1-regulators";
  
-@@ -107,7 +112,7 @@
+@@ -107,7 +123,7 @@
  
  			vddcore: buck1 {
  				regulator-name = "vddcore";
@@ -643,7 +648,7 @@ index e36773dde9..3925be2751 100644
  				regulator-max-microvolt = <1350000>;
  				regulator-always-on;
  				regulator-initial-mode = <0>;
-@@ -187,7 +192,6 @@
+@@ -187,7 +203,6 @@
  				regulator-max-microvolt = <1200000>;
  				regulator-always-on;
  				interrupts = <IT_CURLIM_LDO6 0>;
@@ -651,7 +656,7 @@ index e36773dde9..3925be2751 100644
  			};
  
  			vref_ddr: vref_ddr {
-@@ -204,7 +208,6 @@
+@@ -204,7 +219,6 @@
  			vbus_otg: pwr_sw1 {
  				regulator-name = "vbus_otg";
  				interrupts = <IT_OCP_OTG 0>;
@@ -659,7 +664,7 @@ index e36773dde9..3925be2751 100644
  			 };
  
  			 vbus_sw: pwr_sw2 {
-@@ -216,8 +219,9 @@
+@@ -216,8 +230,9 @@
  
  		onkey {
  			compatible = "st,stpmic1-onkey";
@@ -670,7 +675,7 @@ index e36773dde9..3925be2751 100644
  			status = "okay";
  		};
  
-@@ -228,6 +232,10 @@
+@@ -228,6 +243,10 @@
  	};
  };
  
@@ -681,7 +686,7 @@ index e36773dde9..3925be2751 100644
  &iwdg2 {
  	timeout-sec = <32>;
  	status = "okay";
-@@ -246,8 +254,10 @@
+@@ -246,8 +265,10 @@
  };
  
  &sdmmc1 {
@@ -694,9 +699,18 @@ index e36773dde9..3925be2751 100644
  	st,neg-edge;
  	bus-width = <4>;
 diff --git a/arch/arm/dts/stm32mp157c-dk2.dts b/arch/arm/dts/stm32mp157c-dk2.dts
-index 9a81d2d472..020ea0f0e2 100644
+index 9a81d2d472..28e931d5b9 100644
 --- a/arch/arm/dts/stm32mp157c-dk2.dts
 +++ b/arch/arm/dts/stm32mp157c-dk2.dts
+@@ -9,7 +9,7 @@
+ #include "stm32mp157a-dk1.dts"
+ 
+ / {
+-	model = "STMicroelectronics STM32MP157C-DK2 Discovery Board";
++	model = "STMicroelectronics STM32MP157C-DK2 Discovery Boardi Via U-Boot";
+ 	compatible = "st,stm32mp157c-dk2", "st,stm32mp157";
+ };
+ 
 @@ -42,6 +42,7 @@
  		compatible = "orisetech,otm8009a";
  		reg = <0>;
@@ -2814,10 +2828,10 @@ index 1724602f1c..90e79fb30d 100644
  obj-$(CONFIG_RTC_X1205) += x1205.o
 diff --git a/drivers/rtc/stm32_rtc.c b/drivers/rtc/stm32_rtc.c
 new file mode 100644
-index 0000000000..5d0ffdbc9f
+index 0000000000..abd339076a
 --- /dev/null
 +++ b/drivers/rtc/stm32_rtc.c
-@@ -0,0 +1,321 @@
+@@ -0,0 +1,323 @@
 +// SPDX-License-Identifier: GPL-2.0+ OR BSD-3-Clause
 +/*
 + * Copyright (C) 2019, STMicroelectronics - All Rights Reserved
@@ -3084,8 +3098,10 @@ index 0000000000..5d0ffdbc9f
 +unlock:
 +	stm32_rtc_lock(dev);
 +
-+	clk_disable(&clk);
-+	clk_free(&clk);
++	if (ret) {
++		clk_disable(&clk);
++		clk_free(&clk);
++	}
 +
 +	return ret;
 +}
@@ -3140,13 +3156,35 @@ index 0000000000..5d0ffdbc9f
 +	.priv_auto_alloc_size = sizeof(struct stm32_rtc_priv),
 +};
 diff --git a/include/configs/stm32mp1.h b/include/configs/stm32mp1.h
-index 1d385e0985..e2cc3c5160 100644
+index 1d385e0985..e57a34d448 100644
 --- a/include/configs/stm32mp1.h
 +++ b/include/configs/stm32mp1.h
-@@ -143,9 +143,13 @@
+@@ -109,15 +109,11 @@
+  */
+ #define STM32MP_BOOTCMD "bootcmd_stm32mp=" \
+ 	"echo \"Boot over ${boot_device}${boot_instance}!\";" \
+-	"if test ${boot_device} = serial || test ${boot_device} = usb;" \
+-	"then stm32prog ${boot_device} ${boot_instance}; " \
+-	"else " \
+-		"if test ${boot_device} = mmc;" \
+-		"then env set boot_targets \"mmc${boot_instance}\"; fi;" \
+-		"if test ${boot_device} = nand;" \
+-		"then env set boot_targets ubifs0; fi;" \
+-		"run distro_bootcmd;" \
+-	"fi;\0"
++	"env set boot_instance \"0\";" \
++	"env set boot_device \"mmc\";" \
++	"env set boot_targets \"mmc${boot_instance}\";" \
++	"run distro_bootcmd;" \
++	"\0"
+ 
+ #include <config_distro_bootcmd.h>
+ 
+@@ -143,9 +139,14 @@
  	"ramdisk_addr_r=0xc4400000\0" \
  	"fdt_high=0xffffffff\0" \
  	"initrd_high=0xffffffff\0" \
++	"fdtfile=" CONFIG_DEFAULT_DEVICE_TREE ".dtb\0" \
 +	"env_default=1\0"				\
 +	"env_check=if test $env_default -eq 1;"\
 +		" then env set env_default 0;env save;fi\0" \
