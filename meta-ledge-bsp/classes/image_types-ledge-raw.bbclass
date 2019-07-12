@@ -30,6 +30,10 @@ IMAGE_CMD_ledgeraw () {
         name=$(echo $f | sed "s/tsv\.template/${IMAGE_LINK_NAME}\.tsv/")
         sed "s/%%IMAGE%/${IMAGE_LINK_NAME}.ext4/" $f > $name
     done
+    for f in $(ls -1 *.fld);
+    do
+        sed -i "s/%%IMAGE%/${IMAGE_LINK_NAME}.ext4/" $f
+    done
 
     for f in ${LEDGE_RAW_FLASHLAYOUTS};
     do
