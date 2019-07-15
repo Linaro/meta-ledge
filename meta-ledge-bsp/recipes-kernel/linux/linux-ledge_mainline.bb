@@ -41,7 +41,7 @@ SRC_URI_append = " file://fragment-10-ledge.config "
 SRC_URI_append = " file://fragment-11-virtio.config "
 SRC_URI_append = " file://fragment-12-security.config "
 
-COMPATIBLE_MACHINE = "(ledge-espressobin|ledge-stm32mp157c-dk2|ledge-qemux86-64|ledge-qemuarm|ledge-qemuarm64|ledge-ti-am572x)"
+COMPATIBLE_MACHINE = "(ledge-synquacer|ledge-stm32mp157c-dk2|ledge-qemux86-64|ledge-qemuarm|ledge-qemuarm64|ledge-ti-am572x)"
 
 do_configure() {
     touch ${B}/.scmversion ${S}/.scmversion
