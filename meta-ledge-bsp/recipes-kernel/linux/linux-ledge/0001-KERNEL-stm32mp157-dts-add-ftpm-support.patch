@@ -1,0 +1,31 @@
+From 042d362bb0ec7942247ab848dd573d51aaff45da Mon Sep 17 00:00:00 2001
+From: Christophe Priouzeau <christophe.priouzeau@linaro.org>
+Date: Thu, 18 Jul 2019 09:02:30 +0200
+Subject: [PATCH] KERNEL: stm32mp157: dts; add ftpm support
+
+Signed-off-by: Christophe Priouzeau <christophe.priouzeau@linaro.org>
+---
+ arch/arm/boot/dts/stm32mp157a-dk1.dts | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/arch/arm/boot/dts/stm32mp157a-dk1.dts b/arch/arm/boot/dts/stm32mp157a-dk1.dts
+index dfedf738d..55b347ac1 100644
+--- a/arch/arm/boot/dts/stm32mp157a-dk1.dts
++++ b/arch/arm/boot/dts/stm32mp157a-dk1.dts
+@@ -47,6 +47,13 @@
+ 			default-state = "off";
+ 		};
+ 	};
++	soc {
++		tpm@0 {
++			compatible = "microsoft,ftpm";
++			linux,sml-base = <0x0 0xC0000000>;
++			linux,sml-size = <0x10000>;
++		};
++	};
+ };
+ 
+ &cec {
+-- 
+2.17.1
+

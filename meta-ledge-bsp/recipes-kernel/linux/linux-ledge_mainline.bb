@@ -23,6 +23,8 @@ SRC_URI[kernel.sha256sum] = "54ad66f672e1a831b574f5e704e8a05f1e6180a8245d4bdd811
 #SRC_URI = "https://git.kernel.org/torvalds/t/linux-${LEDGE_KVERSION}.tar.gz;name=kernel"
 
 SRC_URI_append_ledge-stm32mp157c-dk2 = " file://0001-STM32mp157c-dk2-optee-and-ethernet-support.patch "
+SRC_URI_append_ledge-stm32mp157c-dk2 = " file://0002-ftpm.patch "
+SRC_URI_append_ledge-stm32mp157c-dk2 = " file://0001-KERNEL-stm32mp157-dts-add-ftpm-support.patch "
 
 PV = "mainline-5.2"
 S = "${WORKDIR}/linux-5.2"
