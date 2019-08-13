@@ -30,17 +30,19 @@ IMAGE_CMD_ledgeraw () {
         name=$(echo $f | sed "s/tsv\.template/${IMAGE_LINK_NAME}\.tsv/")
         sed "s/%%IMAGE%/${IMAGE_LINK_NAME}.ext4/" $f > $name
     done
-    for f in $(ls -1 *.fld);
+    for f in $(ls -1 *.fld.template);
     do
-        sed -i "s/%%IMAGE%/${IMAGE_LINK_NAME}.ext4/" $f
+        name=$(echo $f | sed "s/\.fld\.template/-${IMAGE_LINK_NAME}\.fld/")
+        sed "s/%%IMAGE%/${IMAGE_LINK_NAME}.ext4/" $f > $name
     done
 
     for f in ${LEDGE_RAW_FLASHLAYOUTS};
     do
-        yes 'yes' | ${DEPLOY_DIR_IMAGE}/scripts/create_raw_from_flashlayout.sh $f
+        name=$(echo $f | sed "s/\.fld/-${IMAGE_LINK_NAME}\.fld/")
+        yes 'yes' | ${DEPLOY_DIR_IMAGE}/scripts/create_raw_from_flashlayout.sh $name
 
         # get suffix
-        binaryname=$(echo $f | cut -d'.' -f1)
+        binaryname=$(echo $name | cut -d'.' -f1)
         cd ${DEPLOY_DIR_IMAGE};gzip -f -9 $binaryname.raw
         #cd ${DEPLOY_DIR_IMAGE};gzip -f -9 -c $binaryname.raw > $binaryname.raw.gz
     done
