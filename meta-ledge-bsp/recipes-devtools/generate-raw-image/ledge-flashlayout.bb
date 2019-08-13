@@ -3,8 +3,8 @@ LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 
 SRC_URI_ledge-stm32mp157c-dk2 = " \
-    file://FlashLayout_sdcard_ledge-stm32mp157c-dk2-basic.fld \
-    file://FlashLayout_sdcard_ledge-stm32mp157c-dk2-optee.fld \
+    file://FlashLayout_sdcard_ledge-stm32mp157c-dk2-basic.fld.template \
+    file://FlashLayout_sdcard_ledge-stm32mp157c-dk2-optee.fld.template \
     \
     file://FlashLayout_sdcard_ledge-stm32mp157c-dk2-basic.tsv.template \
     file://FlashLayout_sdcard_ledge-stm32mp157c-dk2-optee.tsv.template \
@@ -23,9 +23,9 @@ ALLOW_EMPTY_${PN} = "1"
 
 do_deploy() {
     install -d ${DEPLOYDIR}/
-    LIST=`ls ${S}/*.fld`
+    LIST=`ls ${S}/*.fld.template`
     if [ -n "$LIST" ]; then
-        install -m 0644 ${S}/*.fld ${DEPLOYDIR}/
+        install -m 0644 ${S}/*.fld.template ${DEPLOYDIR}/
     fi
     #for ST Flasher
     install -m 0644 ${S}/*.tsv.template ${DEPLOYDIR}/
