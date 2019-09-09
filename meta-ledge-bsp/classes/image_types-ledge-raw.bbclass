@@ -30,13 +30,13 @@ IMAGE_CMD_ledgeraw () {
     for f in ${LEDGE_RAW_FLASHER_TSV};
     do
         name=$(echo $f | sed "s/tsv\.template/${IMAGE_LINK_NAME}\.tsv/")
-        sed "s/%%IMAGE%/${IMAGE_NAME}.ext4/" $f > $name
+        sed "s/%%IMAGE%/${IMAGE_NAME}.rootfs.ext4/" $f > $name
         sed -i "s/%%BOOTFS%/${BOOTFS_IMAGE_NAME_DETECTED}/" $name
     done
     for f in $(ls -1 *.fld.template);
     do
         name=$(echo $f | sed "s/\.fld\.template/-${IMAGE_LINK_NAME}\.fld/")
-        sed "s/%%IMAGE%/${IMAGE_NAME}.ext4/" $f > $name
+        sed "s/%%IMAGE%/${IMAGE_NAME}.rootfs.ext4/" $f > $name
         sed -i "s/%%BOOTFS%/${BOOTFS_IMAGE_NAME_DETECTED}/" $name
     done
 
