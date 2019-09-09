@@ -21,19 +21,23 @@ do_image_ledgeraw[depends] += " \
 # This image depends on the rootfs image
 IMAGE_TYPEDEP_ledgeraw_append = " ext4 "
 
-
+BOOTFS_IMAGE_NAME = "ledge-image-bootfs-${MACHINE}.ext4"
 IMAGE_CMD_ledgeraw () {
     cd ${DEPLOY_DIR_IMAGE};
+
+    BOOTFS_IMAGE_NAME_DETECTED=$(readlink ${BOOTFS_IMAGE_NAME})
 
     for f in ${LEDGE_RAW_FLASHER_TSV};
     do
         name=$(echo $f | sed "s/tsv\.template/${IMAGE_LINK_NAME}\.tsv/")
-        sed "s/%%IMAGE%/${IMAGE_LINK_NAME}.ext4/" $f > $name
+        sed "s/%%IMAGE%/${IMAGE_NAME}.ext4/" $f > $name
+        sed -i "s/%%BOOTFS%/${BOOTFS_IMAGE_NAME_DETECTED}/" $name
     done
     for f in $(ls -1 *.fld.template);
     do
         name=$(echo $f | sed "s/\.fld\.template/-${IMAGE_LINK_NAME}\.fld/")
-        sed "s/%%IMAGE%/${IMAGE_LINK_NAME}.ext4/" $f > $name
+        sed "s/%%IMAGE%/${IMAGE_NAME}.ext4/" $f > $name
+        sed -i "s/%%BOOTFS%/${BOOTFS_IMAGE_NAME_DETECTED}/" $name
     done
 
     for f in ${LEDGE_RAW_FLASHLAYOUTS};
