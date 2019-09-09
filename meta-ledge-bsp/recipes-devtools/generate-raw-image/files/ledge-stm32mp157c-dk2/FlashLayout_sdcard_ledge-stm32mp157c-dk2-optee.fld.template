@@ -17,5 +17,5 @@ P	ssbl	Binary	0x00084400	u-boot-trusted.stm32
 P	teeh	Binary	0x00284400	optee/tee-header_v2.stm32
 P	teed	Binary	0x002C4400	optee/tee-pageable_v2.stm32
 P	teex	Binary	0x00304400	optee/tee-pager_v2.stm32
-P	bootfs	System	0x00344400	ledge-image-bootfs-ledge-stm32mp157c-dk2.ext4
+P	bootfs	System	0x00344400	%%BOOTFS%
 P	rootfs	FileSystem	0x04344400	%%IMAGE%
