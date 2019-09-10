@@ -20,15 +20,20 @@ unset FLASHLAYOUT_rawname
 unset FLASHLAYOUT_filename_path
 unset FLASHLAYOUT_prefix_image_path
 unset FLASHLAYOUT_number_of_line
+unset FLASHLAYOUT_uri
+unset FLASHLAYOUT_module
 
 declare -A FLASHLAYOUT_data
-
+FLASHLAYOUT_uri=""
+FLASHLAYOUT_module=""
 # Size of 4GB
 #DEFAULT_RAW_SIZE=4096
+# Size of 2,5GB
+#DEFAULT_RAW_SIZE=2560
 # Size of 2GB
-DEFAULT_RAW_SIZE=2048
-# Size of 1.5GB
-#DEFAULT_RAW_SIZE=1536
+#DEFAULT_RAW_SIZE=2048
+# Size of 1GB
+DEFAULT_RAW_SIZE=1024
 
 # 32 MB of Padding on B
 DEFAULT_PADDING_SIZE=33554432
@@ -96,6 +101,14 @@ function read_flash_layout() {
 
 			debug "READ: ${flashlayout_data[0]} ${flashlayout_data[1]} ${flashlayout_data[2]} ${flashlayout_data[3]} ..."
 		fi
+		if [ "$selected" == "URI" ]
+		then
+			FLASHLAYOUT_uri=${flashlayout_data[1]}
+		fi
+		if [ "$selected" == "MODULE" ]
+		then
+			FLASHLAYOUT_module=${flashlayout_data[1]}
+		fi
 	done < "$FLASHLAYOUT_filename"
 
 	FLASHLAYOUT_number_of_line=$i
@@ -103,49 +116,159 @@ function read_flash_layout() {
 
 function debug_dump_flashlayout_data_array() {
 	columns=8
-	for ((i=0;i<FLASHLAYOUT_number_of_line;i++)) do
-		for ((j=0;j<columns;j++)) do
+	for i in $(seq 0 $FLASHLAYOUT_number_of_line); do
+		for j in $(seq 0 $columns); do
 			echo -n " ${FLASHLAYOUT_data[$i,$j]}"
 		done
 		echo ""
 	done
 }
 
+function generate_rootfs_from_tarball() {
+	tarball=$1
+	_rootfs_name="${tarball%.*.*}" #tar.xz
+
+	if [ -f $FLASHLAYOUT_prefix_image_path/$_rootfs_name.ext4 ];
+	then
+		# ext4 already generated
+		# update FLASHLAYOUT_data for rootfs
+		for i in $(seq 0 $FLASHLAYOUT_number_of_line)
+		do
+			selected=${FLASHLAYOUT_data[$i,$COL_SELECTED_OPT]}
+			partName=${FLASHLAYOUT_data[$i,$COL_PARTNAME]}
+			bin2flash=${FLASHLAYOUT_data[$i,$COL_BIN2FLASH]}
+			if [ "$partName" == "rootfs" ];
+			then
+				FLASHLAYOUT_data[$i,$COL_BIN2FLASH]=$_rootfs_name.ext4
+			fi
+		done
+		return
+	fi
+
+	mkdir temp_rootfs
+	cd temp_rootfs
+	sudo tar xf ../$tarball
+	sudo tar xf ../$FLASHLAYOUT_module
+	cd ..
+
+	size_full=$(sudo du -s temp_rootfs| tr '\t' ' ' | cut -f 1 -d' ')
+	_size=$(($size_full/1024))
+	size=$(($_size + 32))
+	addons=$(echo $size"M")
+	echo "[SIZE = $_size M] mkfs.ext4 -d temp_rootfs -m 5 -L debian_rootfs -F -O ^64bit $_rootfs_name.ext4 $addons"
+	sudo mkfs.ext4 -d temp_rootfs -m 5 -L debian_rootfs -F -O ^64bit $_rootfs_name.ext4 $addons
+	# update FLASHLAYOUT_data for rootfs
+	for i in $(seq 0 $FLASHLAYOUT_number_of_line)
+	do
+		selected=${FLASHLAYOUT_data[$i,$COL_SELECTED_OPT]}
+		partName=${FLASHLAYOUT_data[$i,$COL_PARTNAME]}
+		bin2flash=${FLASHLAYOUT_data[$i,$COL_BIN2FLASH]}
+		if [ "$partName" == "rootfs" ];
+		then
+			FLASHLAYOUT_data[$i,$COL_BIN2FLASH]=$_rootfs_name.ext4
+		fi
+	done
+	# clean
+	sudo rm -rf temp_rootfs
+}
+
 # Verify and precise the path to image specified on Flash layout
 function get_last_image_path() {
 	local i=0
-	last_image=""
-	for ((i=0;i<FLASHLAYOUT_number_of_line;i++))
+	root_image=""
+
+	for i in $(seq 0 $FLASHLAYOUT_number_of_line)
 	do
 		selected=${FLASHLAYOUT_data[$i,$COL_SELECTED_OPT]}
+		partName=${FLASHLAYOUT_data[$i,$COL_PARTNAME]}
 		bin2flash=${FLASHLAYOUT_data[$i,$COL_BIN2FLASH]}
 
 		case "$selected" in
 		1|P)
-			last_image=$bin2flash
+			if [ "$partName" == 'rootfs' ];
+			then
+				root_image=$bin2flash
+				echo $bin2flash | grep -q tar;
+				is_tar=$?
+				if [ $is_tar -eq 0 ];
+				then
+					continue
+				fi
+			fi
+			if [ -f $FLASHLAYOUT_filename_path/$bin2flash ];
+			then
+				FLASHLAYOUT_prefix_image_path="$FLASHLAYOUT_filename_path"
+			else
+				if [ -f $FLASHLAYOUT_filename_path/../$bin2flash ];
+				then
+					FLASHLAYOUT_prefix_image_path="$FLASHLAYOUT_filename_path/.."
+				else
+					if [ -z $FLASHLAYOUT_uri ];
+					then
+						echo "[ERROR] couldn't find $bin2flash on $FLASHLAYOUT_filename_path/"
+						exit 0
+					fi
+					FLASHLAYOUT_prefix_image_path="$FLASHLAYOUT_filename_path"
+					# try to download file
+					dirname_bin2flash=$(dirname $bin2flash)
+					if [ "$dirname_bin2flash" != '.' ];
+					then
+						mkdir -p $dirname_bin2flash
+					fi
+					echo "[Try to Download]: wget $FLASHLAYOUT_uri/$bin2flash -O $FLASHLAYOUT_prefix_image_path/$bin2flash"
+					wget $FLASHLAYOUT_uri/$bin2flash -O $FLASHLAYOUT_prefix_image_path/$bin2flash 2> /dev/null
+					ret=$?
+					if [ ! $ret -eq 0 ];
+					then
+						# clean last wget request
+						rm -f $bin2flash
+						# try to get tge gzip version
+						echo "[Try to Download]: wget $FLASHLAYOUT_uri/$bin2flash -O $FLASHLAYOUT_prefix_image_path/$bin2flash.gz"
+						wget $FLASHLAYOUT_uri/$bin2flash.gz -O $FLASHLAYOUT_prefix_image_path/$bin2flash.gz
+						ret=$?
+						if [ ! $ret -eq 0 ];
+						then
+							echo "[ERROR] couldn't download $bin2flash on $FLASHLAYOUT_uri/"
+							exit 0
+						else
+							gunzip $FLASHLAYOUT_prefix_image_path/$bin2flash.gz
+						fi
+					fi
+				fi
+			fi
 			;;
 		*)
 			;;
 		esac
-		i=$(($i+1))
 	done
-	if [ -n $last_image ];
+	# modules
+	if [ ! -f $FLASHLAYOUT_module ];
 	then
-		echo "$FLASHLAYOUT_filename_path/$last_image"
-		if [ -f $FLASHLAYOUT_filename_path/$last_image ];
+		if [ -z $FLASHLAYOUT_uri ];
 		then
-			FLASHLAYOUT_prefix_image_path="$FLASHLAYOUT_filename_path"
+			echo "[ERROR] couldn't download $FLASHLAYOUT_module because URI are not declared"
+			exit 0
 		else
-			if [ -f $FLASHLAYOUT_filename_path/../$last_image ];
+			echo "[Try to Download]: wget $FLASHLAYOUT_uri/$FLASHLAYOUT_module -O $FLASHLAYOUT_prefix_image_path/$FLASHLAYOUT_module"
+			wget $FLASHLAYOUT_uri/$FLASHLAYOUT_module -O $FLASHLAYOUT_module 2> /dev/null
+			ret=$?
+			if [ ! $ret -eq 0 ];
 			then
-				FLASHLAYOUT_prefix_image_path="$FLASHLAYOUT_filename_path/.."
-			else
-				echo "[ERROR]: do not found image associated to this FLash layout on the directory:"
-				echo "[ERROR]:    $FLASHLAYOUT_filename_path"
-				echo "[ERROR]: or $FLASHLAYOUT_filename_path/.."
-				echo ""
+				echo "[ERROR] couldn't download $FLASHLAYOUT_module on $FLASHLAYOUT_uri/"
 				exit 0
 			fi
+		fi
+	fi
+
+	#generate rootfs filesystem if not exist
+	if [ ! -z "$root_image" ];
+	then
+		echo $root_image | grep -q tar;
+		is_tar=$?
+		if [ $is_tar -eq 0 ];
+		then
+			tarball=$(ls -1 $FLASHLAYOUT_filename_path/$root_image | head -n 1)
+			generate_rootfs_from_tarball $tarball
 		fi
 	fi
 }
@@ -154,7 +277,7 @@ function get_last_image_path() {
 # calculate number of parition enable
 function calculate_number_of_partition() {
 	num=0
-	for ((i=0;i<FLASHLAYOUT_number_of_line;i++))
+	for i in $(seq 0 $FLASHLAYOUT_number_of_line)
 	do
 		selected=${FLASHLAYOUT_data[$i,$COL_SELECTED_OPT]}
 		if [ "$selected" == "P" ] || [ "$selected" == "E" ];
@@ -178,7 +301,7 @@ function generate_gpt_partition_table_from_flash_layout() {
 
 	echo "Create partition table:"
 
-	for ((i=0;i<FLASHLAYOUT_number_of_line;i++))
+	for i in $(seq 0 $FLASHLAYOUT_number_of_line)
 	do
 		selected=${FLASHLAYOUT_data[$i,$COL_SELECTED_OPT]}
 		partName=${FLASHLAYOUT_data[$i,$COL_PARTNAME]}
@@ -196,7 +319,7 @@ function generate_gpt_partition_table_from_flash_layout() {
 			;;
 		esac
 		# add boot flags on gpt partition
-		if [ "$partName" == "bootfs" ];
+		if [ "$partName" == 'bootfs' ];
 		then
 			bootfs_param=" -A $j:set:2"
 		else
@@ -327,7 +450,7 @@ function populate_gpt_partition_table_from_flash_layout() {
 	local j=1
 	echo "Populate raw image with image content:"
 
-	for ((i=0;i<FLASHLAYOUT_number_of_line;i++))
+	for i in $(seq 0 $FLASHLAYOUT_number_of_line)
 	do
 		#debug "DUMP LINE=${FLASHLAYOUT_data[$i]}"
 		selected=${FLASHLAYOUT_data[$i,$COL_SELECTED_OPT]}
@@ -378,8 +501,8 @@ function print_shema_on_infofile() {
 	local j=1
 	local i=1
 	# print schema of partition
-	i=1
-	for ((i=0;i<FLASHLAYOUT_number_of_line;i++))
+
+	for i in $(seq 0 $FLASHLAYOUT_number_of_line)
 	do
 		selected=${FLASHLAYOUT_data[$i,$COL_SELECTED_OPT]}
 		if [ "$selected" == "P" ] || [ "$selected" == "E" ];
@@ -390,7 +513,7 @@ function print_shema_on_infofile() {
 	echo "=" >> $FLASHLAYOUT_infoname
 
 	#empty line
-	for ((i=0;i<FLASHLAYOUT_number_of_line;i++))
+	for i in $(seq 0 $FLASHLAYOUT_number_of_line)
 	do
 		selected=${FLASHLAYOUT_data[$i,$COL_SELECTED_OPT]}
 		if [ "$selected" == "P" ] || [ "$selected" == "E" ];
@@ -400,7 +523,7 @@ function print_shema_on_infofile() {
 	done
 	echo "=" >> $FLASHLAYOUT_infoname
 	# part name
-	for ((i=0;i<FLASHLAYOUT_number_of_line;i++))
+	for i in $(seq 0 $FLASHLAYOUT_number_of_line)
 	do
 		selected=${FLASHLAYOUT_data[$i,$COL_SELECTED_OPT]}
 		partName=${FLASHLAYOUT_data[$i,$COL_PARTNAME]}
@@ -411,7 +534,7 @@ function print_shema_on_infofile() {
 	done
 	echo "=" >> $FLASHLAYOUT_infoname
 	#empty
-	for ((i=0;i<FLASHLAYOUT_number_of_line;i++))
+	for i in $(seq 0 $FLASHLAYOUT_number_of_line)
 	do
 		selected=${FLASHLAYOUT_data[$i,$COL_SELECTED_OPT]}
 		if [ "$selected" == "P" ] || [ "$selected" == "E" ];
@@ -421,7 +544,7 @@ function print_shema_on_infofile() {
 	done
 	echo "=" >> $FLASHLAYOUT_infoname
 	# partition number
-	for ((i=0;i<FLASHLAYOUT_number_of_line;i++))
+	for i in $(seq 0 $FLASHLAYOUT_number_of_line)
 	do
 		selected=${FLASHLAYOUT_data[$i,$COL_SELECTED_OPT]}
 		if [ "$selected" == "P" ] || [ "$selected" == "E" ];
@@ -432,7 +555,7 @@ function print_shema_on_infofile() {
 	done
 	echo "=" >> $FLASHLAYOUT_infoname
 	j=1
-	for ((i=0;i<FLASHLAYOUT_number_of_line;i++))
+	for i in $(seq 0 $FLASHLAYOUT_number_of_line)
 	do
 		selected=${FLASHLAYOUT_data[$i,$COL_SELECTED_OPT]}
 		if [ "$selected" == "P" ] || [ "$selected" == "E" ];
@@ -442,7 +565,7 @@ function print_shema_on_infofile() {
 		fi
 	done
 	echo "=" >> $FLASHLAYOUT_infoname
-	for ((i=0;i<FLASHLAYOUT_number_of_line;i++))
+	for i in $(seq 0 $FLASHLAYOUT_number_of_line)
 	do
 		selected=${FLASHLAYOUT_data[$i,$COL_SELECTED_OPT]}
 		if [ "$selected" == "P" ] || [ "$selected" == "E" ];
@@ -451,7 +574,7 @@ function print_shema_on_infofile() {
 		fi
 	done
 	echo "=" >> $FLASHLAYOUT_infoname
-	for ((i=0;i<FLASHLAYOUT_number_of_line;i++))
+	for i in $(seq 0 $FLASHLAYOUT_number_of_line)
 	do
 		selected=${FLASHLAYOUT_data[$i,$COL_SELECTED_OPT]}
 		if [ "$selected" == "P" ] || [ "$selected" == "E" ];
@@ -462,7 +585,7 @@ function print_shema_on_infofile() {
 	echo "=" >> $FLASHLAYOUT_infoname
 	# print legend of partition
 	j=1
-	for ((i=0;i<FLASHLAYOUT_number_of_line;i++))
+	for i in $(seq 0 $FLASHLAYOUT_number_of_line)
 	do
 		selected=${FLASHLAYOUT_data[$i,$COL_SELECTED_OPT]}
 		partName=${FLASHLAYOUT_data[$i,$COL_PARTNAME]}
@@ -485,7 +608,7 @@ function print_shema_on_infofile() {
 
 function print_populate_on_infofile() {
 	local j=1
-	for ((i=0;i<FLASHLAYOUT_number_of_line;i++))
+	for i in $(seq 0 $FLASHLAYOUT_number_of_line)
 	do
 		selected=${FLASHLAYOUT_data[$i,$COL_SELECTED_OPT]}
 		partName=${FLASHLAYOUT_data[$i,$COL_PARTNAME]}
