@@ -40,6 +40,13 @@ IMAGE_CMD_ledgeraw () {
         sed -i "s/%%BOOTFS%/${BOOTFS_IMAGE_NAME_DETECTED}/" $name
     done
 
+    if [ ! -f ${DEPLOY_DIR_IMAGE}/ledge-image-bootfs-${MACHINE}-for-debian.ext4 ];
+    then
+        # make a copy of module stripped and bootfs for debian image
+        cp ${DEPLOY_DIR_IMAGE}/modules-stripped-${MACHINE}.tgz ${DEPLOY_DIR_IMAGE}/modules-stripped-${MACHINE}-for-debian.tar.gz
+        cp ${DEPLOY_DIR_IMAGE}/${BOOTFS_IMAGE_NAME_DETECTED} ${DEPLOY_DIR_IMAGE}/ledge-image-bootfs-${MACHINE}-for-debian.ext4
+    fi
+
     for f in ${LEDGE_RAW_FLASHLAYOUTS};
     do
         name=$(echo $f | sed "s/\.fld/-${IMAGE_LINK_NAME}\.fld/")
