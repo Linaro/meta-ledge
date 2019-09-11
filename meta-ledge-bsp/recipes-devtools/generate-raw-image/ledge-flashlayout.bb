@@ -10,6 +10,7 @@ SRC_URI_ledge-stm32mp157c-dk2 = " \
     file://FlashLayout_sdcard_ledge-stm32mp157c-dk2-optee.tsv.template \
     file://tf-a-stm32mp157c-dk2-flasher.stm32 \
     file://u-boot-stm32mp157c-dk2-flasher.stm32 \
+    file://FlashLayout_sdcard_ledge-stm32mp157c-dk2-debian.fld \
     "
 
 S = "${WORKDIR}"
