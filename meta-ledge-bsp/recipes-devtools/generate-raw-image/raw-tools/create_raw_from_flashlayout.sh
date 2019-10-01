@@ -168,6 +168,13 @@ function generate_rootfs_from_tarball() {
 			FLASHLAYOUT_data[$i,$COL_BIN2FLASH]=$_rootfs_name.ext4
 		fi
 	done
+	# update tsv file if exist
+	tsv_template_file=$(echo "$FLASHLAYOUT_filename" | sed -e "s/fld/tsv.template/")
+	tsv_file=$(echo "$FLASHLAYOUT_filename" | sed -e "s/fld/tsv/")
+	if [ -e $tsv_template_file ]
+	then
+		sed -e "s|%%IMAGE%|$_rootfs_name.ext4|g" $tsv_template_file > $tsv_file
+	fi
 	# clean
 	sudo rm -rf temp_rootfs
 }
@@ -222,16 +229,16 @@ function get_last_image_path() {
 					then
 						# clean last wget request
 						rm -f $bin2flash
-						# try to get tge gzip version
-						echo "[Try to Download]: wget $FLASHLAYOUT_uri/$bin2flash -O $FLASHLAYOUT_prefix_image_path/$bin2flash.gz"
-						wget $FLASHLAYOUT_uri/$bin2flash.gz -O $FLASHLAYOUT_prefix_image_path/$bin2flash.gz
+						# try to get tge xz version
+						echo "[Try to Download]: wget $FLASHLAYOUT_uri/$bin2flash -O $FLASHLAYOUT_prefix_image_path/$bin2flash.xz"
+						wget $FLASHLAYOUT_uri/$bin2flash.xz -O $FLASHLAYOUT_prefix_image_path/$bin2flash.xz
 						ret=$?
 						if [ ! $ret -eq 0 ];
 						then
 							echo "[ERROR] couldn't download $bin2flash on $FLASHLAYOUT_uri/"
 							exit 0
 						else
-							gunzip $FLASHLAYOUT_prefix_image_path/$bin2flash.gz
+							gunzip $FLASHLAYOUT_prefix_image_path/$bin2flash.xz
 						fi
 					fi
 				fi
