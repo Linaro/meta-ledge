@@ -8,4 +8,6 @@ IMAGE_FEATURES += "package-management ssh-server-openssh allow-empty-password"
 
 CORE_IMAGE_BASE_INSTALL += "\
     packagegroup-ledge-iot \
+    ${@bb.utils.contains("MACHINE_FEATURES", "optee", "packagegroup-ledge-optee", "", d)} \
+    ${@bb.utils.contains("MACHINE_FEATURES", "tsn", "packagegroup-ledge-tsn", "", d)} \
     "
