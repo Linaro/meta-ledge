@@ -76,22 +76,29 @@ python __anonymous () {
 }
 
 do_install_append() {
-#    if [ "${@bb.utils.contains('DISTRO_FEATURES', 'efi', '1', '0', d)}" = "1" ]; then
+    if [ "${@bb.utils.contains('DISTRO_FEATURES', 'efi', '1', '0', d)}" = "1" ]; then
+        install -d ${D}/boot/efi/boot
         for t in ${KERNEL_IMAGETYPE} ${KERNEL_ALT_IMAGETYPE}; do
             if [ "$t" = "zImage" ]; then
-                install -d ${D}/boot/efi/boot
                 ln -s ../../zImage ${D}/boot/efi/boot/${KERNEL_EFI_IMAGE}
             fi
+            if [ "$t" = "Image" ]; then
+                ln -s ../../Image ${D}/boot/efi/boot/${KERNEL_EFI_IMAGE}
+            fi
+            ln -s ../../$t ${D}/boot/efi/boot/$t
         done
-
-#    fi
+   fi
 }
+FILES_${KERNEL_PACKAGE_NAME}-image += "/boot/efi"
+
 python __anonymous () {
     types = d.getVar('KERNEL_IMAGETYPES') or ""
     kname = d.getVar('KERNEL_PACKAGE_NAME') or "kernel"
     for type in types.split():
         typelower = type.lower()
         if typelower == 'zimage':
+            d.appendVar('FILES_' + kname + '-image-' + typelower, ' /boot/efi/boot ')
+        if typelower == 'image':
             d.appendVar('FILES_' + kname + '-image-' + typelower, ' /boot/efi/boot ')
 }
 FILES_${KERNEL_PACKAGE_NAME}-base += "${nonarch_base_libdir}/modules/${KERNEL_VERSION}/modules.builtin.modinfo "
