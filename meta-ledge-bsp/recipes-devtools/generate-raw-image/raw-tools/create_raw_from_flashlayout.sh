@@ -22,10 +22,14 @@ unset FLASHLAYOUT_prefix_image_path
 unset FLASHLAYOUT_number_of_line
 unset FLASHLAYOUT_uri
 unset FLASHLAYOUT_module
+unset FLASHLAYOUT_kernel
+unset FLASHLAYOUT_dtb
 
 declare -A FLASHLAYOUT_data
 FLASHLAYOUT_uri=""
 FLASHLAYOUT_module=""
+FLASHLAYOUT_kernel=""
+FLASHLAYOUT_dtb=""
 # Size of 4GB
 #DEFAULT_RAW_SIZE=4096
 # Size of 2,5GB
@@ -109,6 +113,15 @@ function read_flash_layout() {
 		then
 			FLASHLAYOUT_module=${flashlayout_data[1]}
 		fi
+		if [ "$selected" == "KERNEL" ]
+		then
+			FLASHLAYOUT_kernel=${flashlayout_data[1]}
+		fi
+		if [ "$selected" == "DTB" ]
+		then
+			FLASHLAYOUT_dtb=${flashlayout_data[1]}
+		fi
+
 	done < "$FLASHLAYOUT_filename"
 
 	FLASHLAYOUT_number_of_line=$i
@@ -145,10 +158,16 @@ function generate_rootfs_from_tarball() {
 		return
 	fi
 
+	localpath=$(pwd)
+	dtb_name=$(echo $FLASHLAYOUT_dtb | sed -e "s/-for-debian//")
 	mkdir temp_rootfs
 	cd temp_rootfs
 	sudo tar xf ../$tarball
 	sudo tar xf ../$FLASHLAYOUT_module
+	sudo mkdir -p boot/efi/boot/
+	sudo ln -sf /boot/$FLASHLAYOUT_kernel boot/efi/boot/bootarm.efi
+	sudo cp $FLASHLAYOUT_kernel boot/
+	sudo cp $FLASHLAYOUT_dtb boot/$dtb_name
 	cd ..
 
 	size_full=$(sudo du -s temp_rootfs| tr '\t' ' ' | cut -f 1 -d' ')
@@ -264,6 +283,25 @@ function get_last_image_path() {
 				echo "[ERROR] couldn't download $FLASHLAYOUT_module on $FLASHLAYOUT_uri/"
 				exit 0
 			fi
+
+			echo "[Try to Download]: wget $FLASHLAYOUT_uri/$FLASHLAYOUT_kernel -O $FLASHLAYOUT_prefix_image_path/$FLASHLAYOUT_kernel"
+			wget $FLASHLAYOUT_uri/$FLASHLAYOUT_kernel -O $FLASHLAYOUT_kernel 2> /dev/null
+			ret=$?
+			if [ ! $ret -eq 0 ];
+			then
+				echo "[ERROR] couldn't download $FLASHLAYOUT_kernel on $FLASHLAYOUT_uri/"
+				exit 0
+			fi
+
+			echo "[Try to Download]: wget $FLASHLAYOUT_uri/$FLASHLAYOUT_dtb -O $FLASHLAYOUT_prefix_image_path/$FLASHLAYOUT_dtb"
+			wget $FLASHLAYOUT_uri/$FLASHLAYOUT_dtb -O $FLASHLAYOUT_dtb 2> /dev/null
+			ret=$?
+			if [ ! $ret -eq 0 ];
+			then
+				echo "[ERROR] couldn't download $FLASHLAYOUT_dtb on $FLASHLAYOUT_uri/"
+				exit 0
+			fi
+
 		fi
 	fi
 
@@ -326,7 +364,7 @@ function generate_gpt_partition_table_from_flash_layout() {
 			;;
 		esac
 		# add boot flags on gpt partition
-		if [ "$partName" == 'bootfs' ];
+		if [ "$partType" == 'System' ];
 		then
 			bootfs_param=" -A $j:set:2"
 		else
@@ -667,15 +705,15 @@ cat >> $FLASHLAYOUT_infoname  << EOF
 
 3. How to update the kernel/devicetree
 --------------------------------------
-The kernel and devicetree are present on "bootfs" partition.
+The kernel and devicetree are present on "rootfs" partition.
 To change kernel and devicetree, you can copy the file on this partitions:
 - plug SDCARD on your PC
 - copy kernel uImage on SDCARD
-   sudo cp uImage /media/\$USER/bootfs/
+   sudo cp uImage /media/\$USER/rootfs/boot/
 - copy devicetree uImage on SDCARD
-   sudo cp stm32mp1*.dtb /media/\$USER/bootfs/
+   sudo cp stm32mp1*.dtb /media/\$USER/rootfs/boot/
 - umount partitions of SDCARD
-   sudo umount /media/\$USER/bootfs/
+   sudo umount /media/\$USER/rootfs/
    (dont't forget to umount the other partitions of SDCARD:
    sudo umount \`lsblk --list | grep mmcblk0 | grep part | gawk '{ print \$7 }' | tr '\\n' ' '\`
    )
