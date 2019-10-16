@@ -13,11 +13,12 @@
 #Opt	Name	Type	Offset	Binary
 URI		https://snapshots.linaro.org/components/ledge/oe/ledge-stm32mp157c-dk2/latest/rpb/
 MODULE	modules-stripped-ledge-stm32mp157c-dk2-for-debian.tar.gz
+KERNEL zImage-for-debian
+DTB stm32mp157c-dk2.dtb-for-debian
 P	fsbl1	Binary	0x00004400	spl/u-boot-spl.stm32-basic
 P	fsbl2	Binary	0x00044400	spl/u-boot-spl.stm32-basic
 P	ssbl	Binary	0x00084400	u-boot-basic.img
 E	teeh	Binary	0x00284400	optee/tee-header_v2.stm32
 E	teed	Binary	0x002C4400	optee/tee-pageable_v2.stm32
 E	teex	Binary	0x00304400	optee/tee-pager_v2.stm32
-P	bootfs	FileSystem	0x00344400	ledge-image-bootfs-ledge-stm32mp157c-dk2-for-debian.ext4
-P	rootfs	FileSystem	0x04344400	rootfs-linaro-buster-raw-unknown-*.tar.xz
+P	rootfs	System	0x00344400	rootfs-linaro-buster-raw-unknown-*.tar.xz
