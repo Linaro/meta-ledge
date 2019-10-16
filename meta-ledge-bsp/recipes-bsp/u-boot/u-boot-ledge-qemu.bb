@@ -11,10 +11,12 @@ PE = "1"
 # repo during parse
 SRCREV = "cdbde65166dd9936d52c6acdc8e38cf685f82195"
 
-SRC_URI = "git://git.linaro.org/people/takahiro.akashi/u-boot.git"
+SRC_URI = "git://git.linaro.org/people/takahiro.akashi/u-boot.git;branch=efi/secboot"
 
 S = "${WORKDIR}/git"
 
 require recipes-bsp/u-boot/u-boot.inc
 
 DEPENDS += "bc-native dtc-native"
+PACKAGE_ARCH = "${MACHINE_ARCH}"
+COMPATIBLE_MACHINE = "(ledge-qemuarm64)"
