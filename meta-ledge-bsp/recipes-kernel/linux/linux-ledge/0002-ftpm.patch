@@ -1,3 +1,8 @@
+From bd13f9cbff186a62ddd255d94144724ec98a66ba Mon Sep 17 00:00:00 2001
+From: Christophe Priouzeau <christophe.priouzeau@linaro.org>
+Date: Wed, 16 Oct 2019 12:03:40 +0200
+Subject: [PATCH 2/3] ftpm
+
 This patch adds support for a software-only implementation of a TPM
 running in TEE.
 
@@ -7,7 +12,6 @@ https://www.microsoft.com/en-us/research/publication/ftpm-software-implementatio
 As well as reference code for the firmware available here:
 https://github.com/Microsoft/ms-tpm-20-ref/tree/master/Samples/ARM32-FirmwareTPM
 
-Tested-by: Thirupathaiah Annapureddy <thiruan@microsoft.com>
 Signed-off-by: Thirupathaiah Annapureddy <thiruan@microsoft.com>
 Co-authored-by: Sasha Levin <sashal@kernel.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
@@ -21,7 +25,7 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  create mode 100644 drivers/char/tpm/tpm_ftpm_tee.h
 
 diff --git a/drivers/char/tpm/Kconfig b/drivers/char/tpm/Kconfig
-index 88a3c06fc153..17bfbf9f572f 100644
+index 88a3c06fc..17bfbf9f5 100644
 --- a/drivers/char/tpm/Kconfig
 +++ b/drivers/char/tpm/Kconfig
 @@ -164,6 +164,11 @@ config TCG_VTPM_PROXY
@@ -37,7 +41,7 @@ index 88a3c06fc153..17bfbf9f572f 100644
  source "drivers/char/tpm/st33zp24/Kconfig"
  endif # TCG_TPM
 diff --git a/drivers/char/tpm/Makefile b/drivers/char/tpm/Makefile
-index a01c4cab902a..c354cdff9c62 100644
+index a01c4cab9..c354cdff9 100644
 --- a/drivers/char/tpm/Makefile
 +++ b/drivers/char/tpm/Makefile
 @@ -33,3 +33,4 @@ obj-$(CONFIG_TCG_TIS_ST33ZP24) += st33zp24/
@@ -47,7 +51,7 @@ index a01c4cab902a..c354cdff9c62 100644
 +obj-$(CONFIG_TCG_FTPM_TEE) += tpm_ftpm_tee.o
 diff --git a/drivers/char/tpm/tpm_ftpm_tee.c b/drivers/char/tpm/tpm_ftpm_tee.c
 new file mode 100644
-index 000000000000..74766a4d3280
+index 000000000..74766a4d3
 --- /dev/null
 +++ b/drivers/char/tpm/tpm_ftpm_tee.c
 @@ -0,0 +1,350 @@
@@ -403,7 +407,7 @@ index 000000000000..74766a4d3280
 +MODULE_LICENSE("GPL v2");
 diff --git a/drivers/char/tpm/tpm_ftpm_tee.h b/drivers/char/tpm/tpm_ftpm_tee.h
 new file mode 100644
-index 000000000000..f98daa7bf68c
+index 000000000..f98daa7bf
 --- /dev/null
 +++ b/drivers/char/tpm/tpm_ftpm_tee.h
 @@ -0,0 +1,40 @@
@@ -448,5 +452,5 @@ index 000000000000..f98daa7bf68c
 +
 +#endif /* __TPM_FTPM_TEE_H__ */
 -- 
-2.20.1
+2.17.1
 
