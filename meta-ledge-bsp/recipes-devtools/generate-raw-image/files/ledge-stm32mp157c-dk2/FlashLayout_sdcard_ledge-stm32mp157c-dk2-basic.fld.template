@@ -17,4 +17,5 @@ P	ssbl	Binary	0x00084400	u-boot-basic.img
 E	teeh	Binary	0x00284400	optee/tee-header_v2.stm32
 E	teed	Binary	0x002C4400	optee/tee-pageable_v2.stm32
 E	teex	Binary	0x00304400	optee/tee-pager_v2.stm32
-P	rootfs	FileSystem	0x00344400	%%IMAGE%
+P	bootfs	FileSystem	0x00344400	%%BOOTFS%
+P	rootfs	FileSystem	0x04344400	%%IMAGE%
