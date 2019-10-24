@@ -1,0 +1,7 @@
+#part /boot --source bootimg-partition --ondisk mmcblk --fstype=vfat --label boot --active --align 4096 --size 16
+#
+part /boot --source bootimg-efi-arm --sourceparams="loader=kernel-uefi" --ondisk mmcblk --fstype=vfat --label boot --align 4096 --size 16
+#part / --source rootfs --rootfs-dir=boot --ondisk mmcblk --fstype=vfat --label boot --align 4096 --size 16
+part / --source rootfs --ondisk mmcblk --fstype=ext4 --label root --align 4096
+bootloader --ptable msdos
+
