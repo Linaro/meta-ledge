@@ -1,53 +1,31 @@
-From bcb91edc06c9959f1f5bb57a07c963868ab34b69 Mon Sep 17 00:00:00 2001
+From 842cbb80c0686ab23b5bb137f6f69092459345a5 Mon Sep 17 00:00:00 2001
 From: Christophe Priouzeau <christophe.priouzeau@st.com>
-Date: Thu, 23 Aug 2018 14:34:51 +0200
-Subject: [PATCH 1/2] MAKEFILE: disable igb for arm platform
+Date: Tue, 5 Nov 2019 09:26:09 +0100
+Subject: [PATCH 1/3] MAKEFILE: disable igb for arm platform
 
 Signed-off-by: Christophe Priouzeau <christophe.priouzeau@st.com>
 ---
- Makefile | 16 ++++++++--------
- 1 file changed, 8 insertions(+), 8 deletions(-)
+ Makefile | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/Makefile b/Makefile
-index 2a931c3..9e193d5 100644
+index 29926fe4..415316b2 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -35,18 +35,18 @@ help:
- 	@echo '  clean: a summary clean target to clean _all_ folders'
+@@ -33,11 +33,11 @@ help:
  	@echo ''
  
--igb: FORCE
--	$(call descend,kmod/$@)
-+# igb: FORCE
-+#         $(call descend,kmod/$@)
- 
--igb_clean:
--	$(call descend,kmod/igb/,clean)
-+# igb_clean:
-+#         $(call descend,kmod/igb/,clean)
- 
  lib: FORCE
--	$(call descend,lib/igb)
-+	#$(call descend,lib/igb)
+-	$(call descend,lib/igb_avb/lib)
++#	$(call descend,lib/igb_avb/lib)
  	$(call descend,lib/common)
  
  lib_clean:
--	$(call descend,lib/igb/,clean)
-+	#$(call descend,lib/igb/,clean)
+-	$(call descend,lib/igb_avb/lib/,clean)
++#	$(call descend,lib/igb_avb/lib/,clean)
  	$(call descend,lib/common/,clean)
  
  mrpd:
-@@ -155,8 +155,8 @@ examples_all: examples_common simple_talker simple_listener mrp_client live_stre
- examples_all_clean: examples_common_clean simple_talker_clean simple_listener_clean mrp_client_clean \
- 	jackd-talker_clean jackd-listener_clean live_stream_clean simple_rx_clean
- 
--all: igb lib daemons_all examples_all avtp_pipeline avtp_avdecc
-+all: lib daemons_all examples_all avtp_pipeline avtp_avdecc
- 
--clean: igb_clean lib_clean daemons_all_clean examples_all_clean avtp_pipeline_clean avtp_avdecc_clean
-+clean: lib_clean daemons_all_clean examples_all_clean avtp_pipeline_clean avtp_avdecc_clean
- 
- .PHONY: FORCE
 -- 
-2.7.4
+2.17.1
 

@@ -1,0 +1,27 @@
+From 6b39d232da6986d794ad9ce58c8eced238049b41 Mon Sep 17 00:00:00 2001
+From: Christophe Priouzeau <christophe.priouzeau@st.com>
+Date: Tue, 5 Nov 2019 09:26:49 +0100
+Subject: [PATCH 3/3] mrpd: correct typedef issue
+
+Signed-off-by: Christophe Priouzeau <christophe.priouzeau@st.com>
+---
+ daemons/mrpd/mrpd.h | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/daemons/mrpd/mrpd.h b/daemons/mrpd/mrpd.h
+index d33de129..e6f69f0f 100644
+--- a/daemons/mrpd/mrpd.h
++++ b/daemons/mrpd/mrpd.h
+@@ -47,7 +47,9 @@ size_t mrpd_send(SOCKET sockfd, const void *buf, size_t len, int flags);
+ #include <sys/socket.h>
+ #include <netinet/in.h>
+ #include <arpa/inet.h>
++#ifndef SOCKET
+ typedef int SOCKET;
++#endif
+ typedef int HTIMER;
+ #define INVALID_SOCKET -1
+ #define SOCKET_ERROR   -1
+-- 
+2.17.1
+
