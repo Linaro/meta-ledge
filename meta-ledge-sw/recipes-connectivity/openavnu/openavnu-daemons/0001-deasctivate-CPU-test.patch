@@ -1,0 +1,68 @@
+From 8f5455892e4714cd583d8d030951cfe68df47375 Mon Sep 17 00:00:00 2001
+From: Christophe Priouzeau <christophe.priouzeau@st.com>
+Date: Tue, 5 Nov 2019 10:46:02 +0100
+Subject: [PATCH] deasctivate CPU test
+
+Signed-off-by: Christophe Priouzeau <christophe.priouzeau@st.com>
+---
+ .../CppUTestBuildTimeDiscoverTests.cmake      | 44 +++++++++----------
+ 1 file changed, 22 insertions(+), 22 deletions(-)
+
+diff --git a/thirdparty/cpputest/cmake/Scripts/CppUTestBuildTimeDiscoverTests.cmake b/thirdparty/cpputest/cmake/Scripts/CppUTestBuildTimeDiscoverTests.cmake
+index 901e08bb..555f38fb 100644
+--- a/thirdparty/cpputest/cmake/Scripts/CppUTestBuildTimeDiscoverTests.cmake
++++ b/thirdparty/cpputest/cmake/Scripts/CppUTestBuildTimeDiscoverTests.cmake
+@@ -56,28 +56,28 @@ set(CTESTFNAME "${CMAKE_CURRENT_BINARY_DIR}/CTestTestfile.cmake")
+ file(STRINGS ${CTESTFNAME} CTESTTESTS)
+ set(EXECUTABLE_CMD "${CMAKE_CURRENT_BINARY_DIR}/${EXECUTABLE}")
+ 
+-if (TESTS_DETAILED)
+-  set(DISCOVER_ARG "-ln")
+-  buildtime_discover_tests("${EXECUTABLE_CMD}" "${DISCOVER_ARG}" TestList_GroupsAndNames)
+-  set(lastgroup "")
+-  foreach(testfullname ${TestList_GroupsAndNames})
+-    string(REGEX MATCH "^([^/.]+)" groupname ${testfullname})
+-    string(REGEX MATCH "([^/.]+)$" testname ${testfullname})
+-    if (NOT ("${groupname}" STREQUAL "${lastgroup}"))
+-      message("TestGroup: ${groupname}:")
+-      set(lastgroup "${groupname}")
+-    endif (NOT ("${groupname}" STREQUAL "${lastgroup}"))
+-    message("... ${testname}")
+-    buildtime_add_test(${EXECUTABLE}.${testfullname} ${EXECUTABLE_CMD} -sg ${groupname} -sn ${testname} -c)
+-  endforeach()
+-else (TESTS_DETAILED)
+-  set(DISCOVER_ARG "-lg")
+-  buildtime_discover_tests("${EXECUTABLE_CMD}" "${DISCOVER_ARG}" TestList_Groups)
+-  foreach(group ${TestList_Groups})
+-    message("TestGroup: ${group}")
+-    buildtime_add_test(${EXECUTABLE}.${group} "${EXECUTABLE_CMD}" -sg ${group} -c)
+-  endforeach()
+-endif (TESTS_DETAILED)
++# if (TESTS_DETAILED)
++#   set(DISCOVER_ARG "-ln")
++#   buildtime_discover_tests("${EXECUTABLE_CMD}" "${DISCOVER_ARG}" TestList_GroupsAndNames)
++#   set(lastgroup "")
++#   foreach(testfullname ${TestList_GroupsAndNames})
++#     string(REGEX MATCH "^([^/.]+)" groupname ${testfullname})
++#     string(REGEX MATCH "([^/.]+)$" testname ${testfullname})
++#     if (NOT ("${groupname}" STREQUAL "${lastgroup}"))
++#       message("TestGroup: ${groupname}:")
++#       set(lastgroup "${groupname}")
++#     endif (NOT ("${groupname}" STREQUAL "${lastgroup}"))
++#     message("... ${testname}")
++#     buildtime_add_test(${EXECUTABLE}.${testfullname} ${EXECUTABLE_CMD} -sg ${groupname} -sn ${testname} -c)
++#   endforeach()
++# else (TESTS_DETAILED)
++#   set(DISCOVER_ARG "-lg")
++#   buildtime_discover_tests("${EXECUTABLE_CMD}" "${DISCOVER_ARG}" TestList_Groups)
++#   foreach(group ${TestList_Groups})
++#     message("TestGroup: ${group}")
++#     buildtime_add_test(${EXECUTABLE}.${group} "${EXECUTABLE_CMD}" -sg ${group} -c)
++#   endforeach()
++# endif (TESTS_DETAILED)
+ 
+ 
+ # create separate CTest test for each CppUTestTests test
+-- 
+2.17.1
+
