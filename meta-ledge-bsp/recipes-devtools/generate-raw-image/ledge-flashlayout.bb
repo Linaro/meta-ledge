@@ -3,10 +3,8 @@ LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 
 SRC_URI_ledge-stm32mp157c-dk2 = " \
-    file://FlashLayout_sdcard_ledge-stm32mp157c-dk2-basic.fld.template \
     file://FlashLayout_sdcard_ledge-stm32mp157c-dk2-optee.fld.template \
     \
-    file://FlashLayout_sdcard_ledge-stm32mp157c-dk2-basic.tsv.template \
     file://FlashLayout_sdcard_ledge-stm32mp157c-dk2-optee.tsv.template \
     file://tf-a-stm32mp157c-dk2-flasher.stm32 \
     file://u-boot-stm32mp157c-dk2-flasher.stm32 \
