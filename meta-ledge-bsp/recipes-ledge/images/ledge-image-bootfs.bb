@@ -5,7 +5,6 @@ LICENSE = "MIT"
 
 # force bootfs image type
 IMAGE_FSTYPES = "tar.xz ext4"
-IMAGE_FSTYPES_remove = "ledgeraw"
 
 inherit core-image
 
