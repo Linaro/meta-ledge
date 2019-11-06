@@ -23,7 +23,6 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	cpio \
 	cracklib \
 	${@bb.utils.contains_any("TUNE_ARCH", [ "x86_64", "arm" ] , "criu", "", d)} \
-	cryptsetup \
 	curl \
 	diffutils \
 	dnf \
