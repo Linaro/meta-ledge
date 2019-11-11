@@ -1,0 +1,2 @@
+part /boot --source rootfs --rootfs-dir=${IMAGE_ROOTFS}/boot --fstype=vfat --label bootfs --active --align 1024 --fixed-size 128M --use-uuid
+part / --source rootfs --fstype=ext4 --label rootfs --align 1024 --exclude-path boot/
