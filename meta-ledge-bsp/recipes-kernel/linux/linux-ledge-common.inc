@@ -8,6 +8,7 @@ KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-02-systemd.config "
 KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-10-ledge.config "
 KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-11-virtio.config "
 KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-12-security.config "
+KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-13-cmdline.config "
 KERNEL_CONFIG_COMMAND = "oe_runmake -C ${S} O=${B} ${KERNEL_DEFCONFIG}"
 
 SRC_URI_append = " file://fragment-01-core.config "
@@ -15,6 +16,7 @@ SRC_URI_append = " file://fragment-02-systemd.config "
 SRC_URI_append = " file://fragment-10-ledge.config "
 SRC_URI_append = " file://fragment-11-virtio.config "
 SRC_URI_append = " file://fragment-12-security.config "
+SRC_URI_APPEND = " file://fragment-13-cmdline.config "
 
 do_configure() {
     touch ${B}/.scmversion ${S}/.scmversion
