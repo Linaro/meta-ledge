@@ -79,17 +79,20 @@ python __anonymous () {
 
 do_install_append() {
     if [ "${@bb.utils.contains('DISTRO_FEATURES', 'efi', '1', '0', d)}" = "1" ]; then
-        install -d ${D}/boot/efi/boot
         for t in ${KERNEL_IMAGETYPE} ${KERNEL_ALT_IMAGETYPE}; do
-            if [ "$t" = "zImage" ]; then
-                ln -s ../../zImage ${D}/boot/efi/boot/${KERNEL_EFI_IMAGE}
+            if [ "$t" = "bzImage" ] || [ "$t" = "zImage" || [ "$t" = "Image" ]; then
+                if [ -e "${D}/boot/$t" ]; then
+                    install -d ${D}/boot/efi/boot
+                    install -m 0644 ${D}/boot/$t ${D}/boot/efi/boot/${KERNEL_EFI_IMAGE}
+                    break;
+                fi
             fi
-            if [ "$t" = "Image" ]; then
-                ln -s ../../Image ${D}/boot/efi/boot/${KERNEL_EFI_IMAGE}
-            fi
-            ln -s ../../$t ${D}/boot/efi/boot/$t
         done
-   fi
+
+        for t in ${KERNEL_IMAGETYPE} ${KERNEL_ALT_IMAGETYPE}; do
+            rm -rf ${D}/boot/$t*
+        done
+    fi
 }
 FILES_${KERNEL_PACKAGE_NAME}-image += "/boot/efi"
 
