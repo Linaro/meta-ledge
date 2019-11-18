@@ -28,6 +28,12 @@ TF_A_PLATFORM_ledge-stm32mp157c-dk2 = "stm32mp1"
 EXTRA_OEMAKE_ADDONS_ledge-stm32mp157c-dk2 = "AARCH32_SP=optee"
 TF_A_DEVICETREE_ledge-stm32mp157c-dk2 = "stm32mp157c-dk2"
 
+# ledge-qemuarm64 specific
+TF_A_PLATFORM_ledge-qemuarm64 = "qemu"
+EXTRA_OEMAKE_ADDONS_ledge-qemuarm64 = ""
+TF_A_DEVICETREE_ledge-qemuarm64 = ""
+TF_A_CONFIG_ledge-qemuarm64 = "qemu_arm64_defconfig"
+
 # ledge-ti-am64xx specific
 #TF_A_SUFFIX_ledge-ti-am64xx = "stm32"
 #TF_A_PLATFORM_ledge-ti-am64xx = "stm32mp1"
@@ -42,7 +48,7 @@ PACKAGECONFIG[optee] = " SPD=opteed "
 # Extra make settings
 EXTRA_OEMAKE = ' CROSS_COMPILE=${TARGET_PREFIX} '
 EXTRA_OEMAKE += ' PLAT=${TF_A_PLATFORM} '
-EXTRA_OEMAKE += ' ARM_ARCH_MAJOR=7 '
+EXTRA_OEMAKE_append_ledge-stm32mp157c-dk2 += ' ARM_ARCH_MAJOR=7 '
 EXTRA_OEMAKE_append_armv7a = ' ARCH=aarch32 '
 EXTRA_OEMAKE_append_armv7ve = ' ARCH=aarch32 '
 
