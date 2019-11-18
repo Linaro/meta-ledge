@@ -1,0 +1,22 @@
+# short-description: Create SD card image with a boot partition
+# long-description: Creates a partitioned SD card image
+#
+#  - ----- --------- -------------- -----------------------------------------------------
+# | | TFA | u-boot  | teeh | teed | teex |    bootfs   |    rootfs                      |
+#  - ----- --------- -------------- -----------------------------------------------------
+# ^ ^     ^         ^      ^      ^      ^             ^                                ^
+# | |     |         |      |      |      |             |                                |
+# 0 17kB 529kB    2.5MB   2.8MB  3MB    3.3MB        67.3MiB
+#
+# Warning: the first stage of boot (here fsbl1, fsbl2, ssbl) MUST be on GPT partition to be detected.
+#
+bootloader --ptable gpt
+part fsbl1 --source gptcopy --sourceparams="file=${DEPLOY_DIR_IMAGE}/arm-trusted-firmware/tf-a-stm32mp157c-dk2.stm32" --ondisk mmcblk --label fsbl1 --part-type 0x8301 --fixed-size 256K --align 17
+part fsbl2 --source gptcopy --sourceparams="file=${DEPLOY_DIR_IMAGE}/arm-trusted-firmware/tf-a-stm32mp157c-dk2.stm32" --ondisk mmcblk --label fsbl2 --part-type 0x8301 --fixed-size 256K
+part ssbl  --source gptcopy --sourceparams="file=${DEPLOY_DIR_IMAGE}/u-boot-trusted.stm32" --ondisk mmcblk --label ssbl --part-type 0x8301 --fixed-size 2048K
+part teeh  --source gptcopy --sourceparams="file=${DEPLOY_DIR_IMAGE}/optee/tee-header_v2.stm32" --ondisk mmcblk --label teeh --part-type 0x8301 --fixed-size 256K
+part teed  --source gptcopy --sourceparams="file=${DEPLOY_DIR_IMAGE}/optee/tee-pageable_v2.stm32" --ondisk mmcblk --label teed --part-type 0x8301 --fixed-size 256K
+part teex  --source gptcopy --sourceparams="file=${DEPLOY_DIR_IMAGE}/optee/tee-pager_v2.stm32" --ondisk mmcblk --label teex --part-type 0x8301 --fixed-size 256K
+
+part /boot --source rootfs --rootfs-dir=${IMAGE_ROOTFS}/boot --fstype=vfat --label bootfs --active --align 1024 --fixed-size 64M --use-uuid
+part / --source rootfs --fstype=ext4 --label rootfs --align 1024 --exclude-path boot/
