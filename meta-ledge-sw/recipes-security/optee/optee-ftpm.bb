@@ -44,6 +44,7 @@ do_configure() {
     #cd TPMCmd
     #./bootstrap
     #oe_runconf
+    sed -i -n '/-mcpu/!p' sub.mk
 }
 
 do_compile() {
