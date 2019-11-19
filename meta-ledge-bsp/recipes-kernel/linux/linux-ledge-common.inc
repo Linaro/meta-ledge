@@ -16,7 +16,7 @@ SRC_URI_append = " file://fragment-02-systemd.config "
 SRC_URI_append = " file://fragment-10-ledge.config "
 SRC_URI_append = " file://fragment-11-virtio.config "
 SRC_URI_append = " file://fragment-12-security.config "
-SRC_URI_APPEND = " file://fragment-13-cmdline.config "
+SRC_URI_append = " file://fragment-13-cmdline.config "
 
 do_configure() {
     touch ${B}/.scmversion ${S}/.scmversion
