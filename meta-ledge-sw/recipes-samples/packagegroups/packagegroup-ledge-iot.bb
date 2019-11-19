@@ -94,7 +94,7 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	pciutils \
 	pinentry \
 	packagegroup-core-ssh-openssh \
-	packagegroup-security-tpm2 \
+	${@bb.utils.contains("MACHINE_FEATURES", "tpm2", "packagegroup-security-tpm2", "", d)} \
 	packagegroup-core-selinux \
 	popt \
 	procps \
