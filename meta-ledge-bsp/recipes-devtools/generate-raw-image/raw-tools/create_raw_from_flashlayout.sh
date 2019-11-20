@@ -154,6 +154,10 @@ function generate_rootfs_from_tarball() {
 			then
 				FLASHLAYOUT_data[$i,$COL_BIN2FLASH]=$_rootfs_name.ext4
 			fi
+			if [ "$partName" == "bootfs" ];
+			then
+				FLASHLAYOUT_data[$i,$COL_BIN2FLASH]=$_rootfs_name.bootfs.vfat
+			fi
 		done
 		return
 	fi
@@ -164,11 +168,18 @@ function generate_rootfs_from_tarball() {
 	cd temp_rootfs
 	sudo tar xf ../$tarball
 	sudo tar xf ../$FLASHLAYOUT_module
+
 	sudo mkdir -p boot/efi/boot/
-	sudo ln -sf /boot/$FLASHLAYOUT_kernel boot/efi/boot/bootarm.efi
-	sudo cp $FLASHLAYOUT_kernel boot/
-	sudo cp $FLASHLAYOUT_dtb boot/$dtb_name
+	sudo cp ../$FLASHLAYOUT_kernel boot/efi/boot/bootarm.efi
+	sudo cp ../$FLASHLAYOUT_dtb boot/$dtb_name
 	cd ..
+	#generate vfat version of bootfs (64MB -512K) (-512 are to not erase the gpt partion information
+	_vfat_block=$((64*1024-512))
+	mkfs.vfat -n BOOT -S 512 -C $_rootfs_name.bootfs.vfat $_vfat_block
+	mcopy -i $_rootfs_name.bootfs.vfat -s $FLASHLAYOUT_dtb ::/
+	mmd -i $_rootfs_name.bootfs.vfat ::/efi
+	mmd -i $_rootfs_name.bootfs.vfat ::/efi/boot
+	mcopy -i $_rootfs_name.bootfs.vfat -s $FLASHLAYOUT_kernel ::/efi/boot/bootarm.efi
 
 	size_full=$(sudo du -s temp_rootfs| tr '\t' ' ' | cut -f 1 -d' ')
 	_size=$(($size_full/1024))
@@ -186,6 +197,10 @@ function generate_rootfs_from_tarball() {
 		then
 			FLASHLAYOUT_data[$i,$COL_BIN2FLASH]=$_rootfs_name.ext4
 		fi
+		if [ "$partName" == "bootfs" ];
+		then
+			FLASHLAYOUT_data[$i,$COL_BIN2FLASH]=$_rootfs_name.bootfs.vfat
+		fi
 	done
 	# update tsv file if exist
 	tsv_template_file=$(echo "$FLASHLAYOUT_filename" | sed -e "s/fld/tsv.template/")
@@ -193,6 +208,7 @@ function generate_rootfs_from_tarball() {
 	if [ -e $tsv_template_file ]
 	then
 		sed -e "s|%%IMAGE%|$_rootfs_name.ext4|g" $tsv_template_file > $tsv_file
+		sed -i -e "s|%%BOOTFS_IMAGE%|$_rootfs_name.bootfs.vfat|g" $tsv_file
 	fi
 	# clean
 	sudo rm -rf temp_rootfs
@@ -241,23 +257,26 @@ function get_last_image_path() {
 					then
 						mkdir -p $dirname_bin2flash
 					fi
-					echo "[Try to Download]: wget $FLASHLAYOUT_uri/$bin2flash -O $FLASHLAYOUT_prefix_image_path/$bin2flash"
-					wget $FLASHLAYOUT_uri/$bin2flash -O $FLASHLAYOUT_prefix_image_path/$bin2flash 2> /dev/null
-					ret=$?
-					if [ ! $ret -eq 0 ];
+					if [ "$bin2flash" != "none" ];
 					then
-						# clean last wget request
-						rm -f $bin2flash
-						# try to get tge xz version
-						echo "[Try to Download]: wget $FLASHLAYOUT_uri/$bin2flash -O $FLASHLAYOUT_prefix_image_path/$bin2flash.xz"
-						wget $FLASHLAYOUT_uri/$bin2flash.xz -O $FLASHLAYOUT_prefix_image_path/$bin2flash.xz
+						echo "[Try to Download]: wget $FLASHLAYOUT_uri/$bin2flash -O $FLASHLAYOUT_prefix_image_path/$bin2flash"
+						wget $FLASHLAYOUT_uri/$bin2flash -O $FLASHLAYOUT_prefix_image_path/$bin2flash 2> /dev/null
 						ret=$?
 						if [ ! $ret -eq 0 ];
 						then
-							echo "[ERROR] couldn't download $bin2flash on $FLASHLAYOUT_uri/"
-							exit 0
-						else
-							gunzip $FLASHLAYOUT_prefix_image_path/$bin2flash.xz
+							# clean last wget request
+							rm -f $bin2flash
+							# try to get tge xz version
+							echo "[Try to Download]: wget $FLASHLAYOUT_uri/$bin2flash -O $FLASHLAYOUT_prefix_image_path/$bin2flash.xz"
+							wget $FLASHLAYOUT_uri/$bin2flash.xz -O $FLASHLAYOUT_prefix_image_path/$bin2flash.xz
+							ret=$?
+							if [ ! $ret -eq 0 ];
+							then
+								echo "[ERROR] couldn't download $bin2flash on $FLASHLAYOUT_uri/"
+								exit 0
+							else
+								gunzip $FLASHLAYOUT_prefix_image_path/$bin2flash.xz
+							fi
 						fi
 					fi
 				fi
