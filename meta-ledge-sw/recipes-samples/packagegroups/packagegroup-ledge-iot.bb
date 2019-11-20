@@ -94,7 +94,7 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	pciutils \
 	pinentry \
 	packagegroup-core-ssh-openssh \
-	packagegroup-security-tpm2 \
+	${@bb.utils.contains("MACHINE_FEATURES", "tpm2", "packagegroup-security-tpm2", "", d)} \
 	packagegroup-core-selinux \
 	popt \
 	procps \
@@ -103,7 +103,6 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	python3 \
 	python3-asn1crypto \
 	python3-babel \
-	python3-blivet \
 	python3-cffi \
 	python3-chardet \
 	python3-coverage \
