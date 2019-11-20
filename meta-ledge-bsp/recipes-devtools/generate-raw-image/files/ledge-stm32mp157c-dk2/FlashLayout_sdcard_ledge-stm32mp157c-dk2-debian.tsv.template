@@ -19,5 +19,5 @@ P	0x06	ssbl	Binary	mmc0	0x00084400	u-boot-basic.img
 P	0x0A	teeh	Binary	mmc0	0x00284400	optee/tee-header_v2.stm32
 P	0x0B	teed	Binary	mmc0	0x002C4400	optee/tee-pageable_v2.stm32
 P	0x0C	teex	Binary	mmc0	0x00304400	optee/tee-pager_v2.stm32
-P	0x21	bootfs	System	mmc0	0x00344400	ledge-image-bootfs-ledge-stm32mp157c-dk2-for-debian.ext4
+P	0x21	bootfs	System	mmc0	0x00344400	%%BOOTFS_IMAGE%
 P	0x22	rootfs	FileSystem	mmc0	0x04344400	%%IMAGE%
