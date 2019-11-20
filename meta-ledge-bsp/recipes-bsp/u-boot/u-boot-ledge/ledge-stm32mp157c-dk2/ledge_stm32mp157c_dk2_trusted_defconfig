@@ -6,7 +6,7 @@ CONFIG_STM32MP1_OPTEE=y
 CONFIG_DISTRO_DEFAULTS=y
 CONFIG_FIT=y
 CONFIG_USE_BOOTARGS=y
-CONFIG_BOOTARGS="console=ttySTM0,115200 rootwait root=/dev/mmcblk0p8 efi=novamap,noruntime selinux=0"
+CONFIG_BOOTARGS="console=ttySTM0,115200 rootwait root=PARTLABEL=rootfs efi=novamap,noruntime selinux=0"
 CONFIG_BOOTCOMMAND="run bootcmd_stm32mp"
 CONFIG_SYS_PROMPT="STM32MP> "
 # CONFIG_CMD_BOOTD is not set

@@ -7,7 +7,7 @@ CONFIG_TARGET_STM32MP1=y
 CONFIG_DISTRO_DEFAULTS=y
 CONFIG_FIT=y
 CONFIG_USE_BOOTARGS=y
-CONFIG_BOOTARGS="console=ttySTM0,115200 rootwait root=/dev/mmcblk0p8 efi=novamap,noruntime  dtb=/stm32mp157c-dk2.dtb selinux=0"
+CONFIG_BOOTARGS="console=ttySTM0,115200 rootwait root=PARTLABEL=rootfs efi=novamap,noruntime  dtb=/stm32mp157c-dk2.dtb selinux=0"
 CONFIG_BOOTCOMMAND="run bootcmd_stm32mp"
 CONFIG_SPL_TEXT_BASE=0x2FFC2500
 CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_USE_PARTITION=y
