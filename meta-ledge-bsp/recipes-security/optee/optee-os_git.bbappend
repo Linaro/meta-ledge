@@ -39,3 +39,11 @@ do_install_append_ledge-stm32mp157c-dk2() {
     # install optee bianries with stm32 images
     install -m 644 ${B}/out/arm-plat-${OPTEEOUTPUTMACHINE}/core/*.stm32 ${D}${nonarch_base_libdir}/firmware/
 }
+
+do_deploy_append_ledge-qemuarm64() {
+    cd ${DEPLOYDIR}
+    ln -sf optee/tee-header_v2.bin   bl32.bin
+    ln -sf optee/tee-pager_v2.bin    bl32_extra1.bin
+    ln -sf optee/tee-pageable_v2.bin bl32_extra2.bin
+    cd -
+}
