@@ -1194,7 +1194,7 @@ class BaseConfig(object):
                             logger.warning("Unknown QB_DRIVE_TYPE: %s" % drive_type)
                             logger.warning("Failed to figure out drive type, consider define or fix QB_DRIVE_TYPE")
                             logger.warning('Trying to use virtio block drive')
-                        vm_drive = '-drive if=virtio,file=%s,format=%s' % (self.rootfs, rootfs_format)
+                        vm_drive = '-drive id=disk0,file=%s,if=none,format=%s -device virtio-blk-device,drive=disk0' % (self.rootfs, rootfs_format)
 
                 # All branches above set vm_drive.
                 self.rootfs_options = '%s -no-reboot' % vm_drive
