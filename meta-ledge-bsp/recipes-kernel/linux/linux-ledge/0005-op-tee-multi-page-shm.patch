@@ -1,11 +1,15 @@
+---
+ drivers/tee/optee/shm_pool.c | 14 +++++++++++++-
+ 1 file changed, 13 insertions(+), 1 deletion(-)
+
 diff --git a/drivers/tee/optee/shm_pool.c b/drivers/tee/optee/shm_pool.c
 index 0332a53..85aa5bb 100644
 --- a/drivers/tee/optee/shm_pool.c
 +++ b/drivers/tee/optee/shm_pool.c
 @@ -28,8 +28,20 @@ static int pool_op_alloc(struct tee_shm_pool_mgr *poolm,
-	shm->size = PAGE_SIZE << order;
-
-	if (shm->flags & TEE_SHM_DMA_BUF) {
+ 	shm->size = PAGE_SIZE << order;
+ 
+ 	if (shm->flags & TEE_SHM_DMA_BUF) {
 +		unsigned int nr_pages = 1 << order, i;
 +		struct page **pages;
 +
@@ -18,11 +22,11 @@ index 0332a53..85aa5bb 100644
 +			page++;
 +		}
 +
-		shm->flags |= TEE_SHM_REGISTER;
+ 		shm->flags |= TEE_SHM_REGISTER;
 -		rc = optee_shm_register(shm->ctx, shm, &page, 1 << order,
 +		rc = optee_shm_register(shm->ctx, shm, pages, nr_pages,
-								(unsigned long)shm->kaddr);
-	}
-
---
+ 					(unsigned long)shm->kaddr);
+ 	}
+ 
+-- 
 2.7.4
