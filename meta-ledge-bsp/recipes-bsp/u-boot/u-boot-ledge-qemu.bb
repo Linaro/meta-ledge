@@ -15,6 +15,7 @@ SRC_URI = "git://git.linaro.org/people/takahiro.akashi/u-boot.git;branch=efi/sec
 
 S = "${WORKDIR}/git"
 
+SRC_URI_append_ledge-qemuarm = " file://ledge-qemuarm_defconfig"
 SRC_URI_append_ledge-qemuarm64 = " file://ledge-qemuarm64_defconfig"
 
 require recipes-bsp/u-boot/u-boot.inc
@@ -37,4 +38,4 @@ do_deploy_append_ledge-qemuarm64() {
 
 DEPENDS += "bc-native dtc-native"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "(ledge-qemuarm64)"
+COMPATIBLE_MACHINE = "(ledge-qemuarm|ledge-qemuarm64)"
