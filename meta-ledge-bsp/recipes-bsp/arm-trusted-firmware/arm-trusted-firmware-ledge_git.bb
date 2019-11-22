@@ -123,6 +123,15 @@ do_deploy() {
         install -m 0644 ${B}/bl32/bl32.elf ${DEPLOYDIR}/arm-trusted-firmware/
     fi
 }
+
+do_deploy_append_ledge-qemuarm64() {
+    cd ${DEPLOYDIR}
+    ln -sf arm-trusted-firmware/bl1.bin  bl1.bin
+    ln -sf arm-trusted-firmware/bl2.bin  bl2.bin
+    ln -sf arm-trusted-firmware/bl31.bin bl31.bin
+    cd -
+}
+
 do_deploy_append_ledge-stm32mp157c-dk2() {
     if [ -n "${TF_A_DEVICETREE}" ]; then
         for dt in ${TF_A_DEVICETREE}; do

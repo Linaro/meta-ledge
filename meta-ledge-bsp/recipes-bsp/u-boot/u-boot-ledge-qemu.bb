@@ -29,6 +29,12 @@ do_compile_prepend() {
     done
 }
 
+do_deploy_append_ledge-qemuarm64() {
+    cd ${DEPLOYDIR}
+    ln -sf u-boot-ledge-qemuarm64.bin bl33.bin
+    cd -
+}
+
 DEPENDS += "bc-native dtc-native"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 COMPATIBLE_MACHINE = "(ledge-qemuarm64)"
