@@ -48,8 +48,9 @@ TF_A_CONFIG_ledge-qemuarm64 = "qemu_arm64_defconfig"
 #PACKAGECONFIG_ledge-ti-am64xx = "optee"
 #EXTRA_OEMAKE_ADDONS_ledge-ti-am64xx = "TARGET_BOARD=\"${generic}\" "
 
-# Make ATF "aware" of OPTEE, no build dependency
-PACKAGECONFIG[optee] = " SPD=opteed "
+# Add TF-A options on aarch64 only for now. We might need it for armv7 in the
+# future
+EXTRA_OEMAKE_append_aarch64 = "${@bb.utils.contains('MACHINE_FEATURES', 'optee', ' SPD=opteed ', '', d)}"
 
 # Extra make settings
 EXTRA_OEMAKE = ' CROSS_COMPILE=${TARGET_PREFIX} '
