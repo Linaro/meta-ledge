@@ -15,11 +15,18 @@ do_deploy () {
 }
 
 do_deploy_append_ledge-qemuarm64() {
-    qemu-system-aarch64 -nographic -machine virt,secure -cpu cortex-a57 -machine dumpdtb=virt.dtb
+    touch dummy.wic bl1.bin
+    qemu-system-aarch64 \
+    -device virtio-net-pci,netdev=net0,mac=52:54:00:12:34:02 -netdev user,id=net0 \
+    -drive id=disk0,file=dummy.wic,if=none,format=raw -device virtio-blk-device,drive=disk0 -show-cursor -device virtio-rng-pci \
+    -monitor null -nographic -d unimp -semihosting-config enable,target=native -bios bl1.bin \
+    -machine virt,secure=on -cpu cortex-a57 -m 4096 -serial mon:stdio -serial null \
+    -machine dumpdtb=virt.dtb
+
     dtc -I dtb -O dts virt.dtb -o virt.dts
     patch -p1 -r - < ${WORKDIR}/0001-qemuarm64.dts-add-ftpm-support.patch
     dtc -I dts -O dtb virt.dts -o ${DEPLOYDIR}/ledge-qemuarm64.dtb
-    rm virt.dts virt.dts.orig virt.dtb
+    rm virt.dts virt.dts.orig virt.dtb dummy.wic bl1.bin
 }
 
 addtask deploy before do_build after do_compile
