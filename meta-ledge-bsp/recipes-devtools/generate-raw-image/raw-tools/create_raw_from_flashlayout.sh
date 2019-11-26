@@ -30,6 +30,7 @@ FLASHLAYOUT_uri=""
 FLASHLAYOUT_module=""
 FLASHLAYOUT_kernel=""
 FLASHLAYOUT_dtb=""
+FLASHLAYOUT_arch=""
 # Size of 4GB
 #DEFAULT_RAW_SIZE=4096
 # Size of 2,5GB
@@ -54,6 +55,9 @@ COL_BIN2FLASH=5
 # P: programme
 # E: erase
 # D: delete
+
+# add on path the /sbin to have access to mkfs.vfat and sgdisk
+PATH=$PATH:/sbin
 
 WARNING_TEXT=""
 
@@ -121,7 +125,10 @@ function read_flash_layout() {
 		then
 			FLASHLAYOUT_dtb=${flashlayout_data[1]}
 		fi
-
+		if [ "$selected" == "ARCH" ]
+		then
+			FLASHLAYOUT_arch=${flashlayout_data[1]}
+		fi
 	done < "$FLASHLAYOUT_filename"
 
 	FLASHLAYOUT_number_of_line=$i
@@ -171,15 +178,28 @@ function generate_rootfs_from_tarball() {
 
 	sudo mkdir -p boot/efi/boot/
 	sudo cp ../$FLASHLAYOUT_kernel boot/efi/boot/bootarm.efi
-	sudo cp ../$FLASHLAYOUT_dtb boot/$dtb_name
+	if [ "$FLASHLAYOUT_dtb" != "none" ];
+	then
+		sudo cp ../$FLASHLAYOUT_dtb boot/$dtb_name
+	fi
 	cd ..
 	#generate vfat version of bootfs (64MB -512K) (-512 are to not erase the gpt partion information
 	_vfat_block=$((64*1024-512))
-	/sbin/mkfs.vfat -n BOOT -S 512 -C $_rootfs_name.bootfs.vfat $_vfat_block
-	mcopy -i $_rootfs_name.bootfs.vfat -s $FLASHLAYOUT_dtb ::/
+	mkfs.vfat -n BOOT -S 512 -C $_rootfs_name.bootfs.vfat $_vfat_block
+	if [ "$FLASHLAYOUT_dtb" != "none" ];
+	then
+		mcopy -i $_rootfs_name.bootfs.vfat -s $FLASHLAYOUT_dtb ::/$dtb_name
+	fi
 	mmd -i $_rootfs_name.bootfs.vfat ::/efi
 	mmd -i $_rootfs_name.bootfs.vfat ::/efi/boot
-	mcopy -i $_rootfs_name.bootfs.vfat -s $FLASHLAYOUT_kernel ::/efi/boot/bootarm.efi
+	case $FLASHLAYOUT_arch in
+	armhf)
+		mcopy -i $_rootfs_name.bootfs.vfat -s $FLASHLAYOUT_kernel ::/efi/boot/bootarm.efi
+		;;
+	aarch64|arm64)
+		mcopy -i $_rootfs_name.bootfs.vfat -s $FLASHLAYOUT_kernel ::/efi/boot/bootaa64.efi
+		;;
+	esac
 
 	size_full=$(sudo du -s temp_rootfs| tr '\t' ' ' | cut -f 1 -d' ')
 	_size=$(($size_full/1024))
@@ -262,7 +282,7 @@ function get_last_image_path() {
 						echo "[Try to Download]: wget $FLASHLAYOUT_uri/$bin2flash -O $FLASHLAYOUT_prefix_image_path/$bin2flash"
 						wget $FLASHLAYOUT_uri/$bin2flash -O $FLASHLAYOUT_prefix_image_path/$bin2flash 2> /dev/null
 						ret=$?
-						if [ ! $ret -eq 0 ];
+						if [ $ret -ne 0 ];
 						then
 							# clean last wget request
 							rm -f $bin2flash
@@ -270,7 +290,7 @@ function get_last_image_path() {
 							echo "[Try to Download]: wget $FLASHLAYOUT_uri/$bin2flash -O $FLASHLAYOUT_prefix_image_path/$bin2flash.xz"
 							wget $FLASHLAYOUT_uri/$bin2flash.xz -O $FLASHLAYOUT_prefix_image_path/$bin2flash.xz
 							ret=$?
-							if [ ! $ret -eq 0 ];
+							if [ $ret -ne 0 ];
 							then
 								echo "[ERROR] couldn't download $bin2flash on $FLASHLAYOUT_uri/"
 								exit 0
@@ -297,7 +317,7 @@ function get_last_image_path() {
 			echo "[Try to Download]: wget $FLASHLAYOUT_uri/$FLASHLAYOUT_module -O $FLASHLAYOUT_prefix_image_path/$FLASHLAYOUT_module"
 			wget $FLASHLAYOUT_uri/$FLASHLAYOUT_module -O $FLASHLAYOUT_module 2> /dev/null
 			ret=$?
-			if [ ! $ret -eq 0 ];
+			if [ $ret -ne 0 ];
 			then
 				echo "[ERROR] couldn't download $FLASHLAYOUT_module on $FLASHLAYOUT_uri/"
 				exit 0
@@ -306,21 +326,23 @@ function get_last_image_path() {
 			echo "[Try to Download]: wget $FLASHLAYOUT_uri/$FLASHLAYOUT_kernel -O $FLASHLAYOUT_prefix_image_path/$FLASHLAYOUT_kernel"
 			wget $FLASHLAYOUT_uri/$FLASHLAYOUT_kernel -O $FLASHLAYOUT_kernel 2> /dev/null
 			ret=$?
-			if [ ! $ret -eq 0 ];
+			if [ $ret -ne 0 ];
 			then
 				echo "[ERROR] couldn't download $FLASHLAYOUT_kernel on $FLASHLAYOUT_uri/"
 				exit 0
 			fi
 
-			echo "[Try to Download]: wget $FLASHLAYOUT_uri/$FLASHLAYOUT_dtb -O $FLASHLAYOUT_prefix_image_path/$FLASHLAYOUT_dtb"
-			wget $FLASHLAYOUT_uri/$FLASHLAYOUT_dtb -O $FLASHLAYOUT_dtb 2> /dev/null
-			ret=$?
-			if [ ! $ret -eq 0 ];
+			if [ "$FLASHLAYOUT_dtb" != "none" ];
 			then
-				echo "[ERROR] couldn't download $FLASHLAYOUT_dtb on $FLASHLAYOUT_uri/"
-				exit 0
+				echo "[Try to Download]: wget $FLASHLAYOUT_uri/$FLASHLAYOUT_dtb -O $FLASHLAYOUT_prefix_image_path/$FLASHLAYOUT_dtb"
+				wget $FLASHLAYOUT_uri/$FLASHLAYOUT_dtb -O $FLASHLAYOUT_dtb 2> /dev/null
+				ret=$?
+				if [ $ret -ne 0 ];
+				then
+					echo "[ERROR] couldn't download $FLASHLAYOUT_dtb on $FLASHLAYOUT_uri/"
+					exit 0
+				fi
 			fi
-
 		fi
 	fi
 
@@ -361,7 +383,7 @@ function generate_gpt_partition_table_from_flash_layout() {
 	new_next_partition_offset_b=0
 	number_of_partition=$( calculate_number_of_partition )
 
-	exec_print "/sbin/sgdisk -og -a 1 $FLASHLAYOUT_rawname"
+	exec_print "sgdisk -og -a 1 $FLASHLAYOUT_rawname"
 
 	echo "Create partition table:"
 
@@ -487,9 +509,9 @@ function generate_gpt_partition_table_from_flash_layout() {
 			fi
 
 			printf "part %d: %8s ..." $j "$partName"
-			exec_print "/sbin/sgdisk -a 1 -n $j:$offset:$next_offset -c $j:$partName -t $j:$gpt_code $bootfs_param $FLASHLAYOUT_rawname"
-			partition_size=$(/sbin/sgdisk -p $FLASHLAYOUT_rawname | grep $partName | awk '{ print $4}')
-			partition_size_type=$(/sbin/sgdisk -p $FLASHLAYOUT_rawname | grep $partName | awk '{ print $5}')
+			exec_print "sgdisk -a 1 -n $j:$offset:$next_offset -c $j:$partName -t $j:$gpt_code $bootfs_param $FLASHLAYOUT_rawname"
+			partition_size=$(sgdisk -p $FLASHLAYOUT_rawname | grep $partName | awk '{ print $4}')
+			partition_size_type=$(sgdisk -p $FLASHLAYOUT_rawname | grep $partName | awk '{ print $5}')
 			printf "\r[CREATED] part %d: %8s [partition size %s %s]\n" $j "$partName"  "$partition_size" "$partition_size_type"
 
 			j=$(($j+1))
@@ -499,7 +521,7 @@ function generate_gpt_partition_table_from_flash_layout() {
 
 	echo ""
 	echo "Partition table from $FLASHLAYOUT_rawname"
-	sudo /sbin/sgdisk -p $FLASHLAYOUT_rawname
+	sudo sgdisk -p $FLASHLAYOUT_rawname
 	echo ""
 }
 
