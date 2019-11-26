@@ -175,7 +175,7 @@ function generate_rootfs_from_tarball() {
 	cd ..
 	#generate vfat version of bootfs (64MB -512K) (-512 are to not erase the gpt partion information
 	_vfat_block=$((64*1024-512))
-	mkfs.vfat -n BOOT -S 512 -C $_rootfs_name.bootfs.vfat $_vfat_block
+	/sbin/mkfs.vfat -n BOOT -S 512 -C $_rootfs_name.bootfs.vfat $_vfat_block
 	mcopy -i $_rootfs_name.bootfs.vfat -s $FLASHLAYOUT_dtb ::/
 	mmd -i $_rootfs_name.bootfs.vfat ::/efi
 	mmd -i $_rootfs_name.bootfs.vfat ::/efi/boot
@@ -361,7 +361,7 @@ function generate_gpt_partition_table_from_flash_layout() {
 	new_next_partition_offset_b=0
 	number_of_partition=$( calculate_number_of_partition )
 
-	exec_print "sgdisk -og -a 1 $FLASHLAYOUT_rawname"
+	exec_print "/sbin/sgdisk -og -a 1 $FLASHLAYOUT_rawname"
 
 	echo "Create partition table:"
 
@@ -487,9 +487,9 @@ function generate_gpt_partition_table_from_flash_layout() {
 			fi
 
 			printf "part %d: %8s ..." $j "$partName"
-			exec_print "sgdisk -a 1 -n $j:$offset:$next_offset -c $j:$partName -t $j:$gpt_code $bootfs_param $FLASHLAYOUT_rawname"
-			partition_size=$(sgdisk -p $FLASHLAYOUT_rawname | grep $partName | awk '{ print $4}')
-			partition_size_type=$(sgdisk -p $FLASHLAYOUT_rawname | grep $partName | awk '{ print $5}')
+			exec_print "/sbin/sgdisk -a 1 -n $j:$offset:$next_offset -c $j:$partName -t $j:$gpt_code $bootfs_param $FLASHLAYOUT_rawname"
+			partition_size=$(/sbin/sgdisk -p $FLASHLAYOUT_rawname | grep $partName | awk '{ print $4}')
+			partition_size_type=$(/sbin/sgdisk -p $FLASHLAYOUT_rawname | grep $partName | awk '{ print $5}')
 			printf "\r[CREATED] part %d: %8s [partition size %s %s]\n" $j "$partName"  "$partition_size" "$partition_size_type"
 
 			j=$(($j+1))
@@ -499,7 +499,7 @@ function generate_gpt_partition_table_from_flash_layout() {
 
 	echo ""
 	echo "Partition table from $FLASHLAYOUT_rawname"
-	sgdisk -p $FLASHLAYOUT_rawname
+	sudo /sbin/sgdisk -p $FLASHLAYOUT_rawname
 	echo ""
 }
 
