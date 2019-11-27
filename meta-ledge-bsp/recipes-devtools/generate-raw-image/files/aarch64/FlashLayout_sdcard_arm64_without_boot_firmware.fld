@@ -1,0 +1,20 @@
+# SDCARD mapping
+# =========================================================================================================
+# =            =            =
+# =    bootfs  =   rootfs   =
+# =            =            =
+# = mmcblk0p1  = mmcblk0p2  =
+# =   (1 )     =    (2 )    =
+# =            =            =
+# =========================================================================================================
+#Opt: P=Populate, E=Empty
+#Type: Binary=raw partition, FileSystem=fs partition(ext4, fat)
+#Ofsset on hexa
+#Opt	Name	Type	Offset	Binary
+URI		https://snapshots.linaro.org/components/ledge/oe/ledge-qemuarm64/latest/rpb/
+MODULE	modules-stripped-ledge-qemuarm64-for-debian.tar.gz
+KERNEL	Image-for-debian
+DTB		none
+ARCH	arm64
+P	bootfs	FileSystem	0x00344400	none
+P	rootfs	FileSystem	0x04344400	rootfs-linaro-buster-raw-unknown-*.tar.xz

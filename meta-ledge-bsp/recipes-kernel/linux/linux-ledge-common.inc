@@ -114,7 +114,7 @@ do_deploy_append() {
         mkdir -p ${D}${root_prefix}/lib
         tar -cvzf $deployDir/modules-stripped-${MODULE_TARBALL_NAME}.tgz -C ${WORKDIR}/package/${root_prefix} lib
         ln -sf modules-stripped-${MODULE_TARBALL_NAME}.tgz $deployDir/modules-stripped-${MODULE_TARBALL_LINK_NAME}.tgz
-        cp $deployDir/modules-stripped-${MODULE_TARBALL_NAME}.tgz $deployDir/modules-stripped-${MACHINE}-for-debian.tar.gz
+        cp $deployDir/modules-stripped-${MODULE_TARBALL_NAME}.tgz $deployDir/modules-stripped-${MACHINE}-for-debian.tgz
     fi
 
     for t in ${KERNEL_IMAGETYPE} ${KERNEL_ALT_IMAGETYPE}; do

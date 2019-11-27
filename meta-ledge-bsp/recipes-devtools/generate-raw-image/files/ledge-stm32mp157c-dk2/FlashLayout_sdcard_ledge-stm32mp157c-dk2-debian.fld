@@ -15,6 +15,7 @@ URI		https://snapshots.linaro.org/components/ledge/oe/ledge-stm32mp157c-dk2/late
 MODULE	modules-stripped-ledge-stm32mp157c-dk2-for-debian.tar.gz
 KERNEL	zImage-for-debian
 DTB		stm32mp157c-dk2.dtb-for-debian
+ARCH	armhf
 P	fsbl1	Binary	0x00004400	spl/u-boot-spl.stm32-basic
 P	fsbl2	Binary	0x00044400	spl/u-boot-spl.stm32-basic
 P	ssbl	Binary	0x00084400	u-boot-basic.img
