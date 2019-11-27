@@ -229,7 +229,7 @@ CONFIG_BOOTSTAGE_STASH_SIZE=0x1000
 # CONFIG_SATA_BOOT is not set
 # CONFIG_SD_BOOT is not set
 # CONFIG_SPI_BOOT is not set
-CONFIG_BOOTDELAY=2
+CONFIG_BOOTDELAY=0
 # CONFIG_USE_BOOTARGS is not set
 CONFIG_USE_BOOTCOMMAND=y
 CONFIG_BOOTCOMMAND="setenv kernel_addr_r 0x60000000; setenv bootargs 'rootwait root=PARTLABEL=rootfs'; efidebug boot add 0000 'kernel' virtio 0:1 /efi/boot/bootarm.efi; efidebug boot order 0000; bootefi bootmgr"
@@ -588,11 +588,11 @@ CONFIG_MKIMAGE_DTC_PATH="dtc"
 #
 # Environment
 #
-# CONFIG_ENV_IS_NOWHERE is not set
+CONFIG_ENV_IS_NOWHERE=y
 # CONFIG_ENV_IS_IN_EEPROM is not set
 # CONFIG_ENV_IS_IN_FAT is not set
 # CONFIG_ENV_IS_IN_EXT4 is not set
-CONFIG_ENV_IS_IN_FLASH=y
+# CONFIG_ENV_IS_IN_FLASH is not set
 # CONFIG_ENV_IS_IN_NAND is not set
 # CONFIG_ENV_IS_IN_NVRAM is not set
 # CONFIG_ENV_IS_IN_ONENAND is not set
