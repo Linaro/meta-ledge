@@ -95,6 +95,7 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	pinentry \
 	packagegroup-core-ssh-openssh \
 	packagegroup-core-selinux \
+	podman \
 	popt \
 	procps \
 	protobuf \
@@ -355,7 +356,6 @@ RDEPENDS_packagegroup-ledge-iot = "\
 # ostree-grub2 : GRUB2 integration for OSTree
 # ostree-libs : Development headers for ostree
 # pkgconf
-# podman : Manage Pods, Containers and Container Images
 #python3-asn1crypto
 #python3-audit
 #python3-babel
