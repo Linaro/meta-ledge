@@ -1,6 +1,7 @@
 inherit kernel siteinfo
 
 DEPENDS += "coreutils-native"
+DEPENDS += "efitools-native"
 
 KERNEL_DEFCONFIG = "defconfig"
 KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-01-core.config "
@@ -17,6 +18,11 @@ SRC_URI_append = " file://fragment-10-ledge.config "
 SRC_URI_append = " file://fragment-11-virtio.config "
 SRC_URI_append = " file://fragment-12-security.config "
 SRC_URI_append = " file://fragment-13-cmdline.config "
+
+SRC_URI_append = " file://uefi-certificates/KEK.auth "
+SRC_URI_append = " file://uefi-certificates/KEK.crt "
+SRC_URI_append = " file://uefi-certificates/KEK.key "
+SRC_URI_append = " file://uefi-certificates/PK.auth "
 
 do_configure() {
     touch ${B}/.scmversion ${S}/.scmversion
@@ -124,5 +130,14 @@ do_deploy_append() {
     for d in  ${KERNEL_DEVICETREE}; do
         cp -f $deployDir/$d $deployDir/$d-for-debian
     done
+
+    hash-to-efi-sig-list ${D}/boot/efi/boot/${KERNEL_EFI_IMAGE} kernel.hash
+    sign-efi-sig-list -c ${WORKDIR}/uefi-certificates/KEK.crt -k ${WORKDIR}/uefi-certificates/KEK.key db kernel.hash kernel.auth
+    mkdir -p certimage
+    cp ${WORKDIR}/uefi-certificates/PK.auth ${WORKDIR}/uefi-certificates/KEK.auth kernel.auth ./certimage
+    truncate -s 4M certimage.ext4
+    mkfs.ext4 certimage.ext4 -d ./certimage
+    rm -rf ./certimage kernel.hash
+    mv certimage.ext4 ${DEPLOYDIR}/ledge-kernel-uefi-certs.ext4
 }
 do_deploy[depends] += " virtual/kernel:do_package "
