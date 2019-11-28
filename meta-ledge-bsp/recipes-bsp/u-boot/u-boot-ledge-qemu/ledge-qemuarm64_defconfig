@@ -241,7 +241,7 @@ CONFIG_BOOTSTAGE_STASH_SIZE=0x1000
 CONFIG_BOOTDELAY=0
 # CONFIG_USE_BOOTARGS is not set
 CONFIG_USE_BOOTCOMMAND=y
-CONFIG_BOOTCOMMAND="setenv kernel_addr_r 0x60000000; setenv bootargs 'rootwait root=PARTLABEL=rootfs'; efidebug boot add 0000 'kernel' virtio 0:1 /efi/boot/bootaa64.efi; efidebug boot order 0000; bootefi bootmgr"
+CONFIG_BOOTCOMMAND="load virtio 0 0x70000000 kernel.auth;setenv -e -nv -bs -rt -at -i 0x70000000,$filesize db; load virtio 0 0x70000000 KEK.auth; setenv -e -nv -bs -rt -at -i 0x70000000,$filesize KEK; load virtio 0 0x70000000 PK.auth;setenv -e -nv -bs -rt -at -i 0x70000000,$filesize PK; setenv kernel_addr_r 0x60000000; setenv bootargs 'rootwait root=PARTLABEL=rootfs'; efidebug boot add 0000 'kernel' virtio 1:1 /efi/boot/bootaa64.efi; efidebug boot order 0000; bootefi bootmgr"
 CONFIG_USE_PREBOOT=y
 CONFIG_PREBOOT="pci enum"
 
