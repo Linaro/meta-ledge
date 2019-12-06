@@ -19,7 +19,6 @@ EXTRA_OEMAKE_remove_ledge-ti-am572x = "ta-targets=ta_arm64"
 EXTRA_OEMAKE_append_ledge-ti-am572x = "CFG_ARM32_core=y ta-targets=ta_arm32 "
 EXTRA_OEMAKE_append_ledge-ti-am572x = " CROSS_COMPILE_ta_arm32=${HOST_PREFIX} CROSS_COMPILE=${CROSS_COMPILE} "
 
-# armv7
 EXTRA_OEMAKE_remove_armv7a = "CFG_ARM64_core=y"
 EXTRA_OEMAKE_remove_armv7a = "ta-targets=ta_arm64"
 EXTRA_OEMAKE_append_armv7a = " CFG_ARM32_core=y ta-targets=ta_arm32"
@@ -33,6 +32,7 @@ EXTRA_OEMAKE_append_ledge-stm32mp157c-dk2 = " CFG_EMBED_DTB_SOURCE_FILE=stm32mp1
 # add traces at startup
 EXTRA_OEMAKE_append = "CFG_TEE_CORE_DEBUG=n CFG_TEE_CORE_LOG_LEVEL=2"
 
+OPTEE_ARCH_armv7a = "arm32"
 OPTEE_ARCH_armv7ve = "arm32"
 
 do_install_append_ledge-stm32mp157c-dk2() {
