@@ -8,10 +8,25 @@ PR = "r1"
 
 inherit deploy
 
-SRC_URI_append_ledge-qemuarm64 = " file://0001-qemuarm64.dts-add-ftpm-support.patch;apply=no"
+SRC_URI_append = " file://0001-qemuarm64.dts-add-ftpm-support.patch;apply=no"
 
 do_deploy () {
 
+}
+
+do_deploy_append_ledge-qemuarm() {
+    touch dummy.wic bl1.bin
+    qemu-system-arm \
+    -device virtio-net-pci,netdev=net0,mac=52:54:00:12:34:02 -netdev user,id=net0 \
+    -drive id=disk0,file=dummy.wic,if=none,format=raw -device virtio-blk-device,drive=disk0 -show-cursor -device virtio-rng-pci \
+    -monitor null -nographic -d unimp -semihosting-config enable,target=native -bios bl1.bin \
+    -machine virt,secure=on -m 4096 -serial mon:stdio -serial null \
+    -machine dumpdtb=virt.dtb
+
+    dtc -I dtb -O dts virt.dtb -o virt.dts
+    patch -p1 -r - < ${WORKDIR}/0001-qemuarm64.dts-add-ftpm-support.patch
+    dtc -I dts -O dtb virt.dts -o ${DEPLOYDIR}/ledge-qemuarm.dtb
+    rm virt.dts virt.dts.orig virt.dtb dummy.wic bl1.bin
 }
 
 do_deploy_append_ledge-qemuarm64() {

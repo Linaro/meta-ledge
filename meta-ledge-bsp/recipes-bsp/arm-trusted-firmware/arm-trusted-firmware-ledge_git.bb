@@ -130,6 +130,13 @@ do_deploy() {
     fi
 }
 
+do_deploy_append_ledge-qemuarm() {
+    cd ${DEPLOYDIR}
+    ln -sf arm-trusted-firmware/bl1.bin  bl1.bin
+    ln -sf arm-trusted-firmware/bl2.bin  bl2.bin
+    cd -
+}
+
 do_deploy_append_ledge-qemuarm64() {
     cd ${DEPLOYDIR}
     ln -sf arm-trusted-firmware/bl1.bin  bl1.bin

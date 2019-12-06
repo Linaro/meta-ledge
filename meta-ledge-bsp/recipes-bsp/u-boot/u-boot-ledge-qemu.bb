@@ -9,7 +9,7 @@ PE = "1"
 
 # We use the revision in order to avoid having to fetch it from the
 # repo during parse
-SRCREV = "4fd88a74084d0b0a7cb1227af6b088ec88b4261a"
+SRCREV = "49c18f12f6377afde18dd7b38ad3bae1db31cec3"
 
 SRC_URI = "git://git.linaro.org/people/takahiro.akashi/u-boot.git;branch=efi/secboot"
 
@@ -28,6 +28,12 @@ do_compile_prepend() {
             cp ${WORKDIR}/$conf ${S}/configs/
         fi
     done
+}
+
+do_deploy_append_ledge-qemuarm() {
+    cd ${DEPLOYDIR}
+    ln -sf u-boot-ledge-qemuarm.bin bl33.bin
+    cd -
 }
 
 do_deploy_append_ledge-qemuarm64() {

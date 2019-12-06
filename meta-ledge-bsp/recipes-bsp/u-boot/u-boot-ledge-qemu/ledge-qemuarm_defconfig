@@ -40,7 +40,7 @@ CONFIG_SYS_CACHELINE_SIZE=64
 # CONFIG_ARCH_CPU_INIT is not set
 CONFIG_SYS_ARCH_TIMER=y
 CONFIG_ARM_SMCCC=y
-# CONFIG_SEMIHOSTING is not set
+CONFIG_SEMIHOSTING=y
 # CONFIG_SYS_THUMB_BUILD is not set
 # CONFIG_SYS_L2CACHE_OFF is not set
 # CONFIG_ENABLE_ARM_SOC_BOOT0_HOOK is not set
@@ -191,7 +191,7 @@ CONFIG_SYS_MALLOC_CLEAR_ON_INIT=y
 # CONFIG_PHYS_64BIT is not set
 CONFIG_BUILD_TARGET=""
 # CONFIG_SYS_CUSTOM_LDSCRIPT is not set
-# CONFIG_SECURE_BOOT is not set
+CONFIG_SECURE_BOOT=y
 
 #
 # Boot images
@@ -232,7 +232,7 @@ CONFIG_BOOTSTAGE_STASH_SIZE=0x1000
 CONFIG_BOOTDELAY=0
 # CONFIG_USE_BOOTARGS is not set
 CONFIG_USE_BOOTCOMMAND=y
-CONFIG_BOOTCOMMAND="setenv kernel_addr_r 0x60000000; setenv bootargs 'rootwait root=PARTLABEL=rootfs'; efidebug boot add 0000 'kernel' virtio 0:1 /efi/boot/bootarm.efi; efidebug boot order 0000; bootefi bootmgr"
+CONFIG_BOOTCOMMAND="load virtio 0 0x70000000 kernel.auth; setenv -e -nv -bs -rt -at -i 0x70000000,$filesize db; load virtio 0 0x70000000 KEK.auth; setenv -e -nv -bs -rt -at -i 0x70000000,$filesize KEK; load virtio 0 0x70000000 PK.auth; setenv -e -nv -bs -rt -at -i 0x70000000,$filesize PK; setenv kernel_addr_r 0x60000000; setenv bootargs 'rootwait root=PARTLABEL=rootfs'; efidebug boot add 0000 'kernel' virtio 1:1 /efi/boot/bootarm.efi; efidebug boot order 0000; bootefi bootmgr"
 CONFIG_USE_PREBOOT=y
 CONFIG_PREBOOT="pci enum"
 
@@ -1141,8 +1141,16 @@ CONFIG_REGEX=y
 # Security support
 #
 # CONFIG_AES is not set
-# CONFIG_RSA is not set
-# CONFIG_ASYMMETRIC_KEY_TYPE is not set
+CONFIG_RSA=y
+# CONFIG_SPL_RSA is not set
+CONFIG_RSA_VERIFY=y
+CONFIG_RSA_VERIFY_WITH_PKEY=y
+CONFIG_RSA_SOFTWARE_EXP=y
+CONFIG_ASYMMETRIC_KEY_TYPE=y
+CONFIG_ASYMMETRIC_PUBLIC_KEY_SUBTYPE=y
+CONFIG_RSA_PUBLIC_KEY_PARSER=y
+CONFIG_X509_CERTIFICATE_PARSER=y
+CONFIG_PKCS7_MESSAGE_PARSER=y
 # CONFIG_TPM is not set
 
 #
@@ -1152,8 +1160,8 @@ CONFIG_REGEX=y
 #
 # Hashing Support
 #
-# CONFIG_SHA1 is not set
-# CONFIG_SHA256 is not set
+CONFIG_SHA1=y
+CONFIG_SHA256=y
 # CONFIG_SHA_HW_ACCEL is not set
 
 #
@@ -1182,6 +1190,9 @@ CONFIG_OF_LIBFDT_ASSUME_MASK=0
 #
 CONFIG_GENERATE_SMBIOS_TABLE=y
 CONFIG_SMBIOS_MANUFACTURER="emulation"
+CONFIG_ASN1_COMPILER=y
+CONFIG_ASN1_DECODER=y
+CONFIG_OID_REGISTRY=y
 CONFIG_EFI_LOADER=y
 CONFIG_EFI_GET_TIME=y
 # CONFIG_EFI_SET_TIME is not set
@@ -1192,6 +1203,7 @@ CONFIG_EFI_UNICODE_CAPITALIZATION=y
 # CONFIG_EFI_UNICODE_COLLATION_PROTOCOL is not set
 CONFIG_EFI_PLATFORM_LANG_CODES="en-US"
 CONFIG_EFI_GRUB_ARM32_WORKAROUND=y
+CONFIG_EFI_SECURE_BOOT=y
 # CONFIG_TEST_FDTDEC is not set
 CONFIG_LIB_DATE=y
 # CONFIG_UNIT_TEST is not set
