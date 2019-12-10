@@ -23,7 +23,7 @@ python __anonymous () {
 BOOTFS_IMAGE_NAME = "ledge-image-bootfs-${MACHINE}.ext4"
 
 tsv_fld_template_for_ledge () {
-    if [ ${PN} == "ledge-image-bootfs" ]
+    if [ "${PN}" == "ledge-image-bootfs" ]
     then
         return;
     fi
