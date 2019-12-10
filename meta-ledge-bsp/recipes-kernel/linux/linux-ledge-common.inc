@@ -138,7 +138,7 @@ do_deploy_append() {
     mkdir -p certimage
     cp ${WORKDIR}/uefi-certificates/PK.auth ${WORKDIR}/uefi-certificates/KEK.auth kernel.auth ./certimage
     truncate -s 4M certimage.ext4
-    mkfs.ext4 certimage.ext4 -d ./certimage
+    ${STAGING_DIR_NATIVE}/${base_sbindir}/mkfs.ext4 certimage.ext4 -d ./certimage
     rm -rf ./certimage kernel.hash
     mv certimage.ext4 ${DEPLOYDIR}/ledge-kernel-uefi-certs.ext4
 }
