@@ -12,7 +12,7 @@
 #Ofsset on hexa
 #Opt	Name	Type	Offset	Binary
 URI		https://snapshots.linaro.org/components/ledge/oe/ledge-qemuarm64/latest/rpb/
-MODULE	modules-stripped-ledge-qemuarm64-for-debian.tar.gz
+MODULE	modules-stripped-ledge-qemuarm64-for-debian.tgz
 KERNEL	Image-for-debian
 DTB		none
 ARCH	arm64
