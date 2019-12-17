@@ -12,7 +12,7 @@
 #Ofsset on hexa
 #Opt	Name	Type	Offset	Binary
 URI		https://snapshots.linaro.org/components/ledge/oe/ledge-stm32mp157c-dk2/latest/rpb/
-MODULE	modules-stripped-ledge-stm32mp157c-dk2-for-debian.tar.gz
+MODULE	modules-stripped-ledge-stm32mp157c-dk2-for-debian.tgz
 KERNEL	zImage-for-debian
 DTB		stm32mp157c-dk2.dtb-for-debian
 ARCH	armhf
