@@ -35,4 +35,8 @@ S = "${WORKDIR}/linux-5.3.6"
 
 COMPATIBLE_MACHINE = "(ledge-synquacer|ledge-stm32mp157c-dk2|ledge-qemux86-64|ledge-qemuarm|ledge-qemuarm64|ledge-ti-am572x)"
 
-
+# enable module signing
+# The signing configuration are located on fragment-14-module-signature
+# to veirfy if a module are signed:
+# tail -c 28 <kernel_module.ko>
+KERNEL_SIGN_ENABLE = "1"
