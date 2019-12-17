@@ -12,6 +12,8 @@ KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-10-ledge.config "
 KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-11-virtio.config "
 KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-12-security.config "
 KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-13-cmdline.config "
+KERNEL_CONFIG_FRAGMENTS_append = " ${@oe.utils.ifelse(d.getVar('KERNEL_SIGN_ENABLE') == '1', '${WORKDIR}/fragment-14-module-signature.config','')} "
+
 KERNEL_CONFIG_COMMAND = "oe_runmake -C ${S} O=${B} ${KERNEL_DEFCONFIG}"
 
 SRC_URI_append = " file://fragment-01-core.config "
@@ -20,11 +22,14 @@ SRC_URI_append = " file://fragment-10-ledge.config "
 SRC_URI_append = " file://fragment-11-virtio.config "
 SRC_URI_append = " file://fragment-12-security.config "
 SRC_URI_append = " file://fragment-13-cmdline.config "
+SRC_URI_append = " file://fragment-14-module-signature.config "
 
 SRC_URI_append = " file://uefi-certificates/KEK.auth "
 SRC_URI_append = " file://uefi-certificates/KEK.crt "
 SRC_URI_append = " file://uefi-certificates/KEK.key "
 SRC_URI_append = " file://uefi-certificates/PK.auth "
+
+EXTRA_OEMAKE += "${@oe.utils.ifelse(d.getVar('KERNEL_SIGN_ENABLE') == '1', 'INSTALL_MOD_STRIP=1','')}"
 
 do_configure() {
     touch ${B}/.scmversion ${S}/.scmversion
