@@ -1,0 +1,6 @@
+# short-description: Create SD card image with a boot partition
+# long-description: Creates a partitioned SD card image
+#
+part firmware --source bootimg-partition --fstype=vfat --label firmware --active --align 4 --size 16
+part /boot --source rootfs --rootfs-dir=${IMAGE_ROOTFS}/boot --fstype=vfat --label boot --align 4 --fixed-size 64M --use-uuid
+part / --source rootfs --fstype=ext4 --label rootfs --align 4 --exclude-path boot/
