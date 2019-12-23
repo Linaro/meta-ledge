@@ -71,56 +71,6 @@ do_configure() {
     cp -a ${B}/defconfig ${DEPLOYDIR}
 }
 
-# -----------------------------------------------------
-#             EFI
-# Determine the target arch for kernel as EFI firmware
-python __anonymous () {
-    import re
-    target = d.getVar('TARGET_ARCH')
-    if target == "x86_64":
-        kernel_efi_image = "bootx64.efi"
-    elif re.match('i.86', target):
-        kernel_efi_image = "bootia32.efi"
-    elif re.match('aarch64', target):
-        kernel_efi_image = "bootaa64.efi"
-    elif re.match('arm', target):
-        kernel_efi_image = "bootarm.efi"
-    else:
-        raise bb.parse.SkipRecipe("kernel efi is incompatible with target %s" % target)
-    d.setVar("KERNEL_EFI_IMAGE", kernel_efi_image)
-}
-
-do_install_append() {
-    if [ "${@bb.utils.contains('DISTRO_FEATURES', 'efi', '1', '0', d)}" = "1" ]; then
-	   for img in bzImage zImage Image; do
-		if [ "x$img" = "x${KERNEL_IMAGETYPE}" ]; then
-			break;
-		fi
-		if [ "x$img" = "x${KERNEL_ALT_IMAGETYPE}" ]; then
-			break;
-		fi
-	   done
-
-	install -d ${D}/boot/efi/boot
-	cat ${D}/boot/${img} > ${D}/boot/efi/boot/${KERNEL_EFI_IMAGE}
-
-	for t in ${KERNEL_IMAGETYPE} ${KERNEL_ALT_IMAGETYPE}; do
-	    rm -rf ${D}/boot/$t*
-	done
-    fi
-}
-FILES_${KERNEL_PACKAGE_NAME}-image += "/boot/efi"
-
-python __anonymous () {
-    types = d.getVar('KERNEL_IMAGETYPES') or ""
-    kname = d.getVar('KERNEL_PACKAGE_NAME') or "kernel"
-    for type in types.split():
-        typelower = type.lower()
-        if typelower == 'zimage':
-            d.appendVar('FILES_' + kname + '-image-' + typelower, ' /boot/efi/boot ')
-        if typelower == 'image':
-            d.appendVar('FILES_' + kname + '-image-' + typelower, ' /boot/efi/boot ')
-}
 FILES_${KERNEL_PACKAGE_NAME}-base += "${nonarch_base_libdir}/modules/${KERNEL_VERSION}/modules.builtin.modinfo "
 
 # for debian purpose
@@ -139,14 +89,5 @@ do_deploy_append() {
     for d in  ${KERNEL_DEVICETREE}; do
         cp -f $deployDir/$d $deployDir/$d-for-debian
     done
-
-    hash-to-efi-sig-list ${D}/boot/efi/boot/${KERNEL_EFI_IMAGE} kernel.hash
-    sign-efi-sig-list -c ${WORKDIR}/uefi-certificates/KEK.crt -k ${WORKDIR}/uefi-certificates/KEK.key db kernel.hash kernel.auth
-    mkdir -p certimage
-    cp ${WORKDIR}/uefi-certificates/PK.auth ${WORKDIR}/uefi-certificates/KEK.auth kernel.auth ./certimage
-    truncate -s 4M certimage.ext4
-    ${STAGING_DIR_NATIVE}${base_sbindir}/mkfs.ext4 certimage.ext4 -d ./certimage
-    rm -rf ./certimage kernel.hash
-    mv certimage.ext4 ${DEPLOYDIR}/ledge-kernel-uefi-certs.ext4
 }
 do_deploy[depends] += " virtual/kernel:do_package "
