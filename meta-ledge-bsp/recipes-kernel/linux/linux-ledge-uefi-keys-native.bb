@@ -3,9 +3,9 @@ LICENSE = "GPLv2"
 SECTION = "kernel"
 
 # for mkfs.ext4
-DEPENDS += "e2fsprogs-native"
-DEPENDS += "efitools-native"
-DEPENDS += "coreutils-native"
+DEPENDS += " e2fsprogs-native "
+DEPENDS += " efitools-native "
+DEPENDS += " coreutils-native "
 
 DEPENDS += "linux-ledge"
 DEPENDS += "virtual/kernel"
