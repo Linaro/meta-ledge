@@ -2,13 +2,8 @@ DESCRIPTION = "Linux Kernel uefi keys"
 LICENSE = "GPLv2"
 SECTION = "kernel"
 
-# for mkfs.ext4
-DEPENDS += " e2fsprogs-native "
-DEPENDS += " efitools-native "
-DEPENDS += " coreutils-native "
-
-DEPENDS += "linux-ledge"
-DEPENDS += "virtual/kernel"
+DEPENDS_append += " e2fsprogs-native  efitools-native  coreutils-native "
+DEPENDS_append += " linux-ledge virtual/kernel "
 
 SRC_URI_append = " file://uefi-certificates/KEK.auth "
 SRC_URI_append = " file://uefi-certificates/KEK.crt "
@@ -21,10 +16,9 @@ inherit deploy native
 
 do_configure[noexec] = "1"
 do_compile[noexec] = "1"
-do_install[noexec] = "1"
 ALLOW_EMPTY_${PN} = "1"
 
-do_deploy() {
+do_install() {
        # WIC image creates efi partition with ${D}/boot/efi/boot/${KERNEL_EFI_IMAGE}
        # @todo: rethink how to sign kernel image after wic chooses one.
        for img in bzImage zImage Image; do
@@ -44,8 +38,14 @@ do_deploy() {
 	cp ${WORKDIR}/uefi-certificates/PK.auth ${WORKDIR}/uefi-certificates/KEK.auth kernel.auth ./certimage
 	truncate -s 4M certimage.ext4
 	${base_sbindir}/mkfs.ext4 certimage.ext4 -d ./certimage
-	rm -rf ./certimage kernel.hash
-	mv certimage.ext4 ${DEPLOYDIR}/ledge-kernel-uefi-certs.ext4
+
+	install -d ${DEPLOY_DIR_IMAGE}
+	install -m 0644 certimage.ext4 ${DEPLOY_DIR_IMAGE}/ledge-kernel-uefi-certs.ext4
+
+	rm -rf ./certimage kernel.hash certimage.ext4
 }
 
-addtask deploy before do_build after do_unpack
+do_install[depends] += " linux-ledge:do_package_write_ipk "
+do_install[depends] += " virtual/kernel:do_package_write_ipk "
+
+PACKAGE_ARCH = "${MACHINE_ARCH}"
