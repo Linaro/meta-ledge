@@ -1,9 +1,6 @@
 inherit kernel siteinfo
 
 DEPENDS += "coreutils-native"
-DEPENDS += "efitools-native"
-# for mkfs.ext4
-DEPENDS += "e2fsprogs-native"
 
 KERNEL_DEFCONFIG = "defconfig"
 KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-01-core.config "
@@ -23,11 +20,6 @@ SRC_URI_append = " file://fragment-11-virtio.config "
 SRC_URI_append = " file://fragment-12-security.config "
 SRC_URI_append = " file://fragment-13-cmdline.config "
 SRC_URI_append = " file://fragment-14-module-signature.config "
-
-SRC_URI_append = " file://uefi-certificates/KEK.auth "
-SRC_URI_append = " file://uefi-certificates/KEK.crt "
-SRC_URI_append = " file://uefi-certificates/KEK.key "
-SRC_URI_append = " file://uefi-certificates/PK.auth "
 
 EXTRA_OEMAKE += "${@oe.utils.ifelse(d.getVar('KERNEL_SIGN_ENABLE') == '1', 'INSTALL_MOD_STRIP=1','')}"
 
