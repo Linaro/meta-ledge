@@ -38,12 +38,12 @@ do_deploy() {
 
 	KERNEL_IMAGE="${DEPLOY_DIR_IMAGE}/${img}"
 
-	hash-to-efi-sig-list ${KERNEL_IMAGE} kernel.hash
-	sign-efi-sig-list -c ${WORKDIR}/uefi-certificates/KEK.crt -k ${WORKDIR}/uefi-certificates/KEK.key db kernel.hash kernel.auth
+	${bindir}/hash-to-efi-sig-list ${KERNEL_IMAGE} kernel.hash
+	${bindir}/sign-efi-sig-list -c ${WORKDIR}/uefi-certificates/KEK.crt -k ${WORKDIR}/uefi-certificates/KEK.key db kernel.hash kernel.auth
 	mkdir -p certimage
 	cp ${WORKDIR}/uefi-certificates/PK.auth ${WORKDIR}/uefi-certificates/KEK.auth kernel.auth ./certimage
 	truncate -s 4M certimage.ext4
-	mkfs.ext4 certimage.ext4 -d ./certimage
+	${base_sbindir}/mkfs.ext4 certimage.ext4 -d ./certimage
 	rm -rf ./certimage kernel.hash
 	mv certimage.ext4 ${DEPLOYDIR}/ledge-kernel-uefi-certs.ext4
 }
