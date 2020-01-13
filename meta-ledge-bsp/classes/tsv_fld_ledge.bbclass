@@ -40,7 +40,7 @@ tsv_fld_template_for_ledge () {
     for f in $(ls -1 *.tsv.template)
     do
         name=$(echo $f | sed "s/tsv\.template/${IMAGE_LINK_NAME}\.tsv/")
-        sed "s/%%IMAGE%/${ROOTFS_IMAGE_NAME_DETECTED}/" $f > $name
+        sed "s/%%IMAGE%/${ROOTFS_IMAGE_NAME_DETECTED}.bin/" $f > $name
         sed -i "s/%%BOOTFS%/${BOOTFS_IMAGE_NAME_DETECTED}/" $name
     done
     for f in $(ls -1 *.fld.template);
