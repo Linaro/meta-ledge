@@ -10,6 +10,7 @@ KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-11-virtio.config "
 KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-12-security.config "
 KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-13-cmdline.config "
 KERNEL_CONFIG_FRAGMENTS_append = " ${@oe.utils.ifelse(d.getVar('KERNEL_SIGN_ENABLE') == '1', '${WORKDIR}/fragment-14-module-signature.config','')} "
+KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-15-cleanup.config "
 
 KERNEL_CONFIG_COMMAND = "oe_runmake -C ${S} O=${B} ${KERNEL_DEFCONFIG}"
 
@@ -20,6 +21,7 @@ SRC_URI_append = " file://fragment-11-virtio.config "
 SRC_URI_append = " file://fragment-12-security.config "
 SRC_URI_append = " file://fragment-13-cmdline.config "
 SRC_URI_append = " file://fragment-14-module-signature.config "
+SRC_URI_append = " file://fragment-15-cleanup.config "
 
 EXTRA_OEMAKE += "${@oe.utils.ifelse(d.getVar('KERNEL_SIGN_ENABLE') == '1', 'INSTALL_MOD_STRIP=1','')}"
 
@@ -61,6 +63,20 @@ do_configure() {
     bbplain "Saving defconfig to:\n${B}/defconfig"
     oe_runmake -C ${B} savedefconfig
     cp -a ${B}/defconfig ${DEPLOYDIR}
+}
+
+do_compile_append() {
+    config="${B}/.config"
+    if grep -q 'CONFIG_ARM_APPENDED_DTB=y' $config; then
+        oe_runmake -C ${B} dtbs
+    fi
+}
+
+do_install_append() {
+    config="${B}/.config"
+    if grep -q 'CONFIG_ARM_APPENDED_DTB=y' $config; then
+        oe_runmake -C ${B} DEPMOD=echo INSTALL_DTBS_PATH=${D}/boot/dtb dtbs_install
+    fi
 }
 
 FILES_${KERNEL_PACKAGE_NAME}-base += "${nonarch_base_libdir}/modules/${KERNEL_VERSION}/modules.builtin.modinfo "
