@@ -12,12 +12,12 @@ SRCREV = "e5aee22e4be75e75a854ab64503fc80598bc2004"
 
 SRC_URI = "git://git.denx.de/u-boot.git"
 
-SRC_URI_append_ledge-stm32mp157c-dk2 = " \
+SRC_URI += " \
         file://ledge_stm32mp157c_dk2_basic_defconfig \
         file://ledge_stm32mp157c_dk2_trusted_defconfig \
     "
 
-SRC_URI_append_ledge-stm32mp157c-dk2 = " \
+SRC_URI += " \
         file://0001-STM32mp157-upstream-for-2019.10.patch \
     "
 
