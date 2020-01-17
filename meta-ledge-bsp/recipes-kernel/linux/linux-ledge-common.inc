@@ -98,5 +98,8 @@ do_deploy_append() {
     for d in  ${KERNEL_DEVICETREE}; do
         cp -f $deployDir/$d $deployDir/$d-for-debian
     done
+    if [ -d ${WORKDIR}/package/boot/dtb ];then
+        cp -rf ${WORKDIR}/package/boot/dtb $deployDir/
+    fi
 }
 do_deploy[depends] += " virtual/kernel:do_package "
