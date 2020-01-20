@@ -2,5 +2,5 @@
 # long-description: Creates a partitioned SD card image
 #
 part firmware --source bootimg-partition --fstype=vfat --label firmware --active --align 4 --size 16
-part /boot --source bootimg-efi --sourceparams="loader=kernel" --fstype=vfat --system-id 0xef --label bootfs --align 4 --use-uuid
+part /boot --source bootimg-efi --sourceparams="loader=kernel" --fstype=vfat --system-id 0xef --label bootfs --align 4 --size 64 --use-uuid  --include-path ${DEPLOY_DIR_IMAGE}/dtb
 part / --source rootfs --fstype=ext4 --label rootfs --align 4 --exclude-path boot/
