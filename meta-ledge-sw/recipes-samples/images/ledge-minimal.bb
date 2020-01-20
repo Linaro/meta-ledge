@@ -10,6 +10,7 @@ REQUIRED_DISTRO_FEATURES = "pam systemd"
 CORE_IMAGE_BASE_INSTALL += " \
     kernel-image \
     kernel-modules \
+    kernel-devicetree \
     "
 
 EXTRA_USERS_PARAMS = "\
