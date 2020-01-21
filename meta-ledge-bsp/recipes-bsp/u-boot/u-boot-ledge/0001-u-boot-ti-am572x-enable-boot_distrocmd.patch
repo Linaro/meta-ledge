@@ -1,27 +1,29 @@
-From 58874672625db8401c3f542f42f6f353f8414a7b Mon Sep 17 00:00:00 2001
+From 4a15a7342dbdb00572d785f66c624b064a2adfd7 Mon Sep 17 00:00:00 2001
 From: Ilias Apalodimas <ilias.apalodimas@linaro.org>
 Date: Fri, 17 Jan 2020 12:13:27 +0200
 Subject: [PATCH] u-boot: ti: am572x enable boot_distrocmd
 
 Signed-off-by: Ilias Apalodimas <ilias.apalodimas@linaro.org>
 ---
- include/configs/am57xx_evm.h      | 4 ++++
- include/configs/ti_omap5_common.h | 1 +
- include/environment/ti/boot.h     | 2 ++
- 3 files changed, 7 insertions(+)
+ include/configs/am57xx_evm.h      |  6 ++++++
+ include/configs/ti_omap5_common.h |  1 +
+ include/environment/ti/boot.h     | 10 +++++++++-
+ 3 files changed, 16 insertions(+), 1 deletion(-)
 
 diff --git a/include/configs/am57xx_evm.h b/include/configs/am57xx_evm.h
-index cdab9246f2c5..b370bf654c5c 100644
+index fea9300a67de..246f862ff811 100644
 --- a/include/configs/am57xx_evm.h
 +++ b/include/configs/am57xx_evm.h
-@@ -50,6 +50,10 @@
+@@ -49,6 +49,12 @@
  #endif
  #endif
  
++#ifdef CONFIG_DISTRO_DEFAULTS
 +#define BOOT_TARGET_DEVICES(func) \
 +        func(MMC, mmc, 0) \
 +
 +#include <config_distro_bootcmd.h>
++#endif
  #include <configs/ti_omap5_common.h>
  
  /* Enhance our eMMC support / experience. */
@@ -38,10 +40,27 @@ index de0a6af2fdc9..d44690fb3a1d 100644
  /*
   * SPL related defines.  The Public RAM memory map the ROM defines the
 diff --git a/include/environment/ti/boot.h b/include/environment/ti/boot.h
-index 684a744f3121..c43326626fc1 100644
+index 6313f3e328a0..227448c3c3cd 100644
 --- a/include/environment/ti/boot.h
 +++ b/include/environment/ti/boot.h
-@@ -198,6 +198,7 @@
+@@ -102,9 +102,15 @@
+ 	"echo Booting into fastboot ...; " \
+ 	"fastboot " __stringify(CONFIG_FASTBOOT_USB_DEV) "; "
+ 
++#ifdef CONFIG_DISTRO_DEFAULTS
++#define FDTFILE
++#else
++#define FDTFILE "fdtfile=undefined\0"
++#endif
++
+ #define DEFAULT_COMMON_BOOT_TI_ARGS \
+ 	"console=" CONSOLEDEV ",115200n8\0" \
+-	"fdtfile=undefined\0" \
++	FDTFILE \
+ 	"bootpart=0:2\0" \
+ 	"bootdir=/boot\0" \
+ 	"bootfile=zImage\0" \
+@@ -200,6 +206,7 @@
  		"if test $fdtfile = undefined; then " \
  			"echo WARNING: Could not determine device tree to use; fi; \0"
  
@@ -49,7 +68,7 @@ index 684a744f3121..c43326626fc1 100644
  #define CONFIG_BOOTCOMMAND \
  	"if test ${dofastboot} -eq 1; then " \
  		"echo Boot fastboot requested, resetting dofastboot ...;" \
-@@ -213,6 +214,7 @@
+@@ -215,6 +222,7 @@
  	"run emmc_linux_boot; " \
  	"run emmc_android_boot; " \
  	""
