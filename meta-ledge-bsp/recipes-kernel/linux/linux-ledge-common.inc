@@ -74,12 +74,19 @@ do_compile_append() {
 
 do_install_append() {
     config="${B}/.config"
+
     if grep -q 'CONFIG_ARM_APPENDED_DTB=y' $config; then
         oe_runmake -C ${B} DEPMOD=echo INSTALL_DTBS_PATH=${D}/boot/dtb dtbs_install
     fi
+
+    if [ ! -d ${D}/boot/dtb ]; then
+        # force the creation of dtb directory on boot to have
+        install -d ${D}/boot/dtb
+        echo "Empty content on case there is no devicetree" > ${D}/boot/dtb/.emtpy
+    fi
 }
 
-FILES_${KERNEL_PACKAGE_NAME}-devicetree += "/${KERNEL_IMAGEDEST}/dtb/*.dtb"
+FILES_${KERNEL_PACKAGE_NAME}-devicetree += "/${KERNEL_IMAGEDEST}/dtb"
 FILES_${KERNEL_PACKAGE_NAME}-base += "${nonarch_base_libdir}/modules/${KERNEL_VERSION}/modules.builtin.modinfo "
 
 # for debian purpose
