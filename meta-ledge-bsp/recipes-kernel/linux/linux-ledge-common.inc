@@ -84,6 +84,20 @@ do_install_append() {
         install -d ${D}/boot/dtb
         echo "Empty content on case there is no devicetree" > ${D}/boot/dtb/.emtpy
     fi
+
+    #rename device tree
+    for dtb in ${DTB_RENAMING}
+    do
+        dtb_orignal=$(echo $dtb | cut -d':' -f 1 )
+        dtb_renamed=$(echo $dtb | cut -d':' -f 2 )
+
+        if [ -f ${D}/boot/$dtb_orignal ]; then
+            mv ${D}/boot/$dtb_orignal ${D}/boot/$dtb_renamed
+        fi
+        if [ -f ${D}/boot/dtb/$dtb_orignal ]; then
+            mv ${D}/boot/dtb/$dtb_orignal ${D}/boot/dtb/$dtb_renamed
+        fi
+    done
 }
 
 FILES_${KERNEL_PACKAGE_NAME}-devicetree += "/${KERNEL_IMAGEDEST}/dtb"
