@@ -20,6 +20,7 @@ SRC_URI += " \
 SRC_URI += " \
         file://0001-STM32mp157-upstream-for-2019.10.patch \
         file://0001-u-boot-ti-am572x-enable-boot_distrocmd.patch \
+        file://0002-distro-account-for-efi-scanning.patch \
     "
 
 S = "${WORKDIR}/git"

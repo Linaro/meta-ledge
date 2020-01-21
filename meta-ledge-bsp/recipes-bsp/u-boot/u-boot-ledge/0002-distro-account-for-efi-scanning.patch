@@ -1,0 +1,29 @@
+From a2f33d9e24472ee35c5072373be1063d7dc4aff9 Mon Sep 17 00:00:00 2001
+From: Ilias Apalodimas <ilias.apalodimas@linaro.org>
+Date: Tue, 21 Jan 2020 17:00:58 +0200
+Subject: [PATCH] distro: account for efi scanning
+
+scan_dev_for_boot was not including scan_dev_for_efi in all partitions
+
+Signed-off-by: Ilias Apalodimas <ilias.apalodimas@linaro.org>
+---
+ include/config_distro_bootcmd.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/config_distro_bootcmd.h b/include/config_distro_bootcmd.h
+index fc0935fa21af..9ded49ee72d4 100644
+--- a/include/config_distro_bootcmd.h
++++ b/include/config_distro_bootcmd.h
+@@ -459,8 +459,8 @@
+ 		"for prefix in ${boot_prefixes}; do "                     \
+ 			"run scan_dev_for_extlinux; "                     \
+ 			"run scan_dev_for_scripts; "                      \
++			SCAN_DEV_FOR_EFI                                  \
+ 		"done;"                                                   \
+-		SCAN_DEV_FOR_EFI                                          \
+ 		"\0"                                                      \
+ 	\
+ 	"scan_dev_for_boot_part="                                         \
+-- 
+2.25.0
+
