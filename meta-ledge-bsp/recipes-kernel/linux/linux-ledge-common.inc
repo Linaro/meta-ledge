@@ -106,6 +106,7 @@ do_install_append() {
 
 FILES_${KERNEL_PACKAGE_NAME}-devicetree += "/${KERNEL_IMAGEDEST}/dtb"
 FILES_${KERNEL_PACKAGE_NAME}-base += "${nonarch_base_libdir}/modules/${KERNEL_VERSION}/modules.builtin.modinfo "
+INITRAMFS_IMAGE = "ledge-initramfs"
 
 # for debian purpose
 do_deploy_append() {
