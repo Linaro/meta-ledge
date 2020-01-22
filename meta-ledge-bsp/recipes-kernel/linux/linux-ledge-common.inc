@@ -92,10 +92,14 @@ do_install_append() {
         dtb_renamed=$(echo $dtb | cut -d':' -f 2 )
 
         if [ -f ${D}/boot/$dtb_orignal ]; then
-            mv ${D}/boot/$dtb_orignal ${D}/boot/$dtb_renamed
+            cd ${D}/boot/
+            ln -s $dtb_orignal $dtb_renamed
+           cd -
         fi
         if [ -f ${D}/boot/dtb/$dtb_orignal ]; then
-            mv ${D}/boot/dtb/$dtb_orignal ${D}/boot/dtb/$dtb_renamed
+            cd ${D}/boot/dtb/
+            ln -s $dtb_orignal $dtb_renamed
+            cd -
         fi
     done
 }
