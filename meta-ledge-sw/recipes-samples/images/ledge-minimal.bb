@@ -8,6 +8,7 @@ inherit core-image distro_features_check extrausers
 REQUIRED_DISTRO_FEATURES = "pam systemd"
 
 CORE_IMAGE_BASE_INSTALL += " \
+    kernel-image \
     kernel-modules \
     kernel-devicetree \
     "
