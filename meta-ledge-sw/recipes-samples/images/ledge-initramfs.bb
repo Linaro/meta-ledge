@@ -2,7 +2,6 @@ DESCRIPTION = "Small ramdisk image for running tests (bootrr, etc)"
 
 PACKAGE_INSTALL = " \
     busybox \
-    udev \
     initramfs-module-rootfs \
     initramfs-module-udev \
 "
@@ -10,7 +9,7 @@ PACKAGE_INSTALL = " \
 # Do not pollute the initrd image with rootfs features
 IMAGE_FEATURES = ""
 
-export IMAGE_BASENAME = "ledge-initramfs"
+export IMAGE_NAME = "ledge-initramfs"
 IMAGE_LINGUAS = ""
 
 LICENSE = "MIT"

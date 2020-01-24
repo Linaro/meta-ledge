@@ -28,6 +28,7 @@ SRC_URI += " \
     file://0003-KERNEL-stm32mp157-dts-add-ftpm-support.patch \
     file://0004-op-tee-shm.patch \
     file://0005-op-tee-multi-page-shm.patch \
+    file://0006-efi-libstub-Fix-kernel-command-line.patch \
     "
 
 PV = "mainline-5.3"
