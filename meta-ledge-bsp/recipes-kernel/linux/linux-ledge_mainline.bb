@@ -7,6 +7,7 @@ DEPENDS = ""
 LIC_FILES_CHKSUM = "file://COPYING;md5=bbea815ee2795b2f4230826c0c6b8814"
 
 include linux-ledge-common.inc
+include linux-ledge-sign.inc
 
 LEDGE_KVERSION = "5.3.6"
 
