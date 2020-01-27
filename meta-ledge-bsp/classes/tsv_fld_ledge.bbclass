@@ -27,6 +27,10 @@ tsv_fld_template_for_ledge () {
     then
         return;
     fi
+    if [ "${PN}" = "${INITRAMFS_IMAGE}" ];
+    then
+        return;
+    fi
 
     cd ${DEPLOY_DIR_IMAGE};
 
