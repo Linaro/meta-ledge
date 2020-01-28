@@ -18,5 +18,5 @@ part teeh  --source rawcopy --fstype=ext4 --fsoptions "noauto" --part-name=teeh 
 part teed  --source rawcopy --fstype=ext4 --fsoptions "noauto" --part-name=teed --sourceparams="file=${DEPLOY_DIR_IMAGE}/optee/tee-pageable_v2.stm32" --ondisk mmcblk --part-type 0x8301 --fixed-size 256K
 part teex  --source rawcopy --fstype=ext4 --fsoptions "noauto" --part-name=teex --sourceparams="file=${DEPLOY_DIR_IMAGE}/optee/tee-pager_v2.stm32" --ondisk mmcblk --part-type 0x8301 --fixed-size 256K
 
-part /boot --source bootimg-efi --sourceparams="loader=kernel" --fstype=vfat --part-type 0xef00 --label bootfs --align 4 --use-uuid --include-path "${DEPLOY_DIR_IMAGE}/dtb ${DEPLOY_DIR_IMAGE}/ledge-initramfs.rootfs.cpio.gz"
+part /boot --source bootimg-efi --sourceparams="loader=kernel" --fstype=vfat --part-type 0xef00 --label bootfs --align 4 --use-uuid --include-path "${DEPLOY_DIR_IMAGE}/dtb ${DEPLOY_DIR_IMAGE}/ledge-initramfs-${MACHINE}.cpio.gz"
 part / --source rootfs --fstype=ext4 --label rootfs --align 4 --fsuuid 6091b3a4-ce08-3020-93a6-f755a22ef03b --exclude-path boot/
