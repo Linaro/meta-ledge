@@ -24,12 +24,14 @@ unset FLASHLAYOUT_uri
 unset FLASHLAYOUT_module
 unset FLASHLAYOUT_kernel
 unset FLASHLAYOUT_dtb
+unset FLASHLAYOUT_initramfs
 
 declare -A FLASHLAYOUT_data
 FLASHLAYOUT_uri=""
 FLASHLAYOUT_module=""
 FLASHLAYOUT_kernel=""
 FLASHLAYOUT_dtb=""
+FLASHLAYOUT_initramfs=""
 FLASHLAYOUT_arch=""
 # Size of 4GB
 #DEFAULT_RAW_SIZE=4096
@@ -125,6 +127,10 @@ function read_flash_layout() {
 		then
 			FLASHLAYOUT_dtb=${flashlayout_data[1]}
 		fi
+		if [ "selected" == "INITRAMFS"]
+		then
+			FLASHLAYOUT_initramfs=${flashlayout_data[1]}
+		fi
 		if [ "$selected" == "ARCH" ]
 		then
 			FLASHLAYOUT_arch=${flashlayout_data[1]}
@@ -170,7 +176,6 @@ function generate_rootfs_from_tarball() {
 	fi
 
 	localpath=$(pwd)
-	dtb_name=$(echo $FLASHLAYOUT_dtb | sed -e "s/-for-debian//")
 	mkdir temp_rootfs
 	cd temp_rootfs
 	sudo tar xf ../$tarball
@@ -188,7 +193,23 @@ function generate_rootfs_from_tarball() {
 	mkfs.vfat -n BOOT -S 512 -C $_rootfs_name.bootfs.vfat $_vfat_block
 	if [ "$FLASHLAYOUT_dtb" != "none" ];
 	then
-		mcopy -i $_rootfs_name.bootfs.vfat -s $FLASHLAYOUT_dtb ::/$dtb_name
+		# verify if it's a devicetree or a tarball
+		dtb_extension=${FLASHLAYOUT_dtb##*.}
+		case $dtb_extension in
+		dtb)
+			dtb_name=$(echo $FLASHLAYOUT_dtb | sed -e "s/-for-debian//")
+			mcopy -i $_rootfs_name.bootfs.vfat -s $FLASHLAYOUT_dtb ::/$dtb_name
+			;;
+		tgz)
+			tar xf ../$FLASHLAYOUT_dtb
+			mmd -i $_rootfs_name.bootfs.vfat ::/dtb
+			mcopy -i $_rootfs_name.bootfs.vfat -s dtb/* ::/dtb/
+			;;
+		esac
+	fi
+	if [ "$FLASHLAYOUT_initramfs" != none ];
+	then
+		mcopy -i $_rootfs_name.bootfs.vfat -s $FLASHLAYOUT_initramfs ::/
 	fi
 	mmd -i $_rootfs_name.bootfs.vfat ::/efi
 	mmd -i $_rootfs_name.bootfs.vfat ::/efi/boot
@@ -343,6 +364,19 @@ function get_last_image_path() {
 					exit 0
 				fi
 			fi
+
+			if [ "$FLASHLAYOUT_initramfs" != "none" ];
+			then
+				echo "[Try to Download]: wget $FLASHLAYOUT_uri/$FLASHLAYOUT_initramfs -O $FLASHLAYOUT_prefix_image_path/$FLASHLAYOUT_initramfs"
+				wget $FLASHLAYOUT_uri/$FLASHLAYOUT_initramfs -O $FLASHLAYOUT_initramfs 2> /dev/null
+				ret=$?
+				if [ $ret -ne 0 ];
+				then
+					echo "[ERROR] couldn't download $FLASHLAYOUT_initramfs on $FLASHLAYOUT_uri/"
+					exit 0
+				fi
+			fi
+
 		fi
 	fi
 
