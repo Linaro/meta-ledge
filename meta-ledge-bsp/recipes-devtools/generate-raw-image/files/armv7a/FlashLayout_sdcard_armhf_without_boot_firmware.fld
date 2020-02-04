@@ -14,7 +14,8 @@
 URI		https://snapshots.linaro.org/components/ledge/oe/ledge-qemuarm/latest/rpb/
 MODULE	modules-stripped-ledge-qemuarm-for-debian.tgz
 KERNEL	zImage-for-debian
-DTB		none
+DTB		kernel-devicetrees.tgz
+INITRAMFS	ledge-initramfs.rootfs.cpio.gz
 ARCH	armhf
 P	bootfs	FileSystem	0x00344400	none
 P	rootfs	FileSystem	0x04344400	rootfs-linaro-buster-raw-unknown-*.tar.xz
