@@ -1,3 +1,4 @@
+BOOTFS_IMAGE_NAME = "${IMAGE_LINK_NAME}.bootfs.vfat"
 
 tsv_fld_template_for_ledge () {
     if [ "${PN}" = "${INITRAMFS_IMAGE}" ];
@@ -7,6 +8,7 @@ tsv_fld_template_for_ledge () {
 
     cd ${DEPLOY_DIR_IMAGE};
 
+    BOOTFS_IMAGE_NAME_DETECTED=$(readlink ${IMGDEPLOYDIR}/${BOOTFS_IMAGE_NAME})
     ROOTFS_IMAGE_NAME_DETECTED=$(readlink ${IMGDEPLOYDIR}/${IMAGE_LINK_NAME}.wic)
     ROOTFS_IMAGE_NAME_DETECTED_NAME=$(basename ${ROOTFS_IMAGE_NAME_DETECTED} )
     echo "${ROOTFS_IMAGE_NAME_DETECTED} ${ROOTFS_IMAGE_NAME_DETECTED_NAME}"
