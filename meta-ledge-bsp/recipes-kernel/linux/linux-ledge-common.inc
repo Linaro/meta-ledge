@@ -2,26 +2,31 @@ inherit kernel siteinfo
 
 DEPENDS += "coreutils-native"
 
-KERNEL_DEFCONFIG = "defconfig"
-KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-01-core.config "
-KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-02-systemd.config "
-KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-10-ledge.config "
-KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-11-virtio.config "
-KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-12-security.config "
-KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-13-cmdline.config "
-KERNEL_CONFIG_FRAGMENTS_append = " ${@oe.utils.ifelse(d.getVar('KERNEL_SIGN_ENABLE') == '1', '${WORKDIR}/fragment-14-module-signature.config','')} "
-KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-15-cleanup.config "
-
-KERNEL_CONFIG_COMMAND = "oe_runmake -C ${S} O=${B} ${KERNEL_DEFCONFIG}"
-
 SRC_URI_append = " file://fragment-01-core.config "
 SRC_URI_append = " file://fragment-02-systemd.config "
 SRC_URI_append = " file://fragment-10-ledge.config "
 SRC_URI_append = " file://fragment-11-virtio.config "
 SRC_URI_append = " file://fragment-12-security.config "
 SRC_URI_append = " file://fragment-13-cmdline.config "
+SRC_URI_append = " file://fragment-13-cmdline_x86.config "
 SRC_URI_append = " file://fragment-14-module-signature.config "
 SRC_URI_append = " file://fragment-15-cleanup.config "
+
+KERNEL_DEFCONFIG = "defconfig"
+KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-01-core.config "
+KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-02-systemd.config "
+KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-10-ledge.config "
+KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-11-virtio.config "
+KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-12-security.config "
+KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-12-security.config "
+KERNEL_CONFIG_FRAGMENTS_append_armv7a = " ${WORKDIR}/fragment-13-cmdline.config "
+KERNEL_CONFIG_FRAGMENTS_append_armv7e = " ${WORKDIR}/fragment-13-cmdline.config "
+KERNEL_CONFIG_FRAGMENTS_append_aarch64 = " ${WORKDIR}/fragment-13-cmdline.config "
+KERNEL_CONFIG_FRAGMENTS_append_x86-64 = " ${WORKDIR}/fragment-13-cmdline_x86.config "
+KERNEL_CONFIG_FRAGMENTS_append = " ${@oe.utils.ifelse(d.getVar('KERNEL_SIGN_ENABLE') == '1', '${WORKDIR}/fragment-14-module-signature.config','')} "
+KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-15-cleanup.config "
+
+KERNEL_CONFIG_COMMAND = "oe_runmake -C ${S} O=${B} ${KERNEL_DEFCONFIG}"
 
 EXTRA_OEMAKE += "${@oe.utils.ifelse(d.getVar('KERNEL_SIGN_ENABLE') == '1', 'INSTALL_MOD_STRIP=1','')}"
 
@@ -104,8 +109,21 @@ do_install_append() {
     done
 }
 
+do_install_append_x86-64() {
+	# LEDGE: Pass initrd as bootloader parameter until
+	# kernel parameter initrd= with the uefi loader will be
+	# implemented for x86 and kernel patches are merged to mainline.
+
+	echo "bootx64.efi initrd=ledge-initramfs.rootfs.cpio.gz " > ${D}/boot/startup.nsh
+}
+
+do_deploy_append_x86-64() {
+	cp -rf ${WORKDIR}/package/boot/startup.nsh $deployDir/
+}
+
 FILES_${KERNEL_PACKAGE_NAME}-devicetree += "/${KERNEL_IMAGEDEST}/dtb"
 FILES_${KERNEL_PACKAGE_NAME}-base += "${nonarch_base_libdir}/modules/${KERNEL_VERSION}/modules.builtin.modinfo "
+FILES_${KERNEL_PACKAGE_NAME}-base_x86-64 += "/${KERNEL_IMAGEDEST}/startup.nsh"
 
 # for debian purpose
 do_deploy_append() {

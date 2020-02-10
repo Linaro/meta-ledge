@@ -1,0 +1,3 @@
+bootloader  --ptable gpt --timeout=0  --append="rootwait"
+part /boot --source bootimg-efi --sourceparams="loader=kernel" --fstype=vfat --label bootfs --active --align 4 --use-uuid --include-path "${DEPLOY_DIR_IMAGE}/dtb ${DEPLOY_DIR_IMAGE}/ledge-initramfs.rootfs.cpio.gz ${DEPLOY_DIR_IMAGE}/startup.nsh"
+part / --source rootfs --fstype=ext4 --label rootfs --align 4 --fsuuid 6091b3a4-ce08-3020-93a6-f755a22ef03b --exclude-path boot/ --use-label
