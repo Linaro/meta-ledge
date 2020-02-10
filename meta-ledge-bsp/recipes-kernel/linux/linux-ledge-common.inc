@@ -144,5 +144,6 @@ do_deploy_append() {
     if [ -d ${WORKDIR}/package/boot/dtb ];then
         cp -rf ${WORKDIR}/package/boot/dtb $deployDir/
     fi
+    (cd $deployDir/; tar cfz kernel-devicetrees.tgz dtb; cd -)
 }
 do_deploy[depends] += " virtual/kernel:do_package "
