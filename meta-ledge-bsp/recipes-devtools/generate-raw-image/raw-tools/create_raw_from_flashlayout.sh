@@ -127,7 +127,7 @@ function read_flash_layout() {
 		then
 			FLASHLAYOUT_dtb=${flashlayout_data[1]}
 		fi
-		if [ "selected" == "INITRAMFS"]
+		if [ "selected" == "INITRAMFS" ]
 		then
 			FLASHLAYOUT_initramfs=${flashlayout_data[1]}
 		fi
