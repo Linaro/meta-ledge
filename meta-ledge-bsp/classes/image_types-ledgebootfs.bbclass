@@ -58,7 +58,20 @@ IMAGE_CMD_ledgebootfs () {
     mcopy -i ${LEDGE_BOOTFS_NAME} -s ${DEPLOY_DIR_IMAGE}/dtb/* ::/dtb/
     # put initramfs
     mcopy -i ${LEDGE_BOOTFS_NAME} -s ${DEPLOY_DIR_IMAGE}/ledge-initramfs.rootfs.cpio.gz ::/
+}
 
+IMAGE_CMD_ledgebootfs_append_x86-64() {
+        # LEDGE: Pass initrd as bootloader parameter until
+        # kernel parameter initrd= with the uefi loader will be
+        # implemented for x86 and kernel patches are merged to mainline.
+
+        echo "bootx64.efi initrd=ledge-initramfs.rootfs.cpio.gz " > startup.nsh
+	mcopy -i ${LEDGE_BOOTFS_NAME} -s startup.nsh ::/
+	rm startup.nsh
+}
+
+# Final stage - compress and create symlinks
+IMAGE_CMD_ledgebootfs_append() {
     (cd ${IMGDEPLOYDIR};ln -sf ${IMAGE_NAME}.bootfs.vfat ${IMAGE_LINK_NAME}.bootfs.vfat)
     (cd ${IMGDEPLOYDIR};gzip -f -9 -c ${IMAGE_NAME}.bootfs.vfat > ${IMAGE_NAME}.bootfs.vfat.gz)
     (cd ${IMGDEPLOYDIR};cp ${IMAGE_NAME}.bootfs.vfat.gz ${IMAGE_LINK_NAME}.bootfs.vfat.gz)
