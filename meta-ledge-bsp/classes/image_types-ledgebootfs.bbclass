@@ -55,7 +55,7 @@ IMAGE_CMD_ledgebootfs () {
 
     # put device tree
     mmd -i ${LEDGE_BOOTFS_NAME} ::/dtb
-    mcopy -i ${LEDGE_BOOTFS_NAME} -s ${DEPLOY_DIR_IMAGE}/dtb/* ::/dtb/
+    find ${DEPLOY_DIR_IMAGE}/dtb/ -name "*.dtb" -type f -exec mcopy -i ${LEDGE_BOOTFS_NAME} -s {} ::/dtb/ \;
     # put initramfs
     mcopy -i ${LEDGE_BOOTFS_NAME} -s ${DEPLOY_DIR_IMAGE}/ledge-initramfs.rootfs.cpio.gz ::/
 }
