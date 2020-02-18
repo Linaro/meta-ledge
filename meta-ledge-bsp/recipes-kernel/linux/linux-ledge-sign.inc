@@ -29,7 +29,7 @@ do_install_append() {
 	${STAGING_DIR_NATIVE}/sbin/mkfs.ext4 certimage.ext4 -d ./certimage
 
 	install -d ${DEPLOY_DIR_IMAGE}
-	install -m 0644 certimage.ext4 ${DEPLOY_DIR_IMAGE}/ledge-kernel-uefi-certs.ext4
+	install -m 0644 certimage.ext4 ${DEPLOY_DIR_IMAGE}/ledge-kernel-uefi-certs.ext4.img
 
 	rm -rf ./certimage kernel.hash certimage.ext4
 }
