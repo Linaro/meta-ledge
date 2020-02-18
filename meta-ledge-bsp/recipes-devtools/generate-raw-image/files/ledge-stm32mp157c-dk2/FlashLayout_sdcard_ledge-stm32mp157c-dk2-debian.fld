@@ -16,6 +16,7 @@ MODULE	modules-stripped-ledge-stm32mp157c-dk2-for-debian.tgz
 KERNEL	zImage-for-debian
 DTB		kernel-devicetrees.tgz
 INITRAMFS	ledge-initramfs.rootfs.cpio.gz
+UUID	6091b3a4-ce08-3020-93a6-f755a22ef03b
 ARCH	armhf
 P	fsbl1	Binary	0x00004400	spl/u-boot-spl.stm32-basic
 P	fsbl2	Binary	0x00044400	spl/u-boot-spl.stm32-basic

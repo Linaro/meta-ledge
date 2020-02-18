@@ -25,13 +25,15 @@ unset FLASHLAYOUT_module
 unset FLASHLAYOUT_kernel
 unset FLASHLAYOUT_dtb
 unset FLASHLAYOUT_initramfs
+unset FLASHLAYOUT_uuid
 
 declare -A FLASHLAYOUT_data
 FLASHLAYOUT_uri=""
-FLASHLAYOUT_module=""
-FLASHLAYOUT_kernel=""
-FLASHLAYOUT_dtb=""
-FLASHLAYOUT_initramfs=""
+FLASHLAYOUT_module="none"
+FLASHLAYOUT_kernel="none"
+FLASHLAYOUT_dtb="none"
+FLASHLAYOUT_initramfs="none"
+FLASHLAYOUT_uuid="6091b3a4-ce08-3020-93a6-f755a22ef03b"
 FLASHLAYOUT_arch=""
 # Size of 4GB
 #DEFAULT_RAW_SIZE=4096
@@ -127,7 +129,7 @@ function read_flash_layout() {
 		then
 			FLASHLAYOUT_dtb=${flashlayout_data[1]}
 		fi
-		if [ "selected" == "INITRAMFS" ]
+		if [ "$selected" == "INITRAMFS" ]
 		then
 			FLASHLAYOUT_initramfs=${flashlayout_data[1]}
 		fi
@@ -135,6 +137,11 @@ function read_flash_layout() {
 		then
 			FLASHLAYOUT_arch=${flashlayout_data[1]}
 		fi
+		if [ "$selected" == "UUID" ]
+		then
+			FLASHLAYOUT_uuid=${flashlayout_data[1]}
+		fi
+
 	done < "$FLASHLAYOUT_filename"
 
 	FLASHLAYOUT_number_of_line=$i
@@ -153,7 +160,9 @@ function debug_dump_flashlayout_data_array() {
 function generate_rootfs_from_tarball() {
 	tarball=$1
 	_rootfs_name="${tarball%.*.*}" #tar.xz
+	bootfs_to_create=0
 
+	debug "[generate_rootfs_from_tarball]"
 	if [ -f $FLASHLAYOUT_prefix_image_path/$_rootfs_name.ext4 ];
 	then
 		# ext4 already generated
@@ -169,65 +178,92 @@ function generate_rootfs_from_tarball() {
 			fi
 			if [ "$partName" == "bootfs" ];
 			then
-				FLASHLAYOUT_data[$i,$COL_BIN2FLASH]=$_rootfs_name.bootfs.vfat
+				if [ "$bin2flash" == "none" ];
+				then
+					FLASHLAYOUT_data[$i,$COL_BIN2FLASH]=$_rootfs_name.bootfs.vfat
+				fi
 			fi
 		done
 		return
+	else
+		for i in $(seq 0 $FLASHLAYOUT_number_of_line)
+		do
+			selected=${FLASHLAYOUT_data[$i,$COL_SELECTED_OPT]}
+			partName=${FLASHLAYOUT_data[$i,$COL_PARTNAME]}
+			bin2flash=${FLASHLAYOUT_data[$i,$COL_BIN2FLASH]}
+			debug "[generate_rootfs_from_tarball] $selected $partName $bin2flash"
+			if [ "$partName" == "bootfs" ];
+			then
+				if [ "$bin2flash" == "none" ];
+				then
+					bootfs_to_create=1
+				else
+					bootfs_to_create=0
+				fi
+			fi
+		done
 	fi
 
+	debug "[generate_rootfs_from_tarball] need to generate bootfs: $bootfs_to_create"
 	localpath=$(pwd)
 	mkdir temp_rootfs
 	cd temp_rootfs
+	debug "[generate_rootfs_from_tarball] sudo tar xf ../$tarball"
 	sudo tar xf ../$tarball
+	debug "[generate_rootfs_from_tarball] sudo tar xf ../$FLASHLAYOUT_module"
 	sudo tar xf ../$FLASHLAYOUT_module
 
-	sudo mkdir -p boot/efi/boot/
-	sudo cp ../$FLASHLAYOUT_kernel boot/efi/boot/bootarm.efi
-	if [ "$FLASHLAYOUT_dtb" != "none" ];
+	if [ $bootfs_to_create -eq 1 ];
 	then
-		sudo cp ../$FLASHLAYOUT_dtb boot/$dtb_name
-	fi
-	cd ..
-	#generate vfat version of bootfs (64MB -512K) (-512 are to not erase the gpt partion information
-	_vfat_block=$((64*1024-512))
-	mkfs.vfat -n BOOT -S 512 -C $_rootfs_name.bootfs.vfat $_vfat_block
-	if [ "$FLASHLAYOUT_dtb" != "none" ];
-	then
-		# verify if it's a devicetree or a tarball
-		dtb_extension=${FLASHLAYOUT_dtb##*.}
-		case $dtb_extension in
-		dtb)
-			dtb_name=$(echo $FLASHLAYOUT_dtb | sed -e "s/-for-debian//")
-			mcopy -i $_rootfs_name.bootfs.vfat -s $FLASHLAYOUT_dtb ::/$dtb_name
+		debug "[generate_rootfs_from_tarball] create bootfs"
+		sudo mkdir -p boot/efi/boot/
+		sudo cp ../$FLASHLAYOUT_kernel boot/efi/boot/bootarm.efi
+		if [ "$FLASHLAYOUT_dtb" != "none" ];
+		then
+			sudo cp ../$FLASHLAYOUT_dtb boot/$dtb_name
+		fi
+		cd ..
+		#generate vfat version of bootfs (64MB -512K) (-512 are to not erase the gpt partion information
+		_vfat_block=$((64*1024-512))
+		mkfs.vfat -n BOOT -S 512 -C $_rootfs_name.bootfs.vfat $_vfat_block
+		if [ "$FLASHLAYOUT_dtb" != "none" ];
+		then
+			# verify if it's a devicetree or a tarball
+			dtb_extension=${FLASHLAYOUT_dtb##*.}
+			case $dtb_extension in
+			dtb)
+				dtb_name=$(echo $FLASHLAYOUT_dtb | sed -e "s/-for-debian//")
+				mcopy -i $_rootfs_name.bootfs.vfat -s $FLASHLAYOUT_dtb ::/$dtb_name
+				;;
+			tgz)
+				tar xf ../$FLASHLAYOUT_dtb
+				mmd -i $_rootfs_name.bootfs.vfat ::/dtb
+				mcopy -i $_rootfs_name.bootfs.vfat -s dtb/* ::/dtb/
+				;;
+			esac
+		fi
+		if [ "$FLASHLAYOUT_initramfs" != none ];
+		then
+			mcopy -i $_rootfs_name.bootfs.vfat -s $FLASHLAYOUT_initramfs ::/
+		fi
+		mmd -i $_rootfs_name.bootfs.vfat ::/efi
+		mmd -i $_rootfs_name.bootfs.vfat ::/efi/boot
+		case $FLASHLAYOUT_arch in
+		armhf)
+			mcopy -i $_rootfs_name.bootfs.vfat -s $FLASHLAYOUT_kernel ::/efi/boot/bootarm.efi
 			;;
-		tgz)
-			tar xf ../$FLASHLAYOUT_dtb
-			mmd -i $_rootfs_name.bootfs.vfat ::/dtb
-			mcopy -i $_rootfs_name.bootfs.vfat -s dtb/* ::/dtb/
+		aarch64|arm64)
+			mcopy -i $_rootfs_name.bootfs.vfat -s $FLASHLAYOUT_kernel ::/efi/boot/bootaa64.efi
 			;;
 		esac
 	fi
-	if [ "$FLASHLAYOUT_initramfs" != none ];
-	then
-		mcopy -i $_rootfs_name.bootfs.vfat -s $FLASHLAYOUT_initramfs ::/
-	fi
-	mmd -i $_rootfs_name.bootfs.vfat ::/efi
-	mmd -i $_rootfs_name.bootfs.vfat ::/efi/boot
-	case $FLASHLAYOUT_arch in
-	armhf)
-		mcopy -i $_rootfs_name.bootfs.vfat -s $FLASHLAYOUT_kernel ::/efi/boot/bootarm.efi
-		;;
-	aarch64|arm64)
-		mcopy -i $_rootfs_name.bootfs.vfat -s $FLASHLAYOUT_kernel ::/efi/boot/bootaa64.efi
-		;;
-	esac
 
 	size_full=$(sudo du -s temp_rootfs| tr '\t' ' ' | cut -f 1 -d' ')
 	_size=$(($size_full/1024))
 	size=$(($_size + 32))
 	addons=$(echo $size"M")
-	echo "[SIZE = $_size M] mkfs.ext4 -d temp_rootfs -m 5 -L debian_rootfs -F -O ^64bit $_rootfs_name.ext4 $addons"
-	sudo mkfs.ext4 -d temp_rootfs -m 5 -L debian_rootfs -F -O ^64bit $_rootfs_name.ext4 $addons
+	echo "[SIZE = $_size M] mkfs.ext4 -d temp_rootfs -m 5 -L debian_rootfs -U $FLASHLAYOUT_uuid -F -O ^64bit $_rootfs_name.ext4 $addons"
+	sudo mkfs.ext4 -d temp_rootfs -m 5 -L debian_rootfs -U $FLASHLAYOUT_uuid -F -O ^64bit $_rootfs_name.ext4 $addons
 	# update FLASHLAYOUT_data for rootfs
 	for i in $(seq 0 $FLASHLAYOUT_number_of_line)
 	do
@@ -281,10 +317,26 @@ function get_last_image_path() {
 			if [ -f $FLASHLAYOUT_filename_path/$bin2flash ];
 			then
 				FLASHLAYOUT_prefix_image_path="$FLASHLAYOUT_filename_path"
+				ext=${bin2flash##*.}
+				if [ "$ext" == "gz" ];
+				then
+					debug "gunzip $FLASHLAYOUT_prefix_image_path/$bin2flash"
+					gunzip $FLASHLAYOUT_prefix_image_path/$bin2flash
+					FLASHLAYOUT_data[$i,$COL_BIN2FLASH]=${bin2flash%.*}
+					debug "new name ${FLASHLAYOUT_data[$i,$COL_BIN2FLASH]}"
+				fi
 			else
 				if [ -f $FLASHLAYOUT_filename_path/../$bin2flash ];
 				then
 					FLASHLAYOUT_prefix_image_path="$FLASHLAYOUT_filename_path/.."
+					ext=${bin2flash##*.}
+					if [ "$ext" == "gz" ];
+					then
+						debug "gunzip $FLASHLAYOUT_prefix_image_path/$bin2flash"
+						gunzip $FLASHLAYOUT_prefix_image_path/$bin2flash
+						FLASHLAYOUT_data[$i,$COL_BIN2FLASH]=${bin2flash%.*}
+						debug "new name ${FLASHLAYOUT_data[$i,$COL_BIN2FLASH]}"
+					fi
 				else
 					if [ -z $FLASHLAYOUT_uri ];
 					then
@@ -316,8 +368,17 @@ function get_last_image_path() {
 								echo "[ERROR] couldn't download $bin2flash on $FLASHLAYOUT_uri/"
 								exit 0
 							else
-								gunzip $FLASHLAYOUT_prefix_image_path/$bin2flash.xz
+								xz -d $FLASHLAYOUT_prefix_image_path/$bin2flash.xz
 							fi
+						fi
+						ext=${bin2flash##*.}
+						
+						if [ "$ext" == "gz" ];
+						then
+							debug "gunzip $FLASHLAYOUT_prefix_image_path/$bin2flash"
+							gunzip $FLASHLAYOUT_prefix_image_path/$bin2flash
+							FLASHLAYOUT_data[$i,$COL_BIN2FLASH]=${bin2flash%.*}
+							debug "new name ${FLASHLAYOUT_data[$i,$COL_BIN2FLASH]}"
 						fi
 					fi
 				fi
@@ -438,13 +499,6 @@ function generate_gpt_partition_table_from_flash_layout() {
 			continue
 			;;
 		esac
-		# add boot flags on gpt partition
-		if [ "$partType" == 'System' ];
-		then
-			bootfs_param=" -A $j:set:2"
-		else
-			bootfs_param=""
-		fi
 
 		# get size of image to put on partition
 		if [ -n "$bin2flash" ];
@@ -504,7 +558,7 @@ function generate_gpt_partition_table_from_flash_layout() {
 
 		debug "   DUMP selected  $selected"
 		debug "   DUMP partName  $partName"
-		#debug "   DUMP partType  $partType"
+		debug "   DUMP partType  $partType"
 		debug "   DUMP offset    ${FLASHLAYOUT_data[$i,$COL_OFFSET]} ($offset)"
 		#debug "   DUMP bin2flash $bin2flash"
 		debug "   DUMP image size     $image_size"
@@ -533,14 +587,22 @@ function generate_gpt_partition_table_from_flash_layout() {
 					exit 1
 				fi
 			fi
-			if [ "$partType" == "Binary" ];
-			then
+			bootfs_param=""
+			case $partType in
+			Binary)
 				# Linux reserved: 0x8301
 				gpt_code="8301"
-			else
+				;;
+			System)
+				# ESP
+				gpt_code="ef00"
+				bootfs_param=" -A $j:set:2"
+				;;
+			FileSystem)
 				# Linux File system: 0x8300
 				gpt_code="8300"
-			fi
+				;;
+			esac
 
 			printf "part %d: %8s ..." $j "$partName"
 			exec_print "sgdisk -a 1 -n $j:$offset:$next_offset -c $j:$partName -t $j:$gpt_code $bootfs_param $FLASHLAYOUT_rawname"
