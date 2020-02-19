@@ -13,9 +13,6 @@
 #Opt	Name	Type	Offset	Binary
 URI		https://snapshots.linaro.org/components/ledge/oe/ledge-qemuarm/latest/rpb/
 MODULE	modules-stripped-ledge-qemuarm-for-debian.tgz
-KERNEL	zImage-for-debian
-DTB		kernel-devicetrees.tgz
-INITRAMFS	ledge-initramfs.rootfs.cpio.gz
 UUID	6091b3a4-ce08-3020-93a6-f755a22ef03b
 ARCH	armhf
 P	bootfs	System	0x00344400	ledge-iot-ledge-qemuarm.bootfs.vfat.gz
