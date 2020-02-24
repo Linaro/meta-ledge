@@ -13,7 +13,6 @@ SRCREV = "0b0c6af38738f2c132cfd41a240889acaa031c8f"
 SRC_URI = "git://git.denx.de/u-boot.git"
 
 SRC_URI += " \
-        file://ledge_stm32mp157c_dk2_basic_defconfig \
         file://ledge_stm32mp157c_dk2_trusted_defconfig \
     "
 
