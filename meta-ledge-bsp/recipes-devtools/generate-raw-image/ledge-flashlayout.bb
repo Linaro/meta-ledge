@@ -11,6 +11,12 @@ SRC_URI_ledge-stm32mp157c-dk2 = " \
     file://FlashLayout_sdcard_ledge-stm32mp157c-dk2-debian.fld \
     "
 
+SRC_URI_ledge-qemuarm = " \
+    file://FlashLayout_sdcard_ledge-stm32mp157c-dk2-optee.tsv.template \
+    file://tf-a-stm32mp157c-dk2-flasher.stm32 \
+    file://u-boot-stm32mp157c-dk2-flasher.stm32 \
+    "
+
 S = "${WORKDIR}"
 
 inherit deploy
@@ -22,13 +28,20 @@ ALLOW_EMPTY_${PN} = "1"
 
 do_deploy() {
     install -d ${DEPLOYDIR}/
-    LIST=`ls ${S}/*.fld.template`
+    LIST=$(ls ${S}/*.fld.template)
     if [ -n "$LIST" ]; then
         install -m 0644 ${S}/*.fld.template ${DEPLOYDIR}/
     fi
     #for ST Flasher
-    install -m 0644 ${S}/*.tsv.template ${DEPLOYDIR}/
-    install -m 0644 ${S}/tf-a-stm32mp157c-dk2-flasher.stm32 ${DEPLOYDIR}/
-    install -m 0644 ${S}/u-boot-stm32mp157c-dk2-flasher.stm32 ${DEPLOYDIR}/
+    LIST=$(`ls ${S}/*.tsv.template)
+    if [ -n "$LIST" ]; then
+        install -m 0644 ${S}/*.tsv.template ${DEPLOYDIR}/
+    fi
+    if [ -e  ${S}/tf-a-stm32mp157c-dk2-flasher.stm32 ]; then
+        install -m 0644 ${S}/tf-a-stm32mp157c-dk2-flasher.stm32 ${DEPLOYDIR}/
+    fi
+    if [ -e ${S}/u-boot-stm32mp157c-dk2-flasher.stm32 ]; then
+        install -m 0644 ${S}/u-boot-stm32mp157c-dk2-flasher.stm32 ${DEPLOYDIR}/
+    fi
 }
 addtask deploy before do_build after do_unpack
