@@ -28,15 +28,11 @@ ALLOW_EMPTY_${PN} = "1"
 
 do_deploy() {
     install -d ${DEPLOYDIR}/
-    LIST=$(ls ${S}/*.fld.template)
-    if [ -n "$LIST" ]; then
-        install -m 0644 ${S}/*.fld.template ${DEPLOYDIR}/
-    fi
+    find ${S} -name "*.fld.template" -exec install -m 0644 {} ${DEPLOYDIR}/ \;
+
     #for ST Flasher
-    LIST=$(ls ${S}/*.tsv.template)
-    if [ -n "$LIST" ]; then
-        install -m 0644 ${S}/*.tsv.template ${DEPLOYDIR}/
-    fi
+    find ${S} -name "*.tsv.template" -exec install -m 0644 {} ${DEPLOYDIR}/ \;
+
     if [ -e  ${S}/tf-a-stm32mp157c-dk2-flasher.stm32 ]; then
         install -m 0644 ${S}/tf-a-stm32mp157c-dk2-flasher.stm32 ${DEPLOYDIR}/
     fi
