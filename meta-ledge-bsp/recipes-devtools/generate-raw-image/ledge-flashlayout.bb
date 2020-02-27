@@ -33,7 +33,7 @@ do_deploy() {
         install -m 0644 ${S}/*.fld.template ${DEPLOYDIR}/
     fi
     #for ST Flasher
-    LIST=$(`ls ${S}/*.tsv.template)
+    LIST=$(ls ${S}/*.tsv.template)
     if [ -n "$LIST" ]; then
         install -m 0644 ${S}/*.tsv.template ${DEPLOYDIR}/
     fi
