@@ -7,7 +7,7 @@ SRC_URI_append = " file://uefi-certificates/PK.auth "
 
 inherit kernel siteinfo
 
-do_install_append() {
+do_deploy_append() {
        # WIC image creates efi partition with ${D}/boot/efi/boot/${KERNEL_EFI_IMAGE}
        # @todo: rethink how to sign kernel image after wic chooses one.
        for img in bzImage zImage Image; do
@@ -28,8 +28,7 @@ do_install_append() {
 	truncate -s 4M certimage.ext4
 	${STAGING_DIR_NATIVE}/sbin/mkfs.ext4 certimage.ext4 -d ./certimage
 
-	install -d ${DEPLOY_DIR_IMAGE}
-	install -m 0644 certimage.ext4 ${DEPLOY_DIR_IMAGE}/ledge-kernel-uefi-certs.ext4.img
+	install -m 0644 certimage.ext4 ${DEPLOYDIR}/ledge-kernel-uefi-certs.ext4.img
 
 	rm -rf ./certimage kernel.hash certimage.ext4
 }
