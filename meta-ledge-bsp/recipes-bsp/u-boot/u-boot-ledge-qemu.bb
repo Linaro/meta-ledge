@@ -7,12 +7,9 @@ LICENSE = "GPLv2+"
 LIC_FILES_CHKSUM = "file://Licenses/README;md5=30503fd321432fc713238f582193b78e"
 PE = "1"
 
-# This autentification uboot patches are not yet upstream. Using branch without
-# SRCREV untill upstream happens.
-# SRCREV = "49c18f12f6377afde18dd7b38ad3bae1db31cec3"
-SRCREV = "${AUTOREV}"
+SRCREV = "49c18f12f6377afde18dd7b38ad3bae1db31cec3"
 
-SRC_URI = "git://git.linaro.org/people/takahiro.akashi/u-boot.git;branch=efi/secboot"
+SRC_URI = "git://github.com/Linaro/ledge-uboot.git;branch=master"
 
 S = "${WORKDIR}/git"
 
