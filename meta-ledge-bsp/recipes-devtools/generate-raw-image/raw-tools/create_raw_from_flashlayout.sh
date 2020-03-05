@@ -217,7 +217,10 @@ function generate_rootfs_from_tarball() {
 	then
 		debug "[generate_rootfs_from_tarball] create bootfs"
 		sudo mkdir -p boot/efi/boot/
-		sudo cp ../$FLASHLAYOUT_kernel boot/efi/boot/bootarm.efi
+		if [ "$FLASHLAYOUT_kernel" != "none" ];
+		then
+			sudo cp ../$FLASHLAYOUT_kernel boot/efi/boot/bootarm.efi
+		fi
 		if [ "$FLASHLAYOUT_dtb" != "none" ];
 		then
 			sudo cp ../$FLASHLAYOUT_dtb boot/$dtb_name
@@ -248,14 +251,17 @@ function generate_rootfs_from_tarball() {
 		fi
 		mmd -i $_rootfs_name.bootfs.vfat ::/efi
 		mmd -i $_rootfs_name.bootfs.vfat ::/efi/boot
-		case $FLASHLAYOUT_arch in
-		armhf)
-			mcopy -i $_rootfs_name.bootfs.vfat -s $FLASHLAYOUT_kernel ::/efi/boot/bootarm.efi
-			;;
-		aarch64|arm64)
-			mcopy -i $_rootfs_name.bootfs.vfat -s $FLASHLAYOUT_kernel ::/efi/boot/bootaa64.efi
-			;;
-		esac
+		if [ "$FLASHLAYOUT_kernel" != "none" ];
+		then
+			case $FLASHLAYOUT_arch in
+			armhf)
+				mcopy -i $_rootfs_name.bootfs.vfat -s $FLASHLAYOUT_kernel ::/efi/boot/bootarm.efi
+				;;
+			aarch64|arm64)
+				mcopy -i $_rootfs_name.bootfs.vfat -s $FLASHLAYOUT_kernel ::/efi/boot/bootaa64.efi
+				;;
+			esac
+		fi
 	fi
 
 	size_full=$(sudo du -s temp_rootfs| tr '\t' ' ' | cut -f 1 -d' ')
@@ -372,7 +378,7 @@ function get_last_image_path() {
 							fi
 						fi
 						ext=${bin2flash##*.}
-						
+
 						if [ "$ext" == "gz" ];
 						then
 							debug "gunzip $FLASHLAYOUT_prefix_image_path/$bin2flash"
@@ -396,22 +402,27 @@ function get_last_image_path() {
 			echo "[ERROR] couldn't download $FLASHLAYOUT_module because URI are not declared"
 			exit 0
 		else
-			echo "[Try to Download]: wget $FLASHLAYOUT_uri/$FLASHLAYOUT_module -O $FLASHLAYOUT_prefix_image_path/$FLASHLAYOUT_module"
-			wget $FLASHLAYOUT_uri/$FLASHLAYOUT_module -O $FLASHLAYOUT_module 2> /dev/null
-			ret=$?
-			if [ $ret -ne 0 ];
+			if [ "$FLASHLAYOUT_module" != "none" ];
 			then
-				echo "[ERROR] couldn't download $FLASHLAYOUT_module on $FLASHLAYOUT_uri/"
-				exit 0
+				echo "[Try to Download]: wget $FLASHLAYOUT_uri/$FLASHLAYOUT_module -O $FLASHLAYOUT_prefix_image_path/$FLASHLAYOUT_module"
+				wget $FLASHLAYOUT_uri/$FLASHLAYOUT_module -O $FLASHLAYOUT_module 2> /dev/null
+				ret=$?
+				if [ $ret -ne 0 ];
+				then
+					echo "[ERROR] couldn't download $FLASHLAYOUT_module on $FLASHLAYOUT_uri/"
+					exit 0
+				fi
 			fi
-
-			echo "[Try to Download]: wget $FLASHLAYOUT_uri/$FLASHLAYOUT_kernel -O $FLASHLAYOUT_prefix_image_path/$FLASHLAYOUT_kernel"
-			wget $FLASHLAYOUT_uri/$FLASHLAYOUT_kernel -O $FLASHLAYOUT_kernel 2> /dev/null
-			ret=$?
-			if [ $ret -ne 0 ];
+			if [ "$FLASHLAYOUT_kernel" != "none" ];
 			then
-				echo "[ERROR] couldn't download $FLASHLAYOUT_kernel on $FLASHLAYOUT_uri/"
-				exit 0
+				echo "[Try to Download]: wget $FLASHLAYOUT_uri/$FLASHLAYOUT_kernel -O $FLASHLAYOUT_prefix_image_path/$FLASHLAYOUT_kernel"
+				wget $FLASHLAYOUT_uri/$FLASHLAYOUT_kernel -O $FLASHLAYOUT_kernel 2> /dev/null
+				ret=$?
+				if [ $ret -ne 0 ];
+				then
+					echo "[ERROR] couldn't download $FLASHLAYOUT_kernel on $FLASHLAYOUT_uri/"
+					exit 0
+				fi
 			fi
 
 			if [ "$FLASHLAYOUT_dtb" != "none" ];
