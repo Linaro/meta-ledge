@@ -44,4 +44,4 @@ COMPATIBLE_MACHINE = "(ledge-synquacer|ledge-stm32mp157c-dk2|ledge-qemux86-64|le
 KERNEL_SIGN_ENABLE = "1"
 
 # rename DTB
-DTB_RENAMING = "am572x-idk.dtb:omap5-am57xx.dtb "
+# DTB_RENAMING = "xyz.dtb:zyx.dtb "
