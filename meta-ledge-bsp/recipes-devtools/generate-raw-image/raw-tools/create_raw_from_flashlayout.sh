@@ -264,6 +264,7 @@ function generate_rootfs_from_tarball() {
 		fi
 	fi
 
+	cd $localpath
 	size_full=$(sudo du -s temp_rootfs| tr '\t' ' ' | cut -f 1 -d' ')
 	_size=$(($size_full/1024))
 	size=$(($_size + 32))
