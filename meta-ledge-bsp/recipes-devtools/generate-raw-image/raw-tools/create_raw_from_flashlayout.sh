@@ -283,7 +283,10 @@ function generate_rootfs_from_tarball() {
 		fi
 		if [ "$partName" == "bootfs" ];
 		then
-			FLASHLAYOUT_data[$i,$COL_BIN2FLASH]=$_rootfs_name.bootfs.vfat
+			if [ "$bin2flash" == "none" ];
+			then
+				FLASHLAYOUT_data[$i,$COL_BIN2FLASH]=$_rootfs_name.bootfs.vfat
+			fi
 		fi
 	done
 	# update tsv file if exist
