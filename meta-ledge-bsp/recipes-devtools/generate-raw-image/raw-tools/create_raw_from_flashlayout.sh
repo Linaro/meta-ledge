@@ -295,7 +295,7 @@ function generate_rootfs_from_tarball() {
 	if [ -e $tsv_template_file ]
 	then
 		sed -e "s|%%IMAGE%|$_rootfs_name.ext4|g" $tsv_template_file > $tsv_file
-		sed -i -e "s|%%BOOTFS_IMAGE%|$_rootfs_name.bootfs.vfat|g" $tsv_file
+		sed -i -e "s|%%BOOTFS%|$_rootfs_name.bootfs.vfat|g" $tsv_file
 	fi
 	# clean
 	sudo rm -rf temp_rootfs
