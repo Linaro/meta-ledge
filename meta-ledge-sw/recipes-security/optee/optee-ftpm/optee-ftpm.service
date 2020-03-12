@@ -1,0 +1,10 @@
+[Unit]
+Description=Load optee ftpm
+After=tee-supplicant.service
+
+[Service]
+Type=oneshot
+ExecStart=/sbin/modprobe tpm_ftpm_tee
+
+[Install]
+WantedBy=basic.target

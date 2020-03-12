@@ -37,6 +37,10 @@ EXTRA_OEMAKE += " TA_DEV_KIT_DIR=${TA_DEV_KIT_DIR} \
 
 B = "${S}"
 
+inherit systemd
+SRC_URI += "file://optee-ftpm.service"
+SYSTEMD_SERVICE_${PN} = "optee-ftpm.service"
+
 do_configure() {
     git submodule init
     git submodule update
@@ -58,9 +62,19 @@ do_compile() {
 do_install () {
     mkdir -p ${D}/lib/optee_armtz
     install -D -p -m0444 ${S}/out/${FTPM_UUID}.ta ${D}/lib/optee_armtz/
+
+    if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
+        # do not load tpm_ftpm_tee at startup (only on demand)
+        mkdir -p ${D}/etc/modprobe.d
+        echo "blacklist tpm_ftpm_tee" > ${D}/etc/modprobe.d/optee-ftpm.conf
+
+        #install systemd service
+        install -d ${D}${systemd_system_unitdir}/
+        install -D -p -m0644 ${WORKDIR}/optee-ftpm.service ${D}${systemd_system_unitdir}/optee-ftpm.service
+    fi
 }
 
-FILES_${PN} += "/lib/optee_armtz/${FTPM_UUID}.ta"
+FILES_${PN} += "/lib/optee_armtz/${FTPM_UUID}.ta /etc/"
 
 # Imports machine specific configs from staging to build
 PACKAGE_ARCH = "${MACHINE_ARCH}"
