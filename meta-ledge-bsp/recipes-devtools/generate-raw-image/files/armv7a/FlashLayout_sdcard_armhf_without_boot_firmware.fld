@@ -11,7 +11,7 @@
 #Type: Binary=raw partition, FileSystem=fs partition(ext4, fat)
 #Ofsset on hexa
 #Opt	Name	Type	Offset	Binary
-URI		https://snapshots.linaro.org/components/ledge/oe/ledge-qemuarm/latest/rpb/
+URI		https://snapshots.linaro.org/components/ledge/oe/ledge-multi-armv7/latest/rpb/ledge-qemuarm/
 MODULE	modules-stripped-ledge-qemuarm-for-debian.tgz
 UUID	6091b3a4-ce08-3020-93a6-f755a22ef03b
 ARCH	armhf
