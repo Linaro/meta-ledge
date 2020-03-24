@@ -7,7 +7,7 @@
 # =   (1 )     =    (2 )    =
 # =            =            =
 # =========================================================================================================
-#Opt: P=Populate, E=Empty
+#Opt: P=Populate, E=Empty, R=Raw
 #Type: Binary=raw partition, FileSystem=fs partition(ext4, fat)
 #Ofsset on hexa
 #Opt	Name	Type	Offset	Binary
@@ -15,5 +15,6 @@ URI		https://snapshots.linaro.org/components/ledge/oe/ledge-qemuarm64/latest/rpb
 MODULE	modules-stripped-ledge-qemuarm64-for-debian.tgz
 UUID	6091b3a4-ce08-3020-93a6-f755a22ef03b
 ARCH	arm64
+PARTITION	GPT
 P	bootfs	System	0x00344400	ledge-iot-ledge-qemuarm64.bootfs.vfat.gz
 P	rootfs	FileSystem	0x04344400	rootfs-linaro-buster-raw-unknown-*.tar.xz
