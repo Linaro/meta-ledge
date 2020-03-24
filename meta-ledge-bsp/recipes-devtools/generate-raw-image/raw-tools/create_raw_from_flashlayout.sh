@@ -26,6 +26,7 @@ unset FLASHLAYOUT_kernel
 unset FLASHLAYOUT_dtb
 unset FLASHLAYOUT_initramfs
 unset FLASHLAYOUT_uuid
+unset FLASHLAYOUT_partition
 
 declare -A FLASHLAYOUT_data
 FLASHLAYOUT_uri=""
@@ -35,6 +36,8 @@ FLASHLAYOUT_dtb="none"
 FLASHLAYOUT_initramfs="none"
 FLASHLAYOUT_uuid="6091b3a4-ce08-3020-93a6-f755a22ef03b"
 FLASHLAYOUT_arch=""
+FLASHLAYOUT_partition="GPT"
+
 # Size of 4GB
 #DEFAULT_RAW_SIZE=4096
 # Size of 2,5GB
@@ -53,6 +56,14 @@ COL_PARTNAME=2
 COL_PARTYPE=3
 COL_OFFSET=4
 COL_BIN2FLASH=5
+COL_PART_INDEX=6
+COL_PART_OFFSET=7
+
+disk_label=0
+DISKS_LABELS_GPT=0
+DISKS_LABELS_DOS=1 # MBR
+
+
 
 # SELECTED/OPT variable meaning:
 # - : boot stage
@@ -76,6 +87,9 @@ debug() {
 		echo ""
 		echo "[DEBUG]: $@"
 	fi
+}
+info() {
+	echo "[INFO]: $@"
 }
 
 function exec_print() {
@@ -109,6 +123,10 @@ function read_flash_layout() {
 			FLASHLAYOUT_data[$i,$COL_OFFSET]=${flashlayout_data[3]}
 			#Bin2flash
 			FLASHLAYOUT_data[$i,$COL_BIN2FLASH]=${flashlayout_data[4]}
+			#partition index (calculated)
+			FLASHLAYOUT_data[$i,$COL_PART_INDEX]=0
+			#partition offset (calculated)
+			FLASHLAYOUT_data[$i,$COL_PART_OFFSET]=0
 			i=$(($i+1))
 
 			debug "READ: ${flashlayout_data[0]} ${flashlayout_data[1]} ${flashlayout_data[2]} ${flashlayout_data[3]} ..."
@@ -140,6 +158,18 @@ function read_flash_layout() {
 		if [ "$selected" == "UUID" ]
 		then
 			FLASHLAYOUT_uuid=${flashlayout_data[1]}
+		fi
+		if [ "$selected" == "PARTITION" ]
+		then
+			FLASHLAYOUT_partition=${flashlayout_data[1]}
+			case $FLASHLAYOUT_partition in
+			GPT|gpt)
+				disk_label=$DISKS_LABELS_GPT
+				;;
+			DOS|dos)
+				disk_label=$DISKS_LABELS_DOS
+				;;
+			esac
 		fi
 
 	done < "$FLASHLAYOUT_filename"
@@ -350,7 +380,7 @@ function get_last_image_path() {
 				else
 					if [ -z $FLASHLAYOUT_uri ];
 					then
-						echo "[ERROR] couldn't find $bin2flash on $FLASHLAYOUT_filename_path/"
+						echo "[ERROR][$partName] couldn't find $bin2flash on $FLASHLAYOUT_filename_path/"
 						exit 0
 					fi
 					FLASHLAYOUT_prefix_image_path="$FLASHLAYOUT_filename_path"
@@ -362,7 +392,7 @@ function get_last_image_path() {
 					fi
 					if [ "$bin2flash" != "none" ];
 					then
-						echo "[Try to Download]: wget $FLASHLAYOUT_uri/$bin2flash -O $FLASHLAYOUT_prefix_image_path/$bin2flash"
+						echo "[Try to Download][$partName]: wget $FLASHLAYOUT_uri/$bin2flash -O $FLASHLAYOUT_prefix_image_path/$bin2flash"
 						wget $FLASHLAYOUT_uri/$bin2flash -O $FLASHLAYOUT_prefix_image_path/$bin2flash 2> /dev/null
 						ret=$?
 						if [ $ret -ne 0 ];
@@ -370,12 +400,12 @@ function get_last_image_path() {
 							# clean last wget request
 							rm -f $bin2flash
 							# try to get tge xz version
-							echo "[Try to Download]: wget $FLASHLAYOUT_uri/$bin2flash -O $FLASHLAYOUT_prefix_image_path/$bin2flash.xz"
+							echo "[Try to Download][$partName]: wget $FLASHLAYOUT_uri/$bin2flash -O $FLASHLAYOUT_prefix_image_path/$bin2flash.xz"
 							wget $FLASHLAYOUT_uri/$bin2flash.xz -O $FLASHLAYOUT_prefix_image_path/$bin2flash.xz
 							ret=$?
 							if [ $ret -ne 0 ];
 							then
-								echo "[ERROR] couldn't download $bin2flash on $FLASHLAYOUT_uri/"
+								echo "[ERROR][$partName] couldn't download $bin2flash on $FLASHLAYOUT_uri/"
 								exit 0
 							else
 								xz -d $FLASHLAYOUT_prefix_image_path/$bin2flash.xz
@@ -399,11 +429,11 @@ function get_last_image_path() {
 		esac
 	done
 	# modules
-	if [ ! -f $FLASHLAYOUT_module ];
+	if [ "$FLASHLAYOUT_kernel" != "none" ] && [ ! -f $FLASHLAYOUT_module ];
 	then
 		if [ -z $FLASHLAYOUT_uri ];
 		then
-			echo "[ERROR] couldn't download $FLASHLAYOUT_module because URI are not declared"
+			echo "[ERROR][$partName] couldn't download $FLASHLAYOUT_module because URI are not declared"
 			exit 0
 		else
 			if [ "$FLASHLAYOUT_module" != "none" ];
@@ -413,18 +443,18 @@ function get_last_image_path() {
 				ret=$?
 				if [ $ret -ne 0 ];
 				then
-					echo "[ERROR] couldn't download $FLASHLAYOUT_module on $FLASHLAYOUT_uri/"
+					echo "[ERROR][$partName] couldn't download $FLASHLAYOUT_module on $FLASHLAYOUT_uri/"
 					exit 0
 				fi
 			fi
 			if [ "$FLASHLAYOUT_kernel" != "none" ];
 			then
-				echo "[Try to Download]: wget $FLASHLAYOUT_uri/$FLASHLAYOUT_kernel -O $FLASHLAYOUT_prefix_image_path/$FLASHLAYOUT_kernel"
+				echo "[Try to Download][$partName]: wget $FLASHLAYOUT_uri/$FLASHLAYOUT_kernel -O $FLASHLAYOUT_prefix_image_path/$FLASHLAYOUT_kernel"
 				wget $FLASHLAYOUT_uri/$FLASHLAYOUT_kernel -O $FLASHLAYOUT_kernel 2> /dev/null
 				ret=$?
 				if [ $ret -ne 0 ];
 				then
-					echo "[ERROR] couldn't download $FLASHLAYOUT_kernel on $FLASHLAYOUT_uri/"
+					echo "[ERROR][$partName] couldn't download $FLASHLAYOUT_kernel on $FLASHLAYOUT_uri/"
 					exit 0
 				fi
 			fi
@@ -493,7 +523,16 @@ function generate_gpt_partition_table_from_flash_layout() {
 	new_next_partition_offset_b=0
 	number_of_partition=$( calculate_number_of_partition )
 
-	exec_print "sgdisk -og -a 1 $FLASHLAYOUT_rawname"
+	case $disk_label in
+	$DISKS_LABELS_GPT)
+		exec_print "sgdisk -og -a 1 $FLASHLAYOUT_rawname"
+		;;
+	$DISKS_LABELS_DOS)
+		exec_print "parted -s $FLASHLAYOUT_rawname mklabel msdos "
+		parted_extended=0
+		free_size_parted=0
+		;;
+	esac
 
 	echo "Create partition table:"
 
@@ -607,22 +646,73 @@ function generate_gpt_partition_table_from_flash_layout() {
 			Binary)
 				# Linux reserved: 0x8301
 				gpt_code="8301"
+				parted_flags=""
 				;;
 			System)
 				# ESP
 				gpt_code="ef00"
 				bootfs_param=" -A $j:set:2"
+				parted_flags="esp on"
 				;;
 			FileSystem)
 				# Linux File system: 0x8300
 				gpt_code="8300"
+				parted_flags=""
 				;;
 			esac
 
 			printf "part %d: %8s ..." $j "$partName"
-			exec_print "sgdisk -a 1 -n $j:$offset:$next_offset -c $j:$partName -t $j:$gpt_code $bootfs_param $FLASHLAYOUT_rawname"
-			partition_size=$(sgdisk -p $FLASHLAYOUT_rawname | grep $partName | awk '{ print $4}')
-			partition_size_type=$(sgdisk -p $FLASHLAYOUT_rawname | grep $partName | awk '{ print $5}')
+			case $disk_label in
+			$DISKS_LABELS_GPT)
+				exec_print "sgdisk -a 1 -n $j:$offset:$next_offset -c $j:$partName -t $j:$gpt_code $bootfs_param $FLASHLAYOUT_rawname"
+				partition_size=$(sgdisk -p $FLASHLAYOUT_rawname | grep $partName | awk '{ print $4}')
+				partition_size_type=$(sgdisk -p $FLASHLAYOUT_rawname | grep $partName | awk '{ print $5}')
+				# set partition number
+				FLASHLAYOUT_data[$i,$COL_PART_INDEX]=$j
+				# set partition offset
+				FLASHLAYOUT_data[$i,$COL_PART_OFFSET]=$offset
+				;;
+			$DISKS_LABELS_DOS)
+				# offset are calculated on number of 512 block
+				#offset_parted=$(( $offset / 2 ))
+				offset_parted=$offset
+				free_size_parted=$(parted -s $FLASHLAYOUT_rawname unit s print free | sed "/^$/d" | tail -n 1 | awk '{ print $3}' | sed 's/s//')
+				if [ "$next_offset" = " " ];
+				then
+					next_offset_parted=$free_size_parted
+				else
+					#next_offset_parted=$(( $next_offset / 2 ))
+					next_offset_parted=$(($next_offset - 1 ))
+				fi
+				if [ $j -gt 1 ];
+				then
+					if [ $parted_extended -eq 1 ];
+					then
+						exec_print "parted -s $FLASHLAYOUT_rawname unit s mkpart logical $(($offset_parted)) $next_offset_parted"
+					else
+						exec_print "parted -s $FLASHLAYOUT_rawname unit s mkpart extended $offset_parted $free_size_parted"
+						exec_print "parted -s $FLASHLAYOUT_rawname -a optimal unit s mkpart logical $(($offset_parted+2)) $next_offset_parted"
+						parted_extended=1
+					fi
+				else
+					exec_print "parted -s $FLASHLAYOUT_rawname unit s mkpart primary $offset_parted $next_offset_parted"
+				fi
+				index_parted=$(parted -s $FLASHLAYOUT_rawname unit s print | sed "/^$/d" | tail -n 1 | awk '{ print $1}')
+				j=$(( $index_parted - 1 ))
+				if [ -n "$parted_flags" ];
+				then
+					exec_print "parted -s $FLASHLAYOUT_rawname set $index_parted $parted_flags"
+				fi
+				partition_size=$(parted -s $FLASHLAYOUT_rawname unit MiB print | grep "$index_parted " | awk '{ print $4}' | sed 's/MiB//')
+				partition_size_type="MiB"
+
+				# set partition number
+				FLASHLAYOUT_data[$i,$COL_PART_INDEX]=$index_parted
+				# set partition offset
+				offset_parted=$(parted -s $FLASHLAYOUT_rawname unit B print | sed "/^$/d" | tail -n 1 | awk '{ print $2}'| sed "s/B//")
+				FLASHLAYOUT_data[$i,$COL_PART_OFFSET]=$offset_parted
+				;;
+			esac
 			printf "\r[CREATED] part %d: %8s [partition size %s %s]\n" $j "$partName"  "$partition_size" "$partition_size_type"
 
 			j=$(($j+1))
@@ -632,7 +722,14 @@ function generate_gpt_partition_table_from_flash_layout() {
 
 	echo ""
 	echo "Partition table from $FLASHLAYOUT_rawname"
-	sudo sgdisk -p $FLASHLAYOUT_rawname
+	case $disk_label in
+	$DISKS_LABELS_GPT)
+		sgdisk -p $FLASHLAYOUT_rawname
+		;;
+	$DISKS_LABELS_DOS)
+		parted -s $FLASHLAYOUT_rawname unit KB print
+		;;
+	esac
 	echo ""
 }
 
@@ -655,6 +752,8 @@ function populate_gpt_partition_table_from_flash_layout() {
 		partType=${FLASHLAYOUT_data[$i,$COL_PARTYPE]}
 		offset=${FLASHLAYOUT_data[$i,$COL_OFFSET]}
 		bin2flash=${FLASHLAYOUT_data[$i,$COL_BIN2FLASH]}
+		partindex=${FLASHLAYOUT_data[$i,$COL_PART_INDEX]}
+		partoffset=${FLASHLAYOUT_data[$i,$COL_PART_OFFSET]}
 
 		offset=$(echo $offset | sed -e "s/0x//")
 		offset=$(echo $((16#$offset)))
@@ -666,13 +765,14 @@ function populate_gpt_partition_table_from_flash_layout() {
 		#debug "   DUMP ip        $ip"
 		#debug "   DUMP offset    $offset "
 		#debug "   DUMP bin2flash $bin2flash"
+
 		if [ "$selected" == "P" ];
 		then
 			# Populate only the partition in "P"
 			if [ -e $FLASHLAYOUT_prefix_image_path/$bin2flash ];
 			then
 				printf "part %d: %8s, image: %s ..." $j "$partName" "$bin2flash"
-				exec_print "dd if=$FLASHLAYOUT_prefix_image_path/$bin2flash of=$FLASHLAYOUT_rawname conv=fdatasync,notrunc seek=1 bs=$offset"
+				exec_print "dd if=$FLASHLAYOUT_prefix_image_path/$bin2flash of=$FLASHLAYOUT_rawname conv=fdatasync,notrunc seek=1 bs=$partoffset"
 				printf "\r[ FILLED ] part %d: %8s, image: %s \n" $j "$partName" "$bin2flash"
 			else
 				printf "\r[UNFILLED] part %d: %8s, image: %s (not present) \n" $j "$partName" "$bin2flash"
@@ -682,6 +782,14 @@ function populate_gpt_partition_table_from_flash_layout() {
 			fi
 			j=$(($j+1))
 		else
+			if [ "$selected" == "R" ];
+			then
+				printf "part %d: %8s, image: %s ..." $j "$partName" "$bin2flash"
+				exec_print "dd if=$FLASHLAYOUT_prefix_image_path/$bin2flash of=$FLASHLAYOUT_rawname conv=fdatasync,notrunc seek=1 bs=$offset"
+				printf "\r[ FILLED ] part %d: %8s, image: %s \n" $j "$partName" "$bin2flash"
+				j=$(($j+1))
+			fi
+
 			if [ "$selected" == "E" ];
 			then
 				printf "\r[UNFILLED] part %d: %8s, \n" $j "$partName"
