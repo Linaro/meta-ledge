@@ -1,0 +1,174 @@
+From f056bf83a57800efb50ba44d8f8fa5b770421960 Mon Sep 17 00:00:00 2001
+From: Maxim Uvarov <maxim.uvarov@linaro.org>
+Date: Thu, 26 Mar 2020 19:17:42 +0000
+Subject: [PATCH] ftpm: postpone tmp initialization until userland is ready
+
+ftpm emulated by userland and it can fail if:
+1. tee-suplicant application is not run.
+2. ftpm TA file is missing on the file system (not yet mounted).
+This patch postpones tpm initialization with periodic checks
+for available resources.
+
+Signed-off-by: Maxim Uvarov <maxim.uvarov@linaro.org>
+---
+ drivers/char/tpm/tpm_ftpm_tee.c | 74 ++++++++++++++++++++++++---------
+ drivers/char/tpm/tpm_ftpm_tee.h |  4 ++
+ 2 files changed, 59 insertions(+), 19 deletions(-)
+
+diff --git a/drivers/char/tpm/tpm_ftpm_tee.c b/drivers/char/tpm/tpm_ftpm_tee.c
+index 74766a4d3..35dfbc923 100644
+--- a/drivers/char/tpm/tpm_ftpm_tee.c
++++ b/drivers/char/tpm/tpm_ftpm_tee.c
+@@ -214,29 +214,22 @@ static int ftpm_tee_match(struct tee_ioctl_version_data *ver, const void *data)
+  * Return:
+  * 	On success, 0. On failure, -errno.
+  */
+-static int ftpm_tee_probe(struct platform_device *pdev)
++static int __ftpm_tee_probe(struct ftpm_tee_private *pvt_data)
+ {
+ 	int rc;
+ 	struct tpm_chip *chip;
+-	struct device *dev = &pdev->dev;
+-	struct ftpm_tee_private *pvt_data = NULL;
+ 	struct tee_ioctl_open_session_arg sess_arg;
++	struct device *dev = pvt_data->dev;
+ 
+-	pvt_data = devm_kzalloc(dev, sizeof(struct ftpm_tee_private),
+-				GFP_KERNEL);
+-	if (!pvt_data)
+-		return -ENOMEM;
+-
+-	dev_set_drvdata(dev, pvt_data);
++	if (pvt_data->ready)
++		return 0;
+ 
+ 	/* Open context with TEE driver */
+ 	pvt_data->ctx = tee_client_open_context(NULL, ftpm_tee_match, NULL,
+ 						NULL);
+ 	if (IS_ERR(pvt_data->ctx)) {
+-		if (ERR_PTR(pvt_data->ctx) == -ENOENT)
+-			return -EPROBE_DEFER;
+ 		dev_err(dev, "%s: tee_client_open_context failed\n", __func__);
+-		return ERR_PTR(pvt_data->ctx);
++		return -EINVAL;
+ 	}
+ 
+ 	/* Open a session with fTPM TA */
+@@ -247,8 +240,8 @@ static int ftpm_tee_probe(struct platform_device *pdev)
+ 
+ 	rc = tee_client_open_session(pvt_data->ctx, &sess_arg, NULL);
+ 	if ((rc < 0) || (sess_arg.ret != 0)) {
+-		dev_err(dev, "%s: tee_client_open_session failed, err=%x\n",
+-			__func__, sess_arg.ret);
++		dev_err(dev, "%s: tee_client_open_session failed, err=%x, rc=%x\n",
++			__func__, sess_arg.ret, rc);
+ 		rc = -EINVAL;
+ 		goto out_tee_session;
+ 	}
+@@ -272,21 +265,22 @@ static int ftpm_tee_probe(struct platform_device *pdev)
+ 		goto out_chip_alloc;
+ 	}
+ 
++	chip->flags |= TPM_CHIP_FLAG_TPM2;
++	dev_set_drvdata(chip->dev.parent, pvt_data);
+ 	pvt_data->chip = chip;
+-	pvt_data->chip->flags |= TPM_CHIP_FLAG_TPM2;
+ 
+ 	/* Create a character device for the fTPM */
+-	rc = tpm_chip_register(pvt_data->chip);
++	rc = tpm_chip_register(chip);
+ 	if (rc) {
+ 		dev_err(dev, "%s: tpm_chip_register failed with rc=%d\n",
+ 			__func__, rc);
+-		goto out_chip;
++		goto out_chip_alloc;
+ 	}
+ 
++	pvt_data->ready = true;
++	dev_info(&chip->dev, "ftpm chip registered.\n");
+ 	return 0;
+ 
+-out_chip:
+-	put_device(&pvt_data->chip->dev);
+ out_chip_alloc:
+ 	tee_shm_free(pvt_data->shm);
+ out_shm_alloc:
+@@ -297,6 +291,45 @@ static int ftpm_tee_probe(struct platform_device *pdev)
+ 	return rc;
+ }
+ 
++static void ftpm_user_work(struct work_struct *work)
++{
++	struct ftpm_tee_private *pvt_data =
++		container_of(work, struct ftpm_tee_private, user_work);
++
++	__ftpm_tee_probe(pvt_data);
++}
++
++static void optee_suplicant_wait(struct timer_list *t)
++{
++	struct ftpm_tee_private *pvt_data = from_timer(pvt_data, t, user_timer);
++
++	schedule_work(&pvt_data->user_work);
++	if (!pvt_data->ready)
++		mod_timer(&pvt_data->user_timer, jiffies + (10 * HZ));
++}
++
++static int ftpm_tee_probe(struct platform_device *pdev)
++{
++	struct device *dev = &pdev->dev;
++	struct ftpm_tee_private *pvt_data = NULL;
++
++
++	pvt_data = devm_kzalloc(dev, sizeof(struct ftpm_tee_private),
++				GFP_KERNEL);
++	if (!pvt_data)
++		return -ENOMEM;
++
++	dev_set_drvdata(dev, pvt_data);
++	pvt_data->dev = dev;
++	pvt_data->ready = false;
++
++	INIT_WORK(&pvt_data->user_work, ftpm_user_work);
++	timer_setup(&pvt_data->user_timer, optee_suplicant_wait, 0);
++	mod_timer(&pvt_data->user_timer, jiffies + (10 * HZ));
++	__ftpm_tee_probe(pvt_data);
++	return 0;
++}
++
+ /**
+  * ftpm_tee_remove - remove the TPM device
+  * @pdev: the platform_device description.
+@@ -308,6 +341,9 @@ static int ftpm_tee_remove(struct platform_device *pdev)
+ {
+ 	struct ftpm_tee_private *pvt_data = dev_get_drvdata(&pdev->dev);
+ 
++	del_singleshot_timer_sync(&pvt_data->user_timer);
++	flush_work(&pvt_data->user_work);
++
+ 	/* Release the chip */
+ 	tpm_chip_unregister(pvt_data->chip);
+ 
+diff --git a/drivers/char/tpm/tpm_ftpm_tee.h b/drivers/char/tpm/tpm_ftpm_tee.h
+index f98daa7bf..922da3898 100644
+--- a/drivers/char/tpm/tpm_ftpm_tee.h
++++ b/drivers/char/tpm/tpm_ftpm_tee.h
+@@ -30,11 +30,15 @@
+  */
+ struct ftpm_tee_private {
+ 	struct tpm_chip *chip;
++	struct device *dev;
+ 	u32 session;
+ 	size_t resp_len;
+ 	u8 resp_buf[MAX_RESPONSE_SIZE];
+ 	struct tee_context *ctx;
+ 	struct tee_shm *shm;
++	bool ready;
++	struct timer_list user_timer; /*< Wait for optee-suplicant */
++	struct work_struct user_work;
+ };
+ 
+ #endif /* __TPM_FTPM_TEE_H__ */
+-- 
+2.17.1
+

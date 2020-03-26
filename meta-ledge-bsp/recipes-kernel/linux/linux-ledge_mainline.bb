@@ -30,6 +30,7 @@ SRC_URI += " \
     file://0004-op-tee-shm.patch \
     file://0005-op-tee-multi-page-shm.patch \
     file://0006-efi-libstub-Fix-kernel-command-line.patch \
+    file://0007-ftpm-postpone-tmp-initialization-until-userland-is-r.patch \
     "
 
 PV = "mainline-5.3"
