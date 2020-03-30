@@ -7,9 +7,9 @@ LICENSE = "GPLv2+"
 LIC_FILES_CHKSUM = "file://Licenses/README;md5=30503fd321432fc713238f582193b78e"
 PE = "1"
 
-SRCREV = "49c18f12f6377afde18dd7b38ad3bae1db31cec3"
+SRCREV = "53df526d7020e6062e0e13b5172441667beccfa8"
 
-SRC_URI = "git://github.com/Linaro/ledge-uboot.git;branch=master"
+SRC_URI = "git://github.com/Linaro/ledge-uboot.git;branch=efi_secboot_v2"
 
 S = "${WORKDIR}/git"
 
