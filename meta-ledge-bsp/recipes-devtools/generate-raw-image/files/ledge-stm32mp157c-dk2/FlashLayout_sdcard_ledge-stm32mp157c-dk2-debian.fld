@@ -7,7 +7,7 @@
 # =    (1 )    =    (2 )    =    (3 )    =    (4 )    =    (5 )    =    (6 )    =    (7 )    =    (8 )    =
 # =            =            =            =            =            =            =            =            =
 # =========================================================================================================
-#Opt: P=Populate, E=Empty
+#Opt: P=Populate, E=Empty, R=Raw
 #Type: Binary=raw partition, FileSystem=fs partition(ext4, fat)
 #Ofsset on hexa
 #Opt	Name	Type	Offset	Binary
@@ -15,6 +15,7 @@ URI		https://snapshots.linaro.org/components/ledge/oe/ledge-stm32mp157c-dk2/late
 MODULE	modules-stripped-ledge-stm32mp157c-dk2-for-debian.tgz
 UUID	6091b3a4-ce08-3020-93a6-f755a22ef03b
 ARCH	armhf
+PARTITION	GPT
 P	fsbl1	Binary	0x00004400	arm-trusted-firmware/tf-a-stm32mp157c-dk2.stm32
 P	fsbl2	Binary	0x00044400	arm-trusted-firmware/tf-a-stm32mp157c-dk2.stm32
 P	ssbl	Binary	0x00084400	u-boot-trusted.stm32
