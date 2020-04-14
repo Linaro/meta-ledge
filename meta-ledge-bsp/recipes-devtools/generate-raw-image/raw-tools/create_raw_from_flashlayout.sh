@@ -764,6 +764,7 @@ function populate_gpt_partition_table_from_flash_layout() {
 		#debug "   DUMP partType  $partType"
 		#debug "   DUMP ip        $ip"
 		#debug "   DUMP offset    $offset "
+		#debug "   DUMP partoffset    $partoffset "
 		#debug "   DUMP bin2flash $bin2flash"
 
 		if [ "$selected" == "P" ];
@@ -772,7 +773,7 @@ function populate_gpt_partition_table_from_flash_layout() {
 			if [ -e $FLASHLAYOUT_prefix_image_path/$bin2flash ];
 			then
 				printf "part %d: %8s, image: %s ..." $j "$partName" "$bin2flash"
-				exec_print "dd if=$FLASHLAYOUT_prefix_image_path/$bin2flash of=$FLASHLAYOUT_rawname conv=fdatasync,notrunc seek=1 bs=$partoffset"
+				exec_print "dd if=$FLASHLAYOUT_prefix_image_path/$bin2flash of=$FLASHLAYOUT_rawname conv=fdatasync,notrunc seek=1 bs=$(($partoffset * 512))"
 				printf "\r[ FILLED ] part %d: %8s, image: %s \n" $j "$partName" "$bin2flash"
 			else
 				printf "\r[UNFILLED] part %d: %8s, image: %s (not present) \n" $j "$partName" "$bin2flash"
