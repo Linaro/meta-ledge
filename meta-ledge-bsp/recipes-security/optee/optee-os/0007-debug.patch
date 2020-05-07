@@ -1,0 +1,29 @@
+From 3c687c40f423f61745dfb6a4817addfae8a71d03 Mon Sep 17 00:00:00 2001
+From: Maxim Uvarov <maxim.uvarov@linaro.org>
+Date: Fri, 24 Apr 2020 20:34:57 +0100
+Subject: [PATCH] debug
+
+Signed-off-by: Maxim Uvarov <maxim.uvarov@linaro.org>
+---
+ core/arch/arm/pta/device.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/core/arch/arm/pta/device.c b/core/arch/arm/pta/device.c
+index 13c88215..155eacf0 100644
+--- a/core/arch/arm/pta/device.c
++++ b/core/arch/arm/pta/device.c
+@@ -23,8 +23,10 @@ static void add_ta(uint32_t flags, const TEE_UUID *uuid, uint8_t *buf,
+ 		   uint32_t blen, uint32_t *pos)
+ {
+ 	if (flags & TA_FLAG_DEVICE_ENUM) {
+-		if (*pos + sizeof(*uuid) <= blen)
++		if (*pos + sizeof(*uuid) <= blen) {
+ 			tee_uuid_to_octets(buf + *pos, uuid);
++			IMSG("provide ta %pUl\n", uuid);
++		}
+ 
+ 		(*pos) += sizeof(*uuid);
+ 	}
+-- 
+2.17.1
+

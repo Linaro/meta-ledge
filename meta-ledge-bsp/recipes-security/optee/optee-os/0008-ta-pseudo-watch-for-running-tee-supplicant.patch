@@ -1,0 +1,109 @@
+From 37f7c10fd133c3a228833a3ad7e6629a80e7acc9 Mon Sep 17 00:00:00 2001
+From: Maxim Uvarov <maxim.uvarov@linaro.org>
+Date: Tue, 5 May 2020 13:28:42 +0100
+Subject: [PATCH] ta: pseudo: watch for running tee-supplicant
+
+Signed-off-by: Maxim Uvarov <maxim.uvarov@linaro.org>
+---
+ core/arch/arm/pta/device.c           | 29 +++++++++++++++++-----------
+ lib/libutee/include/pta_device.h     |  1 +
+ lib/libutee/include/user_ta_header.h |  5 +++--
+ 3 files changed, 22 insertions(+), 13 deletions(-)
+
+diff --git a/core/arch/arm/pta/device.c b/core/arch/arm/pta/device.c
+index 155eacf0..3a5ed7d8 100644
+--- a/core/arch/arm/pta/device.c
++++ b/core/arch/arm/pta/device.c
+@@ -20,20 +20,25 @@
+ #define PTA_NAME "device.pta"
+ 
+ static void add_ta(uint32_t flags, const TEE_UUID *uuid, uint8_t *buf,
+-		   uint32_t blen, uint32_t *pos)
++		   uint32_t blen, uint32_t *pos, bool supplicant)
+ {
+-	if (flags & TA_FLAG_DEVICE_ENUM) {
+-		if (*pos + sizeof(*uuid) <= blen) {
+-			tee_uuid_to_octets(buf + *pos, uuid);
+-			IMSG("provide ta %pUl\n", uuid);
+-		}
++	if (!supplicant && !(flags & TA_FLAG_DEVICE_ENUM))
++		return;
+ 
+-		(*pos) += sizeof(*uuid);
++	if (supplicant && !(flags & TA_FLAG_DEVICE_ENUM_SUPP))
++		return;
++
++	if (*pos + sizeof(*uuid) <= blen) {
++		tee_uuid_to_octets(buf + *pos, uuid);
++		IMSG("provide ta %pUl\n", uuid);
+ 	}
++
++	(*pos) += sizeof(*uuid);
+ }
+ 
+ static TEE_Result get_devices(uint32_t types,
+-			      TEE_Param params[TEE_NUM_PARAMS])
++			      TEE_Param params[TEE_NUM_PARAMS],
++			      bool supplicant)
+ {
+ 	const struct pseudo_ta_head *ta = NULL;
+ 	void *buf = NULL;
+@@ -53,14 +58,14 @@ static TEE_Result get_devices(uint32_t types,
+ 	blen = params[0].memref.size;
+ 
+ 	SCATTERED_ARRAY_FOREACH(ta, pseudo_tas, struct pseudo_ta_head)
+-		add_ta(ta->flags, &ta->uuid, buf, blen, &pos);
++		add_ta(ta->flags, &ta->uuid, buf, blen, &pos, supplicant);
+ 
+ #ifdef	CFG_EARLY_TA
+ 	{
+ 		const struct early_ta *eta = NULL;
+ 
+ 		for_each_early_ta(eta)
+-			add_ta(eta->flags, &eta->uuid, buf, blen, &pos);
++			add_ta(eta->flags, &eta->uuid, buf, blen, &pos, supplicant);
+ 	}
+ #endif
+ 
+@@ -77,7 +82,9 @@ static TEE_Result invoke_command(void *pSessionContext __unused,
+ {
+ 	switch (nCommandID) {
+ 	case PTA_CMD_GET_DEVICES:
+-		return get_devices(nParamTypes, pParams);
++	case PTA_CMD_GET_DEVICES_SUPP:
++		return get_devices(nParamTypes, pParams,
++				   (nCommandID == PTA_CMD_GET_DEVICES_SUPP));
+ 	default:
+ 		break;
+ 	}
+diff --git a/lib/libutee/include/pta_device.h b/lib/libutee/include/pta_device.h
+index 434e1df5..8844d1a7 100644
+--- a/lib/libutee/include/pta_device.h
++++ b/lib/libutee/include/pta_device.h
+@@ -24,5 +24,6 @@
+  * TEE_ERROR_SHORT_BUFFER - Output buffer size less than required
+  */
+ #define PTA_CMD_GET_DEVICES		0x0
++#define PTA_CMD_GET_DEVICES_SUPP	0x1
+ 
+ #endif /* __PTA_DEVICE_H */
+diff --git a/lib/libutee/include/user_ta_header.h b/lib/libutee/include/user_ta_header.h
+index dbc454f5..006c38a2 100644
+--- a/lib/libutee/include/user_ta_header.h
++++ b/lib/libutee/include/user_ta_header.h
+@@ -23,9 +23,10 @@
+ 	 * (pseudo-TAs only).
+ 	 */
+ #define TA_FLAG_CONCURRENT		(1 << 8)
+-#define TA_FLAG_DEVICE_ENUM		(1 << 9) /* device enumeration */
++#define TA_FLAG_DEVICE_ENUM		(1 << 9) /* device enumeration w/o tee-supplicant*/
++#define TA_FLAG_DEVICE_ENUM_SUPP	(1 << 10) /* device enumeration, w tee-supplicant */
+ 
+-#define TA_FLAGS_MASK			GENMASK_32(9, 0)
++#define TA_FLAGS_MASK			GENMASK_32(10, 0)
+ 
+ struct ta_head {
+ 	TEE_UUID uuid;
+-- 
+2.17.1
+

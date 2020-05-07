@@ -1,0 +1,32 @@
+From c96c449f92400be383d9c80b60bb4cf46c3444ea Mon Sep 17 00:00:00 2001
+From: Maxim Uvarov <maxim.uvarov@linaro.org>
+Date: Fri, 17 Apr 2020 21:37:22 +0100
+Subject: [PATCH 1/6] backport ta_bin_to_c.py switch to python3
+
+Signed-off-by: Maxim Uvarov <maxim.uvarov@linaro.org>
+---
+ scripts/ta_bin_to_c.py | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/scripts/ta_bin_to_c.py b/scripts/ta_bin_to_c.py
+index 1496f816..52a68e46 100755
+--- a/scripts/ta_bin_to_c.py
++++ b/scripts/ta_bin_to_c.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python
++#!/usr/bin/env python3
+ # SPDX-License-Identifier: BSD-2-Clause
+ #
+ # Copyright (c) 2017, Linaro Limited
+@@ -79,7 +79,7 @@ def main():
+     while i < size:
+         if i % 8 == 0:
+             f.write('\t\t')
+-        f.write('0x' + '{:02x}'.format(ord(bytes[i])) + ',')
++        f.write(hex(bytes[i]) + ',')
+         i = i + 1
+         if i % 8 == 0 or i == size:
+             f.write('\n')
+-- 
+2.17.1
+

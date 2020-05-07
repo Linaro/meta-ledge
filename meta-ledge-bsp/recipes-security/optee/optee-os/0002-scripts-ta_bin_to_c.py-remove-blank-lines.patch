@@ -1,0 +1,37 @@
+From 0a5f792f7c01d9597228ace11e5d97805a12b05a Mon Sep 17 00:00:00 2001
+From: Jerome Forissier <jerome@forissier.org>
+Date: Wed, 22 Apr 2020 18:29:40 +0200
+Subject: [PATCH 2/6] scripts/ta_bin_to_c.py: remove blank lines
+
+Python functions don't have to start with a blank line. Remove them for
+consistency with other scripts.
+
+Signed-off-by: Jerome Forissier <jerome@forissier.org>
+Signed-off-by: Maxim Uvarov <maxim.uvarov@linaro.org>
+---
+ scripts/ta_bin_to_c.py | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/scripts/ta_bin_to_c.py b/scripts/ta_bin_to_c.py
+index 52a68e46..daf516cc 100755
+--- a/scripts/ta_bin_to_c.py
++++ b/scripts/ta_bin_to_c.py
+@@ -13,7 +13,6 @@ import zlib
+ 
+ 
+ def get_args():
+-
+     parser = argparse.ArgumentParser(
+         description='Converts a Trusted '
+         'Application ELF file into a C source file, ready for '
+@@ -39,7 +38,6 @@ def get_args():
+ 
+ 
+ def main():
+-
+     args = get_args()
+ 
+     ta_uuid = uuid.UUID(re.sub(r'\..*', '', os.path.basename(args.ta)))
+-- 
+2.17.1
+
