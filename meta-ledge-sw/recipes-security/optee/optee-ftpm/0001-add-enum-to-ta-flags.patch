@@ -1,0 +1,26 @@
+From 8935b1ac46eb11c59fd4515b0e3bc7383cf28b48 Mon Sep 17 00:00:00 2001
+From: Maxim Uvarov <maxim.uvarov@linaro.org>
+Date: Fri, 17 Apr 2020 12:05:53 +0100
+Subject: [PATCH] add enum to ta flags
+
+Signed-off-by: Maxim Uvarov <maxim.uvarov@linaro.org>
+---
+ user_ta_header_defines.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/user_ta_header_defines.h b/user_ta_header_defines.h
+index 72ecbf0..e83619d 100644
+--- a/user_ta_header_defines.h
++++ b/user_ta_header_defines.h
+@@ -44,7 +44,7 @@
+ 
+ #define TA_UUID                     TA_FTPM_UUID
+ 
+-#define TA_FLAGS                    (TA_FLAG_SINGLE_INSTANCE | TA_FLAG_INSTANCE_KEEP_ALIVE) 
++#define TA_FLAGS                    (TA_FLAG_SINGLE_INSTANCE | TA_FLAG_INSTANCE_KEEP_ALIVE | TA_FLAG_DEVICE_ENUM_SUPP)
+ #define TA_STACK_SIZE               (64 * 1024)
+ #define TA_DATA_SIZE                (32 * 1024)
+ 
+-- 
+2.17.1
+

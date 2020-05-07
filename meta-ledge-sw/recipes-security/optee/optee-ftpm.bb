@@ -20,6 +20,8 @@ DEPENDS += "openssl-native autoconf-archive-native"
 SRC_URI = "git://github.com/apalos/ms-tpm-20-ref.git;branch=ftpm"
 SRCREV = "8b2a8eaf9a5f165bc6acc2388490d6237c0de116"
 
+SRC_URI_append = " file://0001-add-enum-to-ta-flags.patch "
+
 S = "${WORKDIR}/git"
 CONFIGURE_SCRIPT = "${S}/TPMCmd/configure"
 
