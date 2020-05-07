@@ -1,0 +1,86 @@
+From 938ed16c5b74708fac9b39634ca3db0542718308 Mon Sep 17 00:00:00 2001
+From: Maxim Uvarov <maxim.uvarov@linaro.org>
+Date: Thu, 9 Apr 2020 15:19:28 +0100
+Subject: [PATCH 3/6] core: early_ta: expose TA flags in struct early_ta
+
+Store TA flags in early TA descriptions so that such TAs can later be
+enumerated by the device PTA when TA_FLAG_DEVICE_ENUM is set.
+Change ta_bin_to_c.py to read the TA flags from its ELF file and store
+it in the early TA description.
+
+Signed-off-by: Maxim Uvarov <maxim.uvarov@linaro.org>
+Reviewed-by: Jerome Forissier <jerome@forissier.org>
+[jf: minor edits to commit message]
+Signed-off-by: Jerome Forissier <jerome@forissier.org>
+Signed-off-by: Maxim Uvarov <maxim.uvarov@linaro.org>
+---
+ core/arch/arm/include/kernel/early_ta.h |  1 +
+ scripts/ta_bin_to_c.py                  | 24 ++++++++++++++++++++++++
+ 2 files changed, 25 insertions(+)
+
+diff --git a/core/arch/arm/include/kernel/early_ta.h b/core/arch/arm/include/kernel/early_ta.h
+index d6414fa2..9b0c6288 100644
+--- a/core/arch/arm/include/kernel/early_ta.h
++++ b/core/arch/arm/include/kernel/early_ta.h
+@@ -10,6 +10,7 @@
+ #include <tee_api_types.h>
+ 
+ struct early_ta {
++	uint32_t flags;
+ 	TEE_UUID uuid;
+ 	uint32_t size;
+ 	uint32_t uncompressed_size; /* 0: not compressed */
+diff --git a/scripts/ta_bin_to_c.py b/scripts/ta_bin_to_c.py
+index daf516cc..ba2a1f4a 100755
+--- a/scripts/ta_bin_to_c.py
++++ b/scripts/ta_bin_to_c.py
+@@ -6,8 +6,10 @@
+ 
+ import argparse
+ import array
++from elftools.elf.elffile import ELFFile
+ import os
+ import re
++import struct
+ import uuid
+ import zlib
+ 
+@@ -37,6 +39,27 @@ def get_args():
+     return parser.parse_args()
+ 
+ 
++def get_name(obj):
++    # Symbol or section .name might be a byte array or a string, we want a
++    # string
++    try:
++        name = obj.name.decode()
++    except (UnicodeDecodeError, AttributeError):
++        name = obj.name
++    return name
++
++
++def ta_get_flags(ta_f):
++    with open(ta_f, 'rb') as f:
++        elffile = ELFFile(f)
++
++        for s in elffile.iter_sections():
++            if get_name(s) == '.ta_head':
++                return struct.unpack('<16x4xI', s.data()[:24])[0]
++
++        raise Exception('.ta_head section not found')
++
++
+ def main():
+     args = get_args()
+ 
+@@ -57,6 +80,7 @@ def main():
+     f.write('__extension__ const struct early_ta __early_ta_' +
+             ta_uuid.hex +
+             '\n__early_ta __aligned(__alignof__(struct early_ta)) = {\n')
++    f.write('\t.flags = 0x{:04x},\n'.format(ta_get_flags(args.ta)))
+     f.write('\t.uuid = {\n')
+     f.write('\t\t.timeLow = 0x{:08x},\n'.format(ta_uuid.time_low))
+     f.write('\t\t.timeMid = 0x{:04x},\n'.format(ta_uuid.time_mid))
+-- 
+2.17.1
+

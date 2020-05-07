@@ -6,8 +6,22 @@ PV="3.6.0+git${SRCPV}"
 SRCREV = "f398d4923da875370149ffee45c963d7adb41495"
 
 SRC_URI_append_ledge-stm32mp157c-dk2 = " file://0001-stm32mp1-BSEC-SiP-SMC-service-to-read-fuses.patch "
+SRC_URI_append = " file://0001-backport-ta_bin_to_c.py-switch-to-python3.patch \
+		   file://0002-scripts-ta_bin_to_c.py-remove-blank-lines.patch \
+		   file://0003-core-early_ta-expose-TA-flags-in-struct-early_ta.patch \
+		   file://0004-core-move-for_each_early_ta-macro-to-kernel-early_ta.patch \
+		   file://0005-core-device-pta-enumerate-early-TAs.patch \
+		   file://0006-pta-pseudo-optee3.7-compat.patch \
+		   file://0007-debug.patch \
+		   file://0008-ta-pseudo-watch-for-running-tee-supplicant.patch"
 
-DEPENDS += "python3-pyelftools-native dtc-native"
+SRC_URI_append_ledge-qemuarm64 = " file://bc50d971-d4c9-42c4-82cb-343fb7f37896.stripped.elf "
+# random
+SRC_URI_append_ledge-qemuarm64 = " file://b6c53aba-9669-4668-a7f2-205629d00f86.stripped.elf "
+
+
+DEPENDS += " dtc-native"
+DEPENDS += " python3-pyelftools-native"
 inherit python3native
 
 # ledge-ti-am572x
@@ -30,10 +44,13 @@ OPTEEOUTPUTMACHINE_ledge-stm32mp157c-dk2 = "stm32mp1"
 EXTRA_OEMAKE_append_ledge-stm32mp157c-dk2 = " CFG_EMBED_DTB_SOURCE_FILE=stm32mp157c-dk2.dts "
 
 # add traces at startup
-EXTRA_OEMAKE_append =  " CFG_TEE_CORE_DEBUG=n CFG_TEE_CORE_LOG_LEVEL=2 "
+EXTRA_OEMAKE_append =  " CFG_TEE_CORE_DEBUG=n CFG_TEE_CORE_LOG_LEVEL=2 V=1 "
 
 OPTEE_ARCH_armv7a = "arm32"
 OPTEE_ARCH_armv7ve = "arm32"
+
+FTPM_UUID="bc50d971-d4c9-42c4-82cb-343fb7f37896"
+EXTRA_OEMAKE_append_ledge-qemuarm64='CFG_EARLY_TA=y EARLY_TA_PATHS="../${FTPM_UUID}.stripped.elf ../b6c53aba-9669-4668-a7f2-205629d00f86.stripped.elf" '
 
 do_install_append_ledge-stm32mp157c-dk2() {
     # install optee bianries with stm32 images
