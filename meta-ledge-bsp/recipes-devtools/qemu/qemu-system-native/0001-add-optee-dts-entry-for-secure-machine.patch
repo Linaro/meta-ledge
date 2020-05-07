@@ -1,0 +1,52 @@
+From fdcc77459847b1743d9b77f58bdab429bb9fea98 Mon Sep 17 00:00:00 2001
+From: Maxim Uvarov <maxim.uvarov@linaro.org>
+Date: Tue, 14 Apr 2020 13:20:12 +0100
+Subject: [PATCH] add optee dts entry for secure machine
+
+Add optee compatible string for dtb to force linux
+to boot optee module.
+
+Signed-off-by: Maxim Uvarov <maxim.uvarov@linaro.org>
+---
+ hw/arm/virt.c | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+diff --git a/hw/arm/virt.c b/hw/arm/virt.c
+index d9496c93..7b74cf3b 100644
+--- a/hw/arm/virt.c
++++ b/hw/arm/virt.c
+@@ -1301,6 +1301,23 @@ static void create_platform_bus(VirtMachineState *vms, qemu_irq *pic)
+                                 sysbus_mmio_get_region(s, 0));
+ }
+ 
++static void create_secure_tee(VirtMachineState *vms)
++{
++    char *firmware;
++    char *optee;
++
++    firmware = g_strdup_printf("/firmware");
++    qemu_fdt_add_subnode(vms->fdt, firmware);
++
++    optee = g_strdup_printf("/firmware/optee");
++    qemu_fdt_add_subnode(vms->fdt, optee);
++    qemu_fdt_setprop_string(vms->fdt, optee, "compatible", "linaro,optee-tz");
++    qemu_fdt_setprop_string(vms->fdt, optee, "method", "smc");
++
++    g_free(optee);
++    g_free(firmware);
++}
++
+ static void create_secure_ram(VirtMachineState *vms,
+                               MemoryRegion *secure_sysmem)
+ {
+@@ -1685,6 +1702,7 @@ static void machvirt_init(MachineState *machine)
+     if (vms->secure) {
+         create_secure_ram(vms, secure_sysmem);
+         create_uart(vms, pic, VIRT_SECURE_UART, secure_sysmem, serial_hd(1));
++        create_secure_tee(vms);
+     }
+ 
+     vms->highmem_ecam &= vms->highmem && (!firmware_loaded || aarch64);
+-- 
+2.17.1
+
