@@ -1,0 +1,85 @@
+From afc015633b5c0a58085a88c6dcbf55d5f9df288a Mon Sep 17 00:00:00 2001
+From: Maxim Uvarov <maxim.uvarov@linaro.org>
+Date: Fri, 22 May 2020 20:10:24 +0100
+Subject: [PATCH 08/10] optee: use uuid for sysfs driver entry
+
+With the evolving use-cases for TEE bus, now it's required to support
+multi-stage enumeration process. But using a simple index doesn't
+suffice this requirement and instead leads to duplicate sysfs entries.
+So instead switch to use more informative device UUID for sysfs entry
+like:
+/sys/bus/tee/devices/optee-ta-<uuid>
+
+Signed-off-by: Maxim Uvarov <maxim.uvarov@linaro.org>
+Reviewed-by: Sumit Garg <sumit.garg@linaro.org>
+Signed-off-by: Maxim Uvarov <maxim.uvarov@linaro.org>
+---
+ Documentation/ABI/testing/sysfs-bus-optee-devices | 8 ++++++++
+ MAINTAINERS                                       | 1 +
+ drivers/tee/optee/device.c                        | 9 ++++++---
+ 3 files changed, 15 insertions(+), 3 deletions(-)
+ create mode 100644 Documentation/ABI/testing/sysfs-bus-optee-devices
+
+diff --git a/Documentation/ABI/testing/sysfs-bus-optee-devices b/Documentation/ABI/testing/sysfs-bus-optee-devices
+new file mode 100644
+index 000000000..0ae04ae53
+--- /dev/null
++++ b/Documentation/ABI/testing/sysfs-bus-optee-devices
+@@ -0,0 +1,8 @@
++What:		/sys/bus/tee/devices/optee-ta-<uuid>/
++Date:           May 2020
++KernelVersion   5.7
++Contact:        tee-dev@lists.linaro.org
++Description:
++		OP-TEE bus provides reference to registered drivers under this directory. The <uuid>
++		matches Trusted Application (TA) driver and corresponding TA in secure OS. Drivers
++		are free to create needed API under optee-ta-<uuid> directory.
+diff --git a/MAINTAINERS b/MAINTAINERS
+index a50e97a63..44cca91d9 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -11934,6 +11934,7 @@ OP-TEE DRIVER
+ M:	Jens Wiklander <jens.wiklander@linaro.org>
+ L:	tee-dev@lists.linaro.org
+ S:	Maintained
++F:	Documentation/ABI/testing/sysfs-bus-optee-devices
+ F:	drivers/tee/optee/
+ 
+ OP-TEE RANDOM NUMBER GENERATOR (RNG) DRIVER
+diff --git a/drivers/tee/optee/device.c b/drivers/tee/optee/device.c
+index e3a148521..23d264c81 100644
+--- a/drivers/tee/optee/device.c
++++ b/drivers/tee/optee/device.c
+@@ -65,7 +65,7 @@ static int get_devices(struct tee_context *ctx, u32 session,
+ 	return 0;
+ }
+ 
+-static int optee_register_device(const uuid_t *device_uuid, u32 device_id)
++static int optee_register_device(const uuid_t *device_uuid)
+ {
+ 	struct tee_client_device *optee_device = NULL;
+ 	int rc;
+@@ -75,7 +75,10 @@ static int optee_register_device(const uuid_t *device_uuid, u32 device_id)
+ 		return -ENOMEM;
+ 
+ 	optee_device->dev.bus = &tee_bus_type;
+-	dev_set_name(&optee_device->dev, "optee-clnt%u", device_id);
++	if (dev_set_name(&optee_device->dev, "optee-ta-%pUl", device_uuid)) {
++		kfree(optee_device);
++		return -ENOMEM;
++	}
+ 	uuid_copy(&optee_device->id.uuid, device_uuid);
+ 
+ 	rc = device_register(&optee_device->dev);
+@@ -144,7 +147,7 @@ int optee_enumerate_devices(void)
+ 	num_devices = shm_size / sizeof(uuid_t);
+ 
+ 	for (idx = 0; idx < num_devices; idx++) {
+-		rc = optee_register_device(&device_uuid[idx], idx);
++		rc = optee_register_device(&device_uuid[idx]);
+ 		if (rc)
+ 			goto out_shm;
+ 	}
+-- 
+2.17.1
+
