@@ -31,6 +31,10 @@ SRC_URI += " \
     file://0005-op-tee-multi-page-shm.patch \
     file://0006-efi-libstub-Fix-kernel-command-line.patch \
     file://0007-ARM-dts-stm32-add-reboot-node-on-stm32mp157.patch \
+    file://0008-optee-add-device-table.patch \
+    file://0009-optee-use-uuid-for-sysfs-driver-entry.patch \
+    file://0010-optee-enable-support-for-multi-stage-bus-enumeration.patch \
+    file://0011-tpm_ftpm_tee-register-driver-on-TEE-bus.patch \
     "
 
 PV = "mainline-5.3"
