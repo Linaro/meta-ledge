@@ -98,6 +98,7 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	auditd \
 	audit-python \
 	audispd-plugins \
+	selinux-ledge \
 	podman \
 	popt \
 	procps \

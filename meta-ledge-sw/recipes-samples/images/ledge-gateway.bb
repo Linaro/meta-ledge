@@ -21,6 +21,7 @@ CORE_IMAGE_BASE_INSTALL += "\
     auditd \
     audit-python \
     audispd-plugins \
+    selinux-ledge \
     ${@bb.utils.contains("MACHINE_FEATURES", "optee", "packagegroup-ledge-optee", "", d)} \
     ${@bb.utils.contains("MACHINE_FEATURES", "tsn", "packagegroup-ledge-tsn", "", d)} \
     ${@bb.utils.contains("MACHINE_FEATURES", "tpm2", "packagegroup-security-tpm2", "", d)} \
