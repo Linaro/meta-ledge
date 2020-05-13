@@ -1,7 +1,7 @@
-From bd13f9cbff186a62ddd255d94144724ec98a66ba Mon Sep 17 00:00:00 2001
+From 144aadbfa385bf2088816ae9e4bd590c684e8a4c Mon Sep 17 00:00:00 2001
 From: Christophe Priouzeau <christophe.priouzeau@linaro.org>
 Date: Wed, 16 Oct 2019 12:03:40 +0200
-Subject: [PATCH 2/3] ftpm
+Subject: [PATCH 2/7] ftpm
 
 This patch adds support for a software-only implementation of a TPM
 running in TEE.

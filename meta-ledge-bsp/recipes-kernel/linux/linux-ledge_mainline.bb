@@ -27,7 +27,7 @@ SRC_URI += " \
     file://0001-STM32mp157c-dk2-optee-and-ethernet-support.patch \
     file://0002-ftpm.patch \
     file://0003-KERNEL-stm32mp157-dts-add-ftpm-support.patch \
-    file://0004-op-tee-shm.patch \
+    file://0004-optee-shm.patch \
     file://0005-op-tee-multi-page-shm.patch \
     file://0006-efi-libstub-Fix-kernel-command-line.patch \
     "

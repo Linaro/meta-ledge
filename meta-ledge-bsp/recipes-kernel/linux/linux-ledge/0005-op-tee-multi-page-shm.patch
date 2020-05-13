@@ -1,9 +1,14 @@
+From 4e0b75ddc63c1a620c646ef0147cab53d56fc784 Mon Sep 17 00:00:00 2001
+From: Christophe Priouzeau <christophe.priouzeau@st.com>
+Date: Tue, 12 May 2020 15:17:07 +0200
+Subject: [PATCH 5/7] op-tee-multi-page-shm
+
 ---
  drivers/tee/optee/shm_pool.c | 14 +++++++++++++-
  1 file changed, 13 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/tee/optee/shm_pool.c b/drivers/tee/optee/shm_pool.c
-index 0332a53..85aa5bb 100644
+index 0332a5301..85aa5bbe8 100644
 --- a/drivers/tee/optee/shm_pool.c
 +++ b/drivers/tee/optee/shm_pool.c
 @@ -28,8 +28,20 @@ static int pool_op_alloc(struct tee_shm_pool_mgr *poolm,
@@ -29,4 +34,5 @@ index 0332a53..85aa5bb 100644
  	}
  
 -- 
-2.7.4
+2.17.1
+

@@ -1,7 +1,7 @@
-From 14e0cb4fdb86d0044f39aeba110f2f6daa52c4ef Mon Sep 17 00:00:00 2001
+From 900555d2d42fef478af937dac8b1147dcdc22b72 Mon Sep 17 00:00:00 2001
 From: Christophe Priouzeau <christophe.priouzeau@linaro.org>
 Date: Wed, 16 Oct 2019 12:05:38 +0200
-Subject: [PATCH 3/3] KERNEL: stm32mp157: dts; add ftpm support
+Subject: [PATCH 3/7] KERNEL: stm32mp157: dts; add ftpm support
 
 Signed-off-by: Christophe Priouzeau <christophe.priouzeau@linaro.org>
 ---

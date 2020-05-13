@@ -1,7 +1,7 @@
-From bc7d3d78fc4f8c2c3beec67f9658ca980f53e2eb Mon Sep 17 00:00:00 2001
-From: Ilias Apalodimas <ilias.apalodimas@linaro.org>
-Date: Fri, 24 Jan 2020 17:57:08 +0200
-Subject: [PATCH] efi: libstub: Fix kernel command line
+From a7b07a2c3cdaa6c325dcc3240b8aba2a97ad7bed Mon Sep 17 00:00:00 2001
+From: Christophe Priouzeau <christophe.priouzeau@st.com>
+Date: Tue, 12 May 2020 15:24:16 +0200
+Subject: [PATCH 6/7] efi: libstub: Fix kernel command line
 
 On our parsing we never included the kernel command line for anything
 apart from efi= related args. As a result adding initrd= on the firmware
@@ -22,7 +22,7 @@ Signed-off-by: Ilias Apalodimas <ilias.apalodimas@linaro.org>
  1 file changed, 69 insertions(+), 18 deletions(-)
 
 diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-index 817237ce2420..a68609670992 100644
+index c382a48c6..2e476c141 100644
 --- a/drivers/firmware/efi/libstub/arm-stub.c
 +++ b/drivers/firmware/efi/libstub/arm-stub.c
 @@ -90,6 +90,47 @@ void install_memreserve_table(efi_system_table_t *sys_table_arg)
@@ -138,8 +138,8 @@ index 817237ce2420..a68609670992 100644
 +		goto fail_free_screeninfo;
  	}
  
- 	efi_retrieve_tpm2_eventlog(sys_table);
-@@ -203,10 +247,10 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+ 	/* Ask the firmware to clear memory on unclean shutdown */
+@@ -201,10 +245,10 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
  	 */
  	if (!IS_ENABLED(CONFIG_EFI_ARMSTUB_DTB_LOADER) ||
  	     secure_boot != efi_secureboot_mode_disabled) {
@@ -152,7 +152,7 @@ index 817237ce2420..a68609670992 100644
  					      "dtb=",
  					      ~0UL, &fdt_addr, &fdt_size);
  
-@@ -228,7 +272,7 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+@@ -226,7 +270,7 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
  	if (!fdt_addr)
  		pr_efi(sys_table, "Generating empty DTB\n");
  
@@ -161,7 +161,7 @@ index 817237ce2420..a68609670992 100644
  				      efi_get_max_initrd_addr(dram_base,
  							      *image_addr),
  				      (unsigned long *)&initrd_addr,
-@@ -261,10 +305,14 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+@@ -259,10 +303,14 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
  
  	install_memreserve_table(sys_table);
  
@@ -177,7 +177,7 @@ index 817237ce2420..a68609670992 100644
  				fdt_addr, fdt_size);
  
  	/*
-@@ -283,9 +331,12 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+@@ -281,9 +329,12 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
  fail_free_image:
  	efi_free(sys_table, image_size, *image_addr);
  	efi_free(sys_table, reserve_size, reserve_addr);
@@ -193,5 +193,5 @@ index 817237ce2420..a68609670992 100644
  	return EFI_ERROR;
  }
 -- 
-2.25.0
+2.17.1
 
