@@ -30,6 +30,7 @@ SRC_URI += " \
     file://0004-optee-shm.patch \
     file://0005-op-tee-multi-page-shm.patch \
     file://0006-efi-libstub-Fix-kernel-command-line.patch \
+    file://0007-ARM-dts-stm32-add-reboot-node-on-stm32mp157.patch \
     "
 
 PV = "mainline-5.3"

@@ -1,0 +1,33 @@
+From 6626590478fc4981e2da9698274fcdd0a75179d3 Mon Sep 17 00:00:00 2001
+From: Christophe Priouzeau <christophe.priouzeau@st.com>
+Date: Tue, 12 May 2020 15:25:44 +0200
+Subject: [PATCH 7/7] ARM: dts: stm32: add reboot node on stm32mp157
+
+Add reboot node on stm32mp157.
+
+Signed-off-by: Alexandre Torgue <alexandre.torgue@st.com>
+---
+ arch/arm/boot/dts/stm32mp157c.dtsi | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/arch/arm/boot/dts/stm32mp157c.dtsi b/arch/arm/boot/dts/stm32mp157c.dtsi
+index abb762f7f..80479523a 100644
+--- a/arch/arm/boot/dts/stm32mp157c.dtsi
++++ b/arch/arm/boot/dts/stm32mp157c.dtsi
+@@ -109,6 +109,13 @@
+ 		};
+ 	};
+ 
++	reboot {
++		compatible = "syscon-reboot";
++		regmap = <&rcc>;
++		offset = <0x404>;
++		mask = <0x1>;
++	};
++
+ 	soc {
+ 		compatible = "simple-bus";
+ 		#address-cells = <1>;
+-- 
+2.17.1
+
