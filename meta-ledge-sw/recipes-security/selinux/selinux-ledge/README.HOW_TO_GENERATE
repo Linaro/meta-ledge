@@ -1,0 +1,43 @@
+To generate a new ledge rule:
+-----------------------------
+1. force SELINUX config to "permissive"
+  BOARD> sed -i "s|^SELINUX=\(.*\)$|SELINUX=permissive|" /etc/selinux/config
+
+2. disable previous Ledge rules
+  BOARD> /sbin/semodule -r /etc/selinux/ledgeEnforcement.pp
+
+3. reboot
+
+4. at boot make all action which are previously not authorized by selinux
+
+5. generete new rule with audit information
+  BOARD> /usr/bin/audit2allow -a -M ledgeEnforcement
+  BOARD> cp ledgeEnforcement.te ledgeEnforcement.pp /etc/selinux
+6. install new selinux ledge rule
+  BOARD> /sbin/semodule -i /etc/selinux/ledgeEnforcement.pp
+
+If you need to add new rules,
+Get new rule from dmesg and add it current rule
+  BOARD> cp /etc/selinux/ledgeEnforcement.te
+  BOARD> audit2allow -d -o ledgeEnforcement.te
+Get new rule from audit and add it current rule
+  BOARD> audit2allow -a -o ledgeEnforcement.te
+Compile new rule
+  BOARD> /usr/bin/checkmodule -M -m -o ledgeEnforcement.mod ledgeEnforcement.te
+(correct rule if it's needed mainly by updating type and class)
+If the check indicate that some action can be made via setting boolean make like following command
+  BOARD> /sbin/setsebool -P systemd_tmpfiles_manage_all 1
+  BOARD> /sbin/setsebool -P allow_polyinstantiation 1
+
+Generate Rule
+  BOARD> /usr/bin/semodule_package -o ledgeEnforcement.pp -m ledgeEnforcement.mod
+Installed to /etc/selinux to be load by /selinux-ledge.sh script
+
+7. force SELINUX config to "enforcing"
+  BOARD> sed -i "s|^SELINUX=\(.*\)$|SELINUX=enforcing|" /etc/selinux/config
+
+
+
+REF:
+https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/security-enhanced_linux/sect-security-enhanced_linux-fixing_problems-allowing_access_audit2allow
+
