@@ -95,6 +95,9 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	pinentry \
 	packagegroup-core-ssh-openssh \
 	packagegroup-core-selinux \
+	auditd \
+	audit-python \
+	audispd-plugins \
 	podman \
 	popt \
 	procps \
