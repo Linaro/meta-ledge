@@ -12,6 +12,9 @@ CORE_IMAGE_BASE_INSTALL += " \
     kernel-devicetree \
     "
 
+# Login: ledge, password: ledge
 EXTRA_USERS_PARAMS = "\
-    useradd -p '' ledge; \
+    useradd -P ledge ledge; \
+    groupadd wheel; \
+    usermod -a -G sudo,wheel,adm ledge; \
     "
