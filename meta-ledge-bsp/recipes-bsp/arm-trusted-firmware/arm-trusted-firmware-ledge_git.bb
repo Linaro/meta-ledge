@@ -14,7 +14,7 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 PV = "2.1"
 
 SRC_URI = "git://github.com/ARM-software/arm-trusted-firmware.git;protocol=https;nobranch=1"
-SRCREV = "76f25eb52b10d56b8b54fc63d748c15e428e409a"
+SRCREV = "fc721f830855ab05f45d8f2024325601bbb4c783"
 
 ALLOW_EMPTY_${PN} = "1"
 
@@ -24,6 +24,8 @@ B = "${WORKDIR}/build"
 inherit deploy
 
 DEPENDS += "dtc-native"
+DEPENDS_ledge-qemuarm += " optee-os u-boot-ledge-qemu "
+DEPENDS_ledge-qemuarm64 += " optee-os u-boot-ledge-qemu "
 
 # ledge-stm32mp157c-dk2 specific
 TF_A_PLATFORM_ledge-stm32mp157c-dk2 = "stm32mp1"
@@ -40,9 +42,13 @@ EXTRA_OEMAKE = ' CROSS_COMPILE=${TARGET_PREFIX} '
 EXTRA_OEMAKE += ' PLAT=${TF_A_PLATFORM} '
 EXTRA_OEMAKE_append_armv7a = ' ARCH=aarch32 ARM_ARCH_MAJOR=7 '
 EXTRA_OEMAKE_append_armv7ve = ' ARCH=aarch32 ARM_ARCH_MAJOR=7 '
-EXTRA_OEMAKE_append_ledge-stm32mp157c-dk2 = "AARCH32_SP=optee"
+EXTRA_OEMAKE_append_ledge-stm32mp157c-dk2 = "AARCH32_SP=optee STM32MP_SDMMC=1 STM32MP_EMMC=1"
 EXTRA_OEMAKE_append_ledge-qemuarm = ' AARCH32_SP=optee ARM_TSP_RAM_LOCATION=tdram BL32_RAM_LOCATION=tdram '
 EXTRA_OEMAKE_append_aarch64 = "${@bb.utils.contains('MACHINE_FEATURES', 'optee', ' SPD=opteed ', '', d)}"
+
+# FIP image
+EXTRA_OEMAKE_append_ledge-qemuarm = 'BL32=${STAGING_DIR_TARGET}/lib/firmware/tee-header_v2.bin BL32_EXTRA1=${STAGING_DIR_TARGET}/lib/firmware/tee-pager_v2.bin BL32_EXTRA2=${STAGING_DIR_TARGET}/lib/firmware/tee-pageable_v2.bin  BL33=${DEPLOY_DIR_IMAGE}/u-boot.bin fip GENERATE_COT=1 BL32_RAM_LOCATION=tdram '
+EXTRA_OEMAKE_append_ledge-qemuarm64 = 'BL32=${STAGING_DIR_TARGET}/lib/firmware/tee-header_v2.bin BL32_EXTRA1=${STAGING_DIR_TARGET}/lib/firmware/tee-pager_v2.bin BL32_EXTRA2=${STAGING_DIR_TARGET}/lib/firmware/tee-pageable_v2.bin  BL33=${DEPLOY_DIR_IMAGE}/u-boot.bin fip GENERATE_COT=1 BL32_RAM_LOCATION=tdram '
 
 # Debug support
 EXTRA_OEMAKE += 'DEBUG=1'
@@ -121,6 +127,12 @@ do_deploy() {
     if [ -f ${B}/bl33.bin ] ; then
         install -m 0644 ${B}/bl32.bin ${DEPLOYDIR}/arm-trusted-firmware/
         install -m 0644 ${B}/bl32/bl32.elf ${DEPLOYDIR}/arm-trusted-firmware/
+    fi
+
+    if [ -f ${B}/fip.bin ] ; then
+        install -m 0644 ${B}/fip.bin ${DEPLOYDIR}/
+	dd if=${B}/bl1.bin of=${DEPLOYDIR}/firmware.bin bs=4096 conv=notrunc
+	dd if=${B}/fip.bin of=${DEPLOYDIR}/firmware.bin seek=64 bs=4096 conv=notrunc
     fi
 }
 
