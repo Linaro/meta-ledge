@@ -1,0 +1,30 @@
+From ed6ae6812d88fc0722d348f9e9029704372ef39a Mon Sep 17 00:00:00 2001
+From: Christophe Priouzeau <christophe.priouzeau@st.com>
+Date: Tue, 26 May 2020 15:21:29 +0200
+Subject: [PATCH 2/6] KERNEL: stm32mp157: dts; add ftpm support
+
+Signed-off-by: Christophe Priouzeau <christophe.priouzeau@st.com>
+---
+ arch/arm/boot/dts/stm32mp151.dtsi | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/arch/arm/boot/dts/stm32mp151.dtsi b/arch/arm/boot/dts/stm32mp151.dtsi
+index bcf01309f..1c839c0d5 100644
+--- a/arch/arm/boot/dts/stm32mp151.dtsi
++++ b/arch/arm/boot/dts/stm32mp151.dtsi
+@@ -1688,6 +1688,12 @@
+ 				status = "disabled";
+ 			};
+ 		};
++
++		tpm@0 {
++			compatible = "microsoft,ftpm";
++			linux,sml-base = <0x0 0xC0000000>;
++			linux,sml-size = <0x10000>;
++		};
+ 	};
+ 
+ 	mlahb: ahb {
+-- 
+2.17.1
+

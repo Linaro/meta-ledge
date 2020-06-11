@@ -1,0 +1,97 @@
+From 9da28e684fe44df22c984cb1bd757091b635ee43 Mon Sep 17 00:00:00 2001
+From: Christophe Priouzeau <christophe.priouzeau@st.com>
+Date: Tue, 26 May 2020 15:17:04 +0200
+Subject: [PATCH 1/6] STM32mp157c-dk2: optee, reboot
+
+Signed-off-by: Christophe Priouzeau <christophe.priouzeau@st.com>
+---
+ arch/arm/boot/dts/stm32mp151.dtsi      |  7 +++++++
+ arch/arm/boot/dts/stm32mp15xx-dkx.dtsi | 22 ++++++++++++++++++----
+ 2 files changed, 25 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm/boot/dts/stm32mp151.dtsi b/arch/arm/boot/dts/stm32mp151.dtsi
+index 3ea05ba48..bcf01309f 100644
+--- a/arch/arm/boot/dts/stm32mp151.dtsi
++++ b/arch/arm/boot/dts/stm32mp151.dtsi
+@@ -110,6 +110,13 @@
+ 		status = "disabled";
+ 	};
+ 
++	reboot {
++		compatible = "syscon-reboot";
++		regmap = <&rcc>;
++		offset = <0x404>;
++		mask = <0x1>;
++	};
++
+ 	soc {
+ 		compatible = "simple-bus";
+ 		#address-cells = <1>;
+diff --git a/arch/arm/boot/dts/stm32mp15xx-dkx.dtsi b/arch/arm/boot/dts/stm32mp15xx-dkx.dtsi
+index d946e0a02..669e44c87 100644
+--- a/arch/arm/boot/dts/stm32mp15xx-dkx.dtsi
++++ b/arch/arm/boot/dts/stm32mp15xx-dkx.dtsi
+@@ -17,7 +17,7 @@
+ 		#address-cells = <1>;
+ 		#size-cells = <1>;
+ 		ranges;
+-
++/*
+ 		mcuram2: mcuram2@10000000 {
+ 			compatible = "shared-dma-pool";
+ 			reg = <0x10000000 0x40000>;
+@@ -53,11 +53,17 @@
+ 			reg = <0x38000000 0x10000>;
+ 			no-map;
+ 		};
+-
++*/
+ 		gpu_reserved: gpu@d4000000 {
+ 			reg = <0xd4000000 0x4000000>;
+ 			no-map;
+ 		};
++
++		optee_reserved: optee@de000000 {
++			reg = <0xde000000 0x02000000>;
++			no-map;
++		};
++
+ 	};
+ 
+ 	led {
+@@ -80,6 +86,14 @@
+ 		dais = <&sai2a_port &sai2b_port &i2s2_port>;
+ 		status = "okay";
+ 	};
++
++	firmware {
++		optee {
++			compatible = "linaro,optee-tz";
++			method = "smc";
++		};
++	};
++
+ };
+ 
+ &adc {
+@@ -404,7 +418,7 @@
+ 		};
+ 	};
+ };
+-
++/*
+ &m4_rproc {
+ 	memory-region = <&retram>, <&mcuram>, <&mcuram2>, <&vdev0vring0>,
+ 			<&vdev0vring1>, <&vdev0buffer>;
+@@ -414,7 +428,7 @@
+ 	interrupts = <68 1>;
+ 	status = "okay";
+ };
+-
++*/
+ &pwr_regulators {
+ 	vdd-supply = <&vdd>;
+ 	vdd_3v3_usbfs-supply = <&vdd_usb>;
+-- 
+2.17.1
+
