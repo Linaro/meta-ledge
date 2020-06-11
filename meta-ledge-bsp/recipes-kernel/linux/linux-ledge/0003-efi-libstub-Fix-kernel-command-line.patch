@@ -1,0 +1,169 @@
+From 9be15a16c2ac00bd3bd787532c12bc10d738ee84 Mon Sep 17 00:00:00 2001
+From: Christophe Priouzeau <christophe.priouzeau@st.com>
+Date: Tue, 26 May 2020 15:34:53 +0200
+Subject: [PATCH 3/6] efi: libstub: Fix kernel command line
+
+On our parsing we never included the kernel command line for anything
+apart from efi= related args. As a result adding initrd= on the firmware
+works fine, but fails if it's specified in the kernel command-line args.
+Also the current code doesn't fully respect CONFIG_CMDLINE_FORCE.
+Provide a function that will concatenate the efi cmd line and kernel cmd
+line when appropriate.
+If CONFIG_CMDLINE_EXTEND is selected command line will be extended.
+If CONFIG_CMDLINE_FORCE is selected the .config command line will be
+forced regardless.
+If CONFIG_CMDLINE_FROM_BOOTLOADER is selected only the firmware
+arguments will be passed, unless empty. In that case we'll use whatever
+the kernel built-in cmd line provides.
+
+Signed-off-by: Ilias Apalodimas <ilias.apalodimas@linaro.org>
+---
+ drivers/firmware/efi/libstub/arm-stub.c | 80 ++++++++++++++++++++-----
+ 1 file changed, 65 insertions(+), 15 deletions(-)
+
+diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+index 48161b1dd..562fd3515 100644
+--- a/drivers/firmware/efi/libstub/arm-stub.c
++++ b/drivers/firmware/efi/libstub/arm-stub.c
+@@ -92,6 +92,48 @@ void install_memreserve_table(void)
+ 		pr_efi_err("Failed to install memreserve config table!\n");
+ }
+ 
++char *concat_cmd_lines(efi_system_table_t *sys_table_arg, char *efi_cmd_line)
++{
++	char *cmdline;
++	int efi_line_len = strlen(efi_cmd_line);
++	int tot_len = efi_line_len;
++	efi_status_t status;
++
++	/* Ignore the kernel cmdline */
++	if (IS_ENABLED(CONFIG_CMDLINE_FROM_BOOTLOADER) && efi_line_len)
++		return efi_cmd_line;
++
++	if (IS_ENABLED(CONFIG_CMDLINE_EXTEND)) {
++		/* white space + NUL termination */
++		tot_len += strlen(CONFIG_CMDLINE) + 2;
++	} else if (IS_ENABLED(CONFIG_CMDLINE_FORCE) ||
++		 (IS_ENABLED(CONFIG_CMDLINE_FROM_BOOTLOADER) && !efi_line_len)) {
++		tot_len = strlen(CONFIG_CMDLINE) + 1;
++		efi_line_len = 0;
++	} else {
++		/* Not all architectures support CONFIG_CMDLINE_* treat
++		 * everything else as extend
++		 */
++		tot_len += strlen(CONFIG_CMDLINE) + 2;
++	}
++
++	status = efi_bs_call(allocate_pool, EFI_LOADER_DATA, tot_len,
++				(void **)&cmdline);
++	if (status != EFI_SUCCESS)
++		return NULL;
++
++	if (efi_line_len) {
++		memcpy(cmdline, efi_cmd_line, efi_line_len);
++		*(cmdline + efi_line_len) = ' ';
++		efi_line_len++;
++	}
++
++	memcpy(cmdline + efi_line_len, CONFIG_CMDLINE,
++	       strlen(CONFIG_CMDLINE) + 1);
++
++	return cmdline;
++}
++
+ static unsigned long get_dram_base(void)
+ {
+ 	efi_status_t status;
+@@ -161,8 +203,9 @@ efi_status_t efi_entry(efi_handle_t handle, efi_system_table_t *sys_table_arg)
+ 	unsigned long initrd_size = 0;
+ 	unsigned long fdt_addr = 0;  /* Original DTB */
+ 	unsigned long fdt_size = 0;
+-	char *cmdline_ptr = NULL;
+-	int cmdline_size = 0;
++	char *efi_cmdline_ptr = NULL;
++	char *full_cmdline_ptr = NULL; /* Include kernel cmdline */
++	int efi_cmdline_size = 0;
+ 	efi_guid_t loaded_image_proto = LOADED_IMAGE_PROTOCOL_GUID;
+ 	unsigned long reserve_addr = 0;
+ 	unsigned long reserve_size = 0;
+@@ -207,20 +250,20 @@ efi_status_t efi_entry(efi_handle_t handle, efi_system_table_t *sys_table_arg)
+ 	 * protocol. We are going to copy the command line into the
+ 	 * device tree, so this can be allocated anywhere.
+ 	 */
+-	cmdline_ptr = efi_convert_cmdline(image, &cmdline_size, ULONG_MAX);
+-	if (!cmdline_ptr) {
++	efi_cmdline_ptr = efi_convert_cmdline(image, &efi_cmdline_size, ULONG_MAX);
++	if (!efi_cmdline_ptr) {
+ 		pr_efi_err("getting command line via LOADED_IMAGE_PROTOCOL\n");
+ 		status = EFI_OUT_OF_RESOURCES;
+ 		goto fail;
+ 	}
+ 
+-	if (IS_ENABLED(CONFIG_CMDLINE_EXTEND) ||
+-	    IS_ENABLED(CONFIG_CMDLINE_FORCE) ||
+-	    cmdline_size == 0)
+-		efi_parse_options(CONFIG_CMDLINE);
++	full_cmdline_ptr = concat_cmd_lines(sys_table, efi_cmdline_ptr);
++	if (!full_cmdline_ptr) {
++		pr_efi_err("Failed to get a proper commandline\n");
++		goto fail_free_cmdline;
++	}
+ 
+-	if (!IS_ENABLED(CONFIG_CMDLINE_FORCE) && cmdline_size > 0)
+-		efi_parse_options(cmdline_ptr);
++	efi_parse_options(full_cmdline_ptr);
+ 
+ 	pr_efi("Booting Linux Kernel...\n");
+ 
+@@ -232,7 +275,7 @@ efi_status_t efi_entry(efi_handle_t handle, efi_system_table_t *sys_table_arg)
+ 				     dram_base, image);
+ 	if (status != EFI_SUCCESS) {
+ 		pr_efi_err("Failed to relocate kernel\n");
+-		goto fail_free_cmdline;
++		goto fail_free_screeninfo;
+ 	}
+ 
+ 	efi_retrieve_tpm2_eventlog();
+@@ -249,7 +292,7 @@ efi_status_t efi_entry(efi_handle_t handle, efi_system_table_t *sys_table_arg)
+ 	 */
+ 	if (!IS_ENABLED(CONFIG_EFI_ARMSTUB_DTB_LOADER) ||
+ 	     secure_boot != efi_secureboot_mode_disabled) {
+-		if (strstr(cmdline_ptr, "dtb="))
++		if (strstr(full_cmdline_ptr, "dtb="))
+ 			pr_efi("Ignoring DTB from command line.\n");
+ 	} else {
+ 		status = efi_load_dtb(image, &fdt_addr, &fdt_size);
+@@ -324,10 +367,14 @@ efi_status_t efi_entry(efi_handle_t handle, efi_system_table_t *sys_table_arg)
+ 
+ 	install_memreserve_table();
+ 
++	/* done with the full cmd line ptr */
++	if (full_cmdline_ptr != efi_cmdline_ptr)
++		efi_bs_call(free_pool, (void *)full_cmdline_ptr);
++
+ 	status = allocate_new_fdt_and_exit_boot(handle, &fdt_addr,
+ 						efi_get_max_fdt_addr(dram_base),
+ 						initrd_addr, initrd_size,
+-						cmdline_ptr, fdt_addr, fdt_size);
++						efi_cmdline_ptr, fdt_addr, fdt_size);
+ 	if (status != EFI_SUCCESS)
+ 		goto fail_free_initrd;
+ 
+@@ -343,9 +390,12 @@ efi_status_t efi_entry(efi_handle_t handle, efi_system_table_t *sys_table_arg)
+ fail_free_image:
+ 	efi_free(image_size, image_addr);
+ 	efi_free(reserve_size, reserve_addr);
+-fail_free_cmdline:
++fail_free_screeninfo:
+ 	free_screen_info(si);
+-	efi_free(cmdline_size, (unsigned long)cmdline_ptr);
++	if (full_cmdline_ptr != efi_cmdline_ptr)
++		efi_bs_call(free_pool, (void *)full_cmdline_ptr);
++fail_free_cmdline:
++	efi_free(efi_cmdline_size, (unsigned long)efi_cmdline_ptr);
+ fail:
+ 	return status;
+ }
+-- 
+2.17.1
+
