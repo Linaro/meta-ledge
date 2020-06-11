@@ -15,7 +15,7 @@ part fsbl1 --source rawcopy --fstype=ext4 --fsoptions "noauto" --part-name=fsbl1
 part fsbl2 --source rawcopy --fstype=ext4 --fsoptions "noauto" --part-name=fsbl2 --sourceparams="file=${DEPLOY_DIR_IMAGE}/arm-trusted-firmware/tf-a-stm32mp157c-dk2.stm32" --ondisk mmcblk --part-type 0x8301 --fixed-size 256K
 part ssbl  --source rawcopy --fstype=ext4 --fsoptions "noauto" --part-name=ssbl --sourceparams="file=${DEPLOY_DIR_IMAGE}/u-boot-trusted.stm32" --ondisk mmcblk --part-type 0x8301 --fixed-size 2048K
 part teeh  --source rawcopy --fstype=ext4 --fsoptions "noauto" --part-name=teeh --sourceparams="file=${DEPLOY_DIR_IMAGE}/optee/tee-header_v2.stm32" --ondisk mmcblk --part-type 0x8301 --fixed-size 256K
-part teed  --source rawcopy --fstype=ext4 --fsoptions "noauto" --part-name=teed --sourceparams="file=${DEPLOY_DIR_IMAGE}/optee/tee-pageable_v2.stm32" --ondisk mmcblk --part-type 0x8301 --fixed-size 256K
+part teed  --source rawcopy --fstype=ext4 --fsoptions "noauto" --part-name=teed --sourceparams="file=${DEPLOY_DIR_IMAGE}/optee/tee-pageable_v2.stm32" --ondisk mmcblk --part-type 0x8301 --fixed-size 512K
 part teex  --source rawcopy --fstype=ext4 --fsoptions "noauto" --part-name=teex --sourceparams="file=${DEPLOY_DIR_IMAGE}/optee/tee-pager_v2.stm32" --ondisk mmcblk --part-type 0x8301 --fixed-size 256K
 
 part /boot --source bootimg-efi --sourceparams="loader=kernel" --fstype=vfat --part-type 0xef00 --label bootfs --align 4 --use-uuid --include-path "${DEPLOY_DIR_IMAGE}/dtb ${DEPLOY_DIR_IMAGE}/ledge-initramfs.rootfs.cpio.gz" --fixed-size 64M
