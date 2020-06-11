@@ -2,7 +2,7 @@ SUMMARY = "OPTEE fTPM Microsoft TA"
 DESCRIPTION = "OPTEE fTPM"
 HOMEPAGE = "https://github.com/microsoft/ms-tpm-20-ref/"
 
-inherit autotools-brokensep pkgconfig gettext
+inherit autotools-brokensep pkgconfig gettext python3native
 
 FTPM_UUID="bc50d971-d4c9-42c4-82cb-343fb7f37896"
 LICENSE = "BSD"
@@ -10,6 +10,7 @@ LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=5a3925ece0806073ae9ebbb08ff6f11e"
 
 DEPENDS = "optee-client optee-os openssl"
 DEPENDS += "openssl-native autoconf-archive-native"
+DEPENDS += "python3-pycryptodomex-native python3-pycrypto-native"
 
 # SRC_URI = "git://github.com/Microsoft/ms-tpm-20-ref;branch=master"
 # Since this is not built as a pseudo TA, we can only use it as a kernel module and not built in.
