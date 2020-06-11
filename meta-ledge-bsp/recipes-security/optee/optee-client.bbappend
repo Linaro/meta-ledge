@@ -1,8 +1,10 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
-# 3.6
-PV="3.6.0+git${SRCPV}"
-SRCREV = "1cdf49d9259ad83c3fbdf416e5ea223a18a28da8"
+# 3.9
+PV="3.9.0+git${SRCPV}"
+SRCREV_ledgecommon = "e9e55969d76ddefcb5b398e592353e5c7f5df198"
+
+DEPENDS_append_ledgecommon += "python3-pycryptodomex-native python3-pycrypto-native"
 
 do_install() {
     oe_runmake install
