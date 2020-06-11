@@ -1,13 +1,19 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
-# 3.6
+# 3.9
 LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=c1f21c4f72f372ef38a5a4aee55ec173"
-PV="3.6.0+git${SRCPV}"
-SRCREV = "f398d4923da875370149ffee45c963d7adb41495"
+PV="3.9.0+git${SRCPV}"
+SRCREV = "af141c61fe7a2430f3b4bb89661d8414117013b3"
 
-SRC_URI_append_ledge-stm32mp157c-dk2 = " file://0001-stm32mp1-BSEC-SiP-SMC-service-to-read-fuses.patch "
+DEPENDS += "dtc-native"
+DEPENDS += "python3-pyelftools-native dtc-native python3-pycryptodomex-native python3-pycrypto-native"
 
-DEPENDS += "python3-pyelftools-native dtc-native"
+SRC_URI_append_ledgecommon = " file://0002-PTA-add-debug-information.patch "
+
+SRC_URI_append_ledge-qemuarm64 = " file://bc50d971-d4c9-42c4-82cb-343fb7f37896.stripped.elf "
+# random
+SRC_URI_append_ledge-qemuarm64 = " file://b6c53aba-9669-4668-a7f2-205629d00f86.stripped.elf "
+
 inherit python3native
 
 # ledge-ti-am572x

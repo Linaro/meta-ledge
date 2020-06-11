@@ -1,0 +1,30 @@
+From 852a7b72ea5899c659ca32821b18e078c044c852 Mon Sep 17 00:00:00 2001
+From: Christophe Priouzeau <christophe.priouzeau@st.com>
+Date: Thu, 11 Jun 2020 11:32:49 +0200
+Subject: [PATCH 2/2] PTA: add debug information
+
+Signed-off-by: Christophe Priouzeau <christophe.priouzeau@st.com>
+Signed-off-by: Maxim Uvarov <maxim.uvarov@linaro.org>
+---
+ core/pta/device.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/core/pta/device.c b/core/pta/device.c
+index a030e85c5..83f6847b1 100644
+--- a/core/pta/device.c
++++ b/core/pta/device.c
+@@ -30,8 +30,10 @@ static void add_ta(uint32_t flags, const TEE_UUID *uuid, uint8_t *buf,
+ 	}
+ 
+ 	if (flags & rflags) {
+-		if (*pos + sizeof(*uuid) <= blen)
++		if (*pos + sizeof(*uuid) <= blen) {
+ 			tee_uuid_to_octets(buf + *pos, uuid);
++			IMSG("provide ta %pUl\n", uuid);
++		}
+ 
+ 		*pos += sizeof(*uuid);
+ 	}
+-- 
+2.17.1
+

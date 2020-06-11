@@ -1,0 +1,30 @@
+From a003c4c1bb73bfa108c3a84cf15348584d99fece Mon Sep 17 00:00:00 2001
+From: Christophe Priouzeau <christophe.priouzeau@st.com>
+Date: Tue, 26 May 2020 09:25:16 +0200
+Subject: [PATCH] Correct support of 32bits
+
+Signed-off-by: Christophe Priouzeau <christophe.priouzeau@st.com>
+---
+ host/xtest/Makefile | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/host/xtest/Makefile b/host/xtest/Makefile
+index 3c206b0..141bab7 100644
+--- a/host/xtest/Makefile
++++ b/host/xtest/Makefile
+@@ -24,6 +24,12 @@ OBJCOPY		?= $(CROSS_COMPILE)objcopy
+ OBJDUMP		?= $(CROSS_COMPILE)objdump
+ READELF		?= $(CROSS_COMPILE)readelf
+ 
++ifeq ($(CFG_ARM32_core),y)
++COMPILE_NS_USER ?= 32
++else
++COMPILE_NS_USER ?= 64
++endif
++
+ # Macros to detect the targeted architecture (e.g., arm-linux-gnueabihf or
+ # aarch64-linux-gnu) and the corresponding bit size (32 or 64).
+ define cc-arch
+-- 
+2.17.1
+
