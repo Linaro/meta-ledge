@@ -2,22 +2,22 @@ SUMMARY = "OPC UA implementation"
 HOMEPAGE = "https://open62541.org/"
 LICENSE = "MPL-2.0"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=815ca599c9df247a0c7f619bab123dad"
-DEPENDS = "openssl python-six-native"
+DEPENDS = "openssl python3-six-native"
 
-SRC_URI = "git://github.com/open62541/open62541.git;protocol=https;branch=0.3"
-SRCREV = "101e167135422f87224d4bd804894d39b3b0d165"
+SRC_URI = "git://github.com/open62541/open62541.git;protocol=https;nobranch=1"
+SRCREV = "391d226c570dd29cb487f467f6941320452b1d96"
 
-PV= "0.3+git${SRCPV}"
+PV= "1.1+git${SRCPV}"
 
 S = "${WORKDIR}/git"
 
-inherit cmake pythonnative
+inherit cmake python3native
 
 EXTRA_OECMAKE += "\
     -DCMAKE_SKIP_RPATH=TRUE \
     "
 
-PACKAGECONFIG ?= "release amalgamation shared examples"
+PACKAGECONFIG ?= "release shared examples"
 
 PACKAGECONFIG[release] = "-DCMAKE_BUILD_TYPE=Release,-DCMAKE_BUILD_TYPE=Debug,"
 # Enable Discovery Service with multicast support (LDS-ME)
@@ -43,7 +43,7 @@ do_install_append() {
 
 PACKAGES =+ "${PN}-examples"
 # limit ${PN} package to libdir only
-FILES_${PN} = "${libdir}"
+FILES_${PN} = "${libdir} ${bindir}"
 FILES_${PN}-examples = "${base_bindir}/examples"
 FILES_${PN}-dev += "${datadir}/open62541"
 
