@@ -1,18 +1,18 @@
-From 32f1c9d0e48a1ddc1b804d97d73abb1a490c7255 Mon Sep 17 00:00:00 2001
-From: Christophe Priouzeau <christophe.priouzeau@linaro.org>
-Date: Wed, 22 Jan 2020 16:27:52 +0100
+From 09676d79f7a667b2e32c079883cb5b84921f2e61 Mon Sep 17 00:00:00 2001
+From: Christophe Priouzeau <christophe.priouzeau@st.com>
+Date: Tue, 26 May 2020 14:42:03 +0200
 Subject: [PATCH 1/2] STM32mp157c-DK2
 
-Signed-off-by: Christophe Priouzeau <christophe.priouzeau@linaro.org>
+Signed-off-by: Christophe Priouzeau <christophe.priouzeau@st.com>
 ---
- include/configs/stm32mp1.h | 19 +++++++++----------
- 1 file changed, 9 insertions(+), 10 deletions(-)
+ include/configs/stm32mp1.h | 17 ++++++-----------
+ 1 file changed, 6 insertions(+), 11 deletions(-)
 
 diff --git a/include/configs/stm32mp1.h b/include/configs/stm32mp1.h
-index d42a7860be..c294762d55 100644
+index f271b84a59..d1ae7dc8c9 100644
 --- a/include/configs/stm32mp1.h
 +++ b/include/configs/stm32mp1.h
-@@ -114,16 +114,11 @@
+@@ -127,17 +127,11 @@
   */
  #define STM32MP_BOOTCMD "bootcmd_stm32mp=" \
  	"echo \"Boot over ${boot_device}${boot_instance}!\";" \
@@ -22,7 +22,8 @@ index d42a7860be..c294762d55 100644
 -		"run env_check;" \
 -		"if test ${boot_device} = mmc;" \
 -		"then env set boot_targets \"mmc${boot_instance}\"; fi;" \
--		"if test ${boot_device} = nand;" \
+-		"if test ${boot_device} = nand ||" \
+-		  " test ${boot_device} = spi-nand ;" \
 -		"then env set boot_targets ubifs0; fi;" \
 -		"run distro_bootcmd;" \
 -	"fi;\0"
@@ -34,17 +35,14 @@ index d42a7860be..c294762d55 100644
  
  #include <config_distro_bootcmd.h>
  
-@@ -194,6 +189,10 @@
+@@ -155,6 +149,7 @@
+ 	"splashimage=0xc4300000\0"  \
  	"ramdisk_addr_r=0xc4400000\0" \
- 	"fdt_high=0xffffffff\0" \
- 	"initrd_high=0xffffffff\0" \
-+	"fdtfile=" CONFIG_DEFAULT_DEVICE_TREE ".dtb\0" \
-+	"env_default=1\0"				\
-+	"env_check=if test $env_default -eq 1;"\
-+		" then env set env_default 0;env save;fi\0" \
  	"altbootcmd=run bootcmd\0" \
++	"fdtfile=" CONFIG_DEFAULT_DEVICE_TREE ".dtb\0" \
  	"env_default=1\0" \
  	"env_check=if test $env_default -eq 1;"\
+ 		" then env set env_default 0;env save;fi\0" \
 -- 
 2.17.1
 

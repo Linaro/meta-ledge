@@ -8,7 +8,8 @@ PE = "1"
 
 # We use the revision in order to avoid having to fetch it from the
 # repo during parse
-SRCREV = "0b0c6af38738f2c132cfd41a240889acaa031c8f"
+SRCREV = "e411a090cf7162626d54d72dfc4530986c788cdb"
+PV = "2020.07-rc4"
 
 SRC_URI = "git://git.denx.de/u-boot.git"
 
@@ -18,7 +19,7 @@ SRC_URI += " \
 
 SRC_URI += " \
         file://0001-STM32mp157c-DK2.patch \
-        file://0001-u-boot-ti-am572x-enable-boot_distrocmd.patch \
+        file://0002-ti-am572x-enable-boot_distrocmd.patch \
     "
 
 S = "${WORKDIR}/git"
