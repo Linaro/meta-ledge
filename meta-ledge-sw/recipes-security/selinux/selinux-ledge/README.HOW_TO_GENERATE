@@ -18,7 +18,7 @@ To generate a new ledge rule:
 
 If you need to add new rules,
 Get new rule from dmesg and add it current rule
-  BOARD> cp /etc/selinux/ledgeEnforcement.te
+  BOARD> cp /etc/selinux/ledgeEnforcement.te .
   BOARD> audit2allow -d -o ledgeEnforcement.te
 Get new rule from audit and add it current rule
   BOARD> audit2allow -a -o ledgeEnforcement.te

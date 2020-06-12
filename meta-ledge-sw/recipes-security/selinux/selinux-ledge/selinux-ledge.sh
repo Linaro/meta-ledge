@@ -11,7 +11,7 @@ load)
         #Force ledge user to be unconfined_u user
         /usr/sbin/semanage login -a -s unconfined_u ledge
         # load ledge selinux rule
-        /sbin/semodule -i /etc/selinux/ledgeEnforcement.pp
+        #/sbin/semodule -i /etc/selinux/ledgeEnforcement.pp
     fi
     ;;
 unload)
