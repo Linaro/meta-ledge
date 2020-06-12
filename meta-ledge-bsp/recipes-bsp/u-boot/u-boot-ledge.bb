@@ -20,6 +20,8 @@ SRC_URI += " \
 SRC_URI += " \
         file://0001-STM32mp157c-DK2.patch \
         file://0002-ti-am572x-enable-boot_distrocmd.patch \
+        file://0003-board-stm32mp1-fix-handling-of-DT-OP-TEE-reserved-me.patch \
+        file://0004-dts-ARM-stm32mp15-add-OP-TEE-node-in-u-boot-DTSI.patch \
     "
 
 S = "${WORKDIR}/git"

@@ -1,0 +1,114 @@
+From 4a8e897e6325a23d937b92ec8ef85517f60c6ce1 Mon Sep 17 00:00:00 2001
+From: Etienne Carriere <etienne.carriere@linaro.org>
+Date: Fri, 5 Jun 2020 09:24:30 +0200
+Subject: [PATCH 4/4] dts: ARM: stm32mp15: add OP-TEE node in u-boot DTSI
+
+Add OP-TEE firmware node in stm32mp15 U-Boot DTSI. This node is
+needed since commit [1] that changed U-Boot/stm32mp15 to detect
+OP-TEE availability by probing the resource instead of relying on
+U-Boot configuration. The software sequence implemented by [1] is
+fine but U-Boot DTS/DTSI files were not updated accordingly since,
+hence OP-TEE presence is never detected by U-Boot, preventing Linux
+kernel from using OP-TEE resources.
+
+For consistency and to synchronize stm32mp15 DTSI files (excluding
+U-Boot specific DTSI files) with the Linux kernel ones, this change
+also moves the OP-TEE reserved memory nodes from board generic DTSI
+files to U-Boot specific board DTSI files.
+
+Link: [1] commit 43df0a159df6 ("stm32mp1: dynamically detect op-tee presence")
+Signed-off-by: Etienne Carriere <etienne.carriere@linaro.org>
+Signed-off-by: Patrick Delaunay <patrick.delaunay@st.com>
+---
+ arch/arm/dts/stm32mp157a-dk1-u-boot.dtsi | 15 +++++++++++++++
+ arch/arm/dts/stm32mp157c-ed1-u-boot.dtsi | 14 ++++++++++++++
+ arch/arm/dts/stm32mp157c-ed1.dts         |  5 -----
+ arch/arm/dts/stm32mp15xx-dkx.dtsi        |  5 -----
+ 4 files changed, 29 insertions(+), 10 deletions(-)
+
+diff --git a/arch/arm/dts/stm32mp157a-dk1-u-boot.dtsi b/arch/arm/dts/stm32mp157a-dk1-u-boot.dtsi
+index c52abeb1e7..3fedb6f1e1 100644
+--- a/arch/arm/dts/stm32mp157a-dk1-u-boot.dtsi
++++ b/arch/arm/dts/stm32mp157a-dk1-u-boot.dtsi
+@@ -20,6 +20,21 @@
+ 		st,fastboot-gpios = <&gpioa 13 GPIO_ACTIVE_LOW>;
+ 		st,stm32prog-gpios = <&gpioa 14 GPIO_ACTIVE_LOW>;
+ 	};
++
++	firmware {
++		optee {
++			compatible = "linaro,optee-tz";
++			method = "smc";
++		};
++	};
++
++	reserved-memory {
++		optee@de000000 {
++			reg = <0xde000000 0x02000000>;
++			no-map;
++		};
++	};
++
+ 	led {
+ 		red {
+ 			label = "error";
+diff --git a/arch/arm/dts/stm32mp157c-ed1-u-boot.dtsi b/arch/arm/dts/stm32mp157c-ed1-u-boot.dtsi
+index 84af7fa47b..a07c585415 100644
+--- a/arch/arm/dts/stm32mp157c-ed1-u-boot.dtsi
++++ b/arch/arm/dts/stm32mp157c-ed1-u-boot.dtsi
+@@ -21,6 +21,20 @@
+ 		st,stm32prog-gpios = <&gpioa 14 GPIO_ACTIVE_LOW>;
+ 	};
+ 
++	firmware {
++		optee {
++			compatible = "linaro,optee-tz";
++			method = "smc";
++		};
++	};
++
++	reserved-memory {
++		optee@fe000000 {
++			reg = <0xfe000000 0x02000000>;
++			no-map;
++		};
++	};
++
+ 	led {
+ 		red {
+ 			label = "error";
+diff --git a/arch/arm/dts/stm32mp157c-ed1.dts b/arch/arm/dts/stm32mp157c-ed1.dts
+index 4fb71100f5..186dc46754 100644
+--- a/arch/arm/dts/stm32mp157c-ed1.dts
++++ b/arch/arm/dts/stm32mp157c-ed1.dts
+@@ -70,11 +70,6 @@
+ 			reg = <0xe8000000 0x8000000>;
+ 			no-map;
+ 		};
+-
+-		optee@fe000000 {
+-			reg = <0xfe000000 0x02000000>;
+-			no-map;
+-		};
+ 	};
+ 
+ 	aliases {
+diff --git a/arch/arm/dts/stm32mp15xx-dkx.dtsi b/arch/arm/dts/stm32mp15xx-dkx.dtsi
+index 812e370ee4..7589c6f9dc 100644
+--- a/arch/arm/dts/stm32mp15xx-dkx.dtsi
++++ b/arch/arm/dts/stm32mp15xx-dkx.dtsi
+@@ -58,11 +58,6 @@
+ 			reg = <0xd4000000 0x4000000>;
+ 			no-map;
+ 		};
+-
+-		optee@de000000 {
+-			reg = <0xde000000 0x02000000>;
+-			no-map;
+-		};
+ 	};
+ 
+ 	led {
+-- 
+2.17.1
+
