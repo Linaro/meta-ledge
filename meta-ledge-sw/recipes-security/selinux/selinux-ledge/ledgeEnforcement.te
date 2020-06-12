@@ -1,72 +1,74 @@
+
 module ledgeEnforcement 1.0;
 
 require {
-	type systemd_sessions_t;
-	type semanage_store_t;
-	type system_dbusd_var_run_t;
-	type init_t;
-	type systemd_networkd_t;
-	type lib_t;
-	type pam_var_run_t;
-	type default_t;
-	type system_dbusd_t;
 	type chkpwd_t;
-	type local_login_t;
-	type avahi_t;
-	type systemd_backlight_t;
-	type policy_config_t;
-	type nsfs_t;
-	type shadow_t;
-	type auditd_log_t;
-	type ntpd_t;
-	type kmod_t;
-	type systemd_resolved_t;
-	type security_t;
-	type systemd_logind_t;
-	type systemd_networkd_var_run_t;
-	type iptables_t;
-	type tmpfs_t;
-	type syslogd_var_run_t;
-	type getty_t;
-	type user_t;
-	type sysctl_t;
-	type auditd_etc_t;
-	type semanage_read_lock_t;
-	type sysctl_kernel_t;
+	type devpts_t;
 	type etc_t;
-	type unlabeled_t;
-	type systemd_tmpfiles_t;
-	type semanage_t;
-	type systemd_gpt_generator_t;
-	type removable_device_t;
-	type var_log_t;
+	type system_dbusd_t;
 	type syslogd_t;
-	type init_var_run_t;
-	type udevadm_t;
+	type kmod_t;
+	type unconfined_t;
+	type rdisc_t;
+	type system_dbusd_var_run_t;
+	type syslogd_var_run_t;
 	type bin_t;
+	type init_t;
+	type getty_t;
+	type sysctl_kernel_t;
+	type auditd_log_t;
+	type auditd_etc_t;
+	type systemd_backlight_var_lib_t;
+	type systemd_sessions_t;
+	type initrc_t;
+	type systemd_networkd_var_run_t;
+	type sysctl_t;
+	type systemd_networkd_t;
+	type avahi_t;
+	type tmpfs_t;
+	type mount_t;
+	type ntpd_t;
+	type shadow_t;
+	type systemd_resolved_t;
+	type systemd_logind_t;
+	type systemd_backlight_t;
+	type local_login_t;
+	type kernel_t;
+	type systemd_tmpfiles_t;
+	type unlabeled_t;
+	type kmsg_device_t;
+	type iptables_t;
+	type nsfs_t;
 	type load_policy_t;
+	type semanage_t;
+	class dir { getattr read search };
+	class file { getattr ioctl map open read };
+	class unix_stream_socket { setopt shutdown };
+	class unix_dgram_socket sendto;
 	class netlink_generic_socket { bind create getattr getopt setopt };
-	class key search;
-	class capability { dac_read_search setuid sys_resource dac_override};
-	class file { create getattr ioctl lock map open read write };
 	class process2 nnp_transition;
-	class security read_policy;
-	class unix_dgram_socket { ioctl read write create getattr setattr lock relabelfrom relabelto append map bind connect listen accept getopt setopt shutdown recvfrom sendto recv_msg send_msg name_bind };
-	class sock_file { ioctl read write create getattr setattr lock relabelfrom relabelto append map unlink link rename execute swapon quotaon mounton open audit_access execmod };
+	class capability dac_read_search;
+	class sock_file write;
 	class dir { ioctl read write create getattr setattr lock relabelfrom relabelto append map unlink link rename execute swapon quotaon mounton add_name remove_name reparent search rmdir open audit_access execmod };
-	class blk_file { ioctl read write create getattr setattr lock relabelfrom relabelto append map unlink link rename execute swapon quotaon mounton open audit_access execmod };
-	class lnk_file { ioctl read write create getattr setattr lock relabelfrom relabelto append map unlink link rename execute swapon quotaon mounton open audit_access execmod };
-	class netlink_audit_socket { ioctl read write create getattr setattr lock relabelfrom relabelto append map bind connect listen accept getopt setopt shutdown recvfrom sendto recv_msg send_msg name_bind nlmsg_read nlmsg_write nlmsg_relay nlmsg_readpriv nlmsg_tty_audit };
+	class process { fork transition sigchld sigkill sigstop signull signal ptrace getsched setsched getsession getpgid setpgid getcap setcap share getattr setexec setfscreate noatsecure siginh setrlimit rlimitinh dyntransition setcurrent execmem execstack execheap setkeycreate setsockcreate getrlimit };
+	class chr_file { ioctl read write create getattr setattr lock relabelfrom relabelto append map unlink link rename execute swapon quotaon mounton execute_no_trans entrypoint execmod open audit_access };	
+	
 }
 
 #============= avahi_t ==============
 allow avahi_t etc_t:file map;
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow avahi_t syslogd_var_run_t:dir search;
 allow avahi_t syslogd_var_run_t:sock_file write;
 
 #============= chkpwd_t ==============
 allow chkpwd_t etc_t:file map;
 allow chkpwd_t init_t:unix_dgram_socket sendto;
 allow chkpwd_t shadow_t:file map;
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow chkpwd_t syslogd_var_run_t:dir search;
 allow chkpwd_t syslogd_var_run_t:sock_file write;
 
 #============= getty_t ==============
@@ -75,6 +77,283 @@ allow getty_t syslogd_var_run_t:sock_file write;
 allow getty_t tmpfs_t:dir search;
 
 #============= init_t ==============
+allow init_t initrc_t:process2 nnp_transition;
+allow init_t kmod_t:process2 nnp_transition;
+
+#============= kmod_t ==============
+allow kmod_t self:capability dac_read_search;
+
+#============= local_login_t ==============
+allow local_login_t etc_t:file map;
+allow local_login_t init_t:unix_dgram_socket sendto;
+allow local_login_t syslogd_var_run_t:sock_file write;
+
+#============= ntpd_t ==============
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow ntpd_t syslogd_var_run_t:dir search;
+allow ntpd_t system_dbusd_var_run_t:dir read;
+allow ntpd_t systemd_networkd_var_run_t:file { getattr open read };
+
+#============= rdisc_t ==============
+allow rdisc_t bin_t:dir { getattr search };
+
+#============= syslogd_t ==============
+
+#	Possible cause is the source level (s15:c0.c1023) and target level (s0-s15:c0.c1023) are different.
+allow syslogd_t init_t:unix_dgram_socket sendto;
+
+#	Possible cause is the source level (s15:c0.c1023) and target level (s0-s15:c0.c1023) are different.
+allow syslogd_t self:unix_stream_socket { setopt shutdown };
+
+#============= system_dbusd_t ==============
+allow system_dbusd_t etc_t:file map;
+
+#============= systemd_backlight_t ==============
+allow systemd_backlight_t sysctl_kernel_t:dir search;
+allow systemd_backlight_t sysctl_kernel_t:file { getattr ioctl open read };
+allow systemd_backlight_t sysctl_t:dir search;
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow systemd_backlight_t syslogd_var_run_t:dir search;
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow systemd_backlight_t systemd_backlight_var_lib_t:file { getattr read };
+
+#============= systemd_logind_t ==============
+allow systemd_logind_t etc_t:file map;
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow systemd_logind_t syslogd_var_run_t:dir search;
+
+#============= systemd_networkd_t ==============
+allow systemd_networkd_t etc_t:file map;
+allow systemd_networkd_t self:netlink_generic_socket { bind create getattr getopt setopt };
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow systemd_networkd_t syslogd_var_run_t:dir search;
+
+#============= systemd_resolved_t ==============
+allow systemd_resolved_t etc_t:file map;
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow systemd_resolved_t syslogd_var_run_t:dir search;
+
+#============= systemd_sessions_t ==============
+allow systemd_sessions_t sysctl_kernel_t:dir search;
+allow systemd_sessions_t sysctl_kernel_t:file { getattr ioctl open read };
+allow systemd_sessions_t sysctl_t:dir search;
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow systemd_sessions_t syslogd_var_run_t:dir search;
+
+#============= unconfined_t ==============
+
+#	Possible cause is the source user (unconfined_u) and target user (system_u) are different.
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow unconfined_t auditd_etc_t:dir search;
+
+#	Possible cause is the source user (unconfined_u) and target user (system_u) are different.
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow unconfined_t auditd_etc_t:file { getattr read };
+
+#	Possible cause is the source user (unconfined_u) and target user (system_u) are different.
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow unconfined_t auditd_log_t:dir { getattr read search };
+
+#	Possible cause is the source user (unconfined_u) and target user (system_u) are different.
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow unconfined_t auditd_log_t:file { getattr read };
+
+
+#============= init_t ==============
+
+#!!!! This avc is a constraint violation.  You would need to modify the attributes of either the source or target types to allow this access.
+#Constraint rule: 
+#	mlsconstrain dir { create } ((l1 eq l2)  or (t1 == mlsfileupgrade -Fail-)  and (l1 domby l2)  or (t1 == mlsfiledowngrade -Fail-)  and (l1 dom l2)  or (t1 == mlsfiledowngrade -Fail-)  and (l1 incomp l2 -Fail-)  and (l1 eq h2 -Fail-)  or (t1 == mlsfileupgrade -Fail-)  and (l1 domby h2)  or (t1 == mlsfiledowngrade -Fail-)  and (l1 dom h2 -Fail-)  or (t1 == mlsfiledowngrade -Fail-)  and (l1 incomp h2 -Fail-) ); Constraint DENIED
+
+allow init_t devpts_t:dir create;
+
+#============= mount_t ==============
+
+#!!!! This avc is a constraint violation.  You would need to modify the attributes of either the source or target types to allow this access.
+#Constraint rule: 
+#	mlsconstrain process { sigkill sigstop signal ptrace setsched setpgid setcap share setexec setfscreate setcurrent } ((l1 eq l2 -Fail-)  or (t1 == mlsprocwritetoclr -Fail-)  and (h1 dom l2)  and (l1 domby l2)  or (t1 == mlsprocwrite -Fail-) ); Constraint DENIED
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow mount_t kernel_t:process setsched;
+
+#============= systemd_tmpfiles_t ==============
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow systemd_tmpfiles_t syslogd_var_run_t:dir search;
+
+
+#============= avahi_t ==============
+allow avahi_t etc_t:file map;
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow avahi_t syslogd_var_run_t:dir search;
+allow avahi_t syslogd_var_run_t:sock_file write;
+
+#============= chkpwd_t ==============
+allow chkpwd_t etc_t:file map;
+allow chkpwd_t init_t:unix_dgram_socket sendto;
+allow chkpwd_t shadow_t:file map;
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow chkpwd_t syslogd_var_run_t:dir search;
+allow chkpwd_t syslogd_var_run_t:sock_file write;
+
+#============= getty_t ==============
+allow getty_t etc_t:file map;
+allow getty_t syslogd_var_run_t:sock_file write;
+allow getty_t tmpfs_t:dir search;
+
+#============= init_t ==============
+allow init_t initrc_t:process2 nnp_transition;
+allow init_t kmod_t:process2 nnp_transition;
+
+#============= kmod_t ==============
+allow kmod_t self:capability dac_read_search;
+
+#============= local_login_t ==============
+allow local_login_t etc_t:file map;
+allow local_login_t init_t:unix_dgram_socket sendto;
+allow local_login_t syslogd_var_run_t:sock_file write;
+allow local_login_t unlabeled_t:file { getattr open read };
+
+#============= ntpd_t ==============
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow ntpd_t syslogd_var_run_t:dir search;
+allow ntpd_t systemd_networkd_var_run_t:file { getattr open read };
+
+#============= rdisc_t ==============
+allow rdisc_t bin_t:dir { getattr search };
+
+#============= syslogd_t ==============
+
+#	Possible cause is the source level (s15:c0.c1023) and target level (s0-s15:c0.c1023) are different.
+allow syslogd_t init_t:unix_dgram_socket sendto;
+
+#	Possible cause is the source level (s15:c0.c1023) and target level (s0-s15:c0.c1023) are different.
+allow syslogd_t self:unix_stream_socket { setopt shutdown };
+
+#============= system_dbusd_t ==============
+allow system_dbusd_t etc_t:file map;
+allow system_dbusd_t unlabeled_t:file { getattr open read };
+
+#============= systemd_backlight_t ==============
+allow systemd_backlight_t sysctl_kernel_t:dir search;
+allow systemd_backlight_t sysctl_kernel_t:file { getattr ioctl open read };
+allow systemd_backlight_t sysctl_t:dir search;
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow systemd_backlight_t syslogd_var_run_t:dir search;
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow systemd_backlight_t systemd_backlight_var_lib_t:file { getattr read };
+
+#============= systemd_logind_t ==============
+allow systemd_logind_t etc_t:file map;
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow systemd_logind_t syslogd_var_run_t:dir search;
+allow systemd_logind_t unlabeled_t:file { getattr open read };
+
+#============= systemd_networkd_t ==============
+allow systemd_networkd_t etc_t:file map;
+allow systemd_networkd_t self:netlink_generic_socket { bind create getattr getopt setopt };
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow systemd_networkd_t syslogd_var_run_t:dir search;
+
+#============= systemd_resolved_t ==============
+allow systemd_resolved_t etc_t:file map;
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow systemd_resolved_t syslogd_var_run_t:dir search;
+allow systemd_resolved_t unlabeled_t:file { getattr open read };
+
+#============= systemd_sessions_t ==============
+allow systemd_sessions_t sysctl_kernel_t:dir search;
+allow systemd_sessions_t sysctl_kernel_t:file { getattr ioctl open read };
+allow systemd_sessions_t sysctl_t:dir search;
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow systemd_sessions_t syslogd_var_run_t:dir search;
+allow systemd_sessions_t unlabeled_t:file { getattr open read };
+
+#============= unconfined_t ==============
+
+#	Possible cause is the source user (unconfined_u) and target user (system_u) are different.
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow unconfined_t auditd_etc_t:dir search;
+
+#	Possible cause is the source user (unconfined_u) and target user (system_u) are different.
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow unconfined_t auditd_etc_t:file { getattr read };
+
+#	Possible cause is the source user (unconfined_u) and target user (system_u) are different.
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow unconfined_t auditd_log_t:dir { getattr read search };
+
+#	Possible cause is the source user (unconfined_u) and target user (system_u) are different.
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow unconfined_t auditd_log_t:file { getattr read };
+
+#	Possible cause is the source user (unconfined_u) and target user (system_u) are different.
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow unconfined_t kmsg_device_t:chr_file read;
+
+
+#============= init_t ==============
+
+#!!!! This avc is a constraint violation.  You would need to modify the attributes of either the source or target types to allow this access.
+#Constraint rule: 
+#	mlsconstrain dir { create } ((l1 eq l2)  or (t1 == mlsfileupgrade -Fail-)  and (l1 domby l2)  or (t1 == mlsfiledowngrade -Fail-)  and (l1 dom l2)  or (t1 == mlsfiledowngrade -Fail-)  and (l1 incomp l2 -Fail-)  and (l1 eq h2 -Fail-)  or (t1 == mlsfileupgrade -Fail-)  and (l1 domby h2)  or (t1 == mlsfiledowngrade -Fail-)  and (l1 dom h2 -Fail-)  or (t1 == mlsfiledowngrade -Fail-)  and (l1 incomp h2 -Fail-) ); Constraint DENIED
+
+allow init_t devpts_t:dir create;
+
+#============= mount_t ==============
+
+#!!!! This avc is a constraint violation.  You would need to modify the attributes of either the source or target types to allow this access.
+#Constraint rule: 
+#	mlsconstrain process { sigkill sigstop signal ptrace setsched setpgid setcap share setexec setfscreate setcurrent } ((l1 eq l2 -Fail-)  or (t1 == mlsprocwritetoclr -Fail-)  and (h1 dom l2)  and (l1 domby l2)  or (t1 == mlsprocwrite -Fail-) ); Constraint DENIED
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow mount_t kernel_t:process setsched;
+
+#============= systemd_tmpfiles_t ==============
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow systemd_tmpfiles_t syslogd_var_run_t:dir search;
+
+
+#============= avahi_t ==============
+allow avahi_t etc_t:file map;
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow avahi_t syslogd_var_run_t:dir search;
+allow avahi_t syslogd_var_run_t:sock_file write;
+
+#============= chkpwd_t ==============
+allow chkpwd_t etc_t:file map;
+allow chkpwd_t init_t:unix_dgram_socket sendto;
+allow chkpwd_t shadow_t:file map;
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow chkpwd_t syslogd_var_run_t:dir search;
+allow chkpwd_t syslogd_var_run_t:sock_file write;
+
+#============= getty_t ==============
+allow getty_t etc_t:file map;
+allow getty_t syslogd_var_run_t:sock_file write;
+allow getty_t tmpfs_t:dir search;
+
+#============= init_t ==============
+allow init_t initrc_t:process2 nnp_transition;
 allow init_t kmod_t:process2 nnp_transition;
 
 #============= iptables_t ==============
@@ -88,16 +367,19 @@ allow kmod_t self:capability dac_read_search;
 allow load_policy_t unlabeled_t:file { getattr open read };
 
 #============= local_login_t ==============
-allow local_login_t default_t:dir search;
 allow local_login_t etc_t:file map;
 allow local_login_t init_t:unix_dgram_socket sendto;
 allow local_login_t syslogd_var_run_t:sock_file write;
 allow local_login_t unlabeled_t:file { getattr open read };
-allow local_login_t tmpfs_t:dir write;
 
 #============= ntpd_t ==============
-allow ntpd_t system_dbusd_var_run_t:dir read;
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow ntpd_t syslogd_var_run_t:dir search;
 allow ntpd_t systemd_networkd_var_run_t:file { getattr open read };
+
+#============= rdisc_t ==============
+allow rdisc_t bin_t:dir { getattr search };
 
 #============= semanage_t ==============
 allow semanage_t etc_t:file map;
@@ -106,72 +388,232 @@ allow semanage_t syslogd_var_run_t:sock_file write;
 allow semanage_t unlabeled_t:file { getattr open read };
 
 #============= syslogd_t ==============
-allow syslogd_t self:netlink_audit_socket nlmsg_write;
-allow syslogd_t syslogd_var_run_t:sock_file create;
+
+#	Possible cause is the source level (s15:c0.c1023) and target level (s0-s15:c0.c1023) are different.
+allow syslogd_t init_t:unix_dgram_socket sendto;
+
+#	Possible cause is the source level (s15:c0.c1023) and target level (s0-s15:c0.c1023) are different.
+allow syslogd_t self:unix_stream_socket { setopt shutdown };
 
 #============= system_dbusd_t ==============
 allow system_dbusd_t etc_t:file map;
-allow system_dbusd_t unlabeled_t:file { getattr open read };
 allow system_dbusd_t syslogd_var_run_t:sock_file write;
+allow system_dbusd_t unlabeled_t:file { getattr open read };
 
 #============= systemd_backlight_t ==============
 allow systemd_backlight_t sysctl_kernel_t:dir search;
 allow systemd_backlight_t sysctl_kernel_t:file { getattr ioctl open read };
 allow systemd_backlight_t sysctl_t:dir search;
 
-#============= systemd_gpt_generator_t ==============
-allow systemd_gpt_generator_t removable_device_t:blk_file read;
-allow systemd_gpt_generator_t sysctl_t:dir search;
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow systemd_backlight_t syslogd_var_run_t:dir search;
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow systemd_backlight_t systemd_backlight_var_lib_t:file { getattr read };
 
 #============= systemd_logind_t ==============
 allow systemd_logind_t etc_t:file map;
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow systemd_logind_t syslogd_var_run_t:dir search;
 allow systemd_logind_t unlabeled_t:file { getattr open read };
 
 #============= systemd_networkd_t ==============
 allow systemd_networkd_t etc_t:file map;
 allow systemd_networkd_t self:netlink_generic_socket { bind create getattr getopt setopt };
-allow systemd_networkd_t init_var_run_t:dir write;
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow systemd_networkd_t syslogd_var_run_t:dir search;
 
 #============= systemd_resolved_t ==============
 allow systemd_resolved_t etc_t:file map;
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow systemd_resolved_t syslogd_var_run_t:dir search;
 allow systemd_resolved_t unlabeled_t:file { getattr open read };
 
 #============= systemd_sessions_t ==============
 allow systemd_sessions_t sysctl_kernel_t:dir search;
 allow systemd_sessions_t sysctl_kernel_t:file { getattr ioctl open read };
 allow systemd_sessions_t sysctl_t:dir search;
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow systemd_sessions_t syslogd_var_run_t:dir search;
+allow systemd_sessions_t unlabeled_t:file { getattr open read };
+
+#============= unconfined_t ==============
+
+#	Possible cause is the source user (unconfined_u) and target user (system_u) are different.
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow unconfined_t auditd_etc_t:dir search;
+
+#	Possible cause is the source user (unconfined_u) and target user (system_u) are different.
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow unconfined_t auditd_etc_t:file { getattr read };
+
+#	Possible cause is the source user (unconfined_u) and target user (system_u) are different.
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow unconfined_t auditd_log_t:dir { getattr read search };
+
+#	Possible cause is the source user (unconfined_u) and target user (system_u) are different.
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow unconfined_t auditd_log_t:file { getattr read };
+
+#	Possible cause is the source user (unconfined_u) and target user (system_u) are different.
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow unconfined_t kmsg_device_t:chr_file read;
+
+
+#============= init_t ==============
+
+allow init_t devpts_t:dir create;
+
+#============= mount_t ==============
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow mount_t kernel_t:process setsched;
+
+#============= systemd_tmpfiles_t ==============
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow systemd_tmpfiles_t syslogd_var_run_t:dir search;
+
+
+#============= avahi_t ==============
+allow avahi_t etc_t:file map;
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow avahi_t syslogd_var_run_t:dir search;
+allow avahi_t syslogd_var_run_t:sock_file write;
+
+#============= chkpwd_t ==============
+allow chkpwd_t etc_t:file map;
+allow chkpwd_t init_t:unix_dgram_socket sendto;
+allow chkpwd_t shadow_t:file map;
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow chkpwd_t syslogd_var_run_t:dir search;
+allow chkpwd_t syslogd_var_run_t:sock_file write;
+
+#============= getty_t ==============
+allow getty_t etc_t:file map;
+allow getty_t syslogd_var_run_t:sock_file write;
+allow getty_t tmpfs_t:dir search;
+
+#============= init_t ==============
+allow init_t initrc_t:process2 nnp_transition;
+allow init_t kmod_t:process2 nnp_transition;
+
+#============= iptables_t ==============
+allow iptables_t nsfs_t:file read;
+
+#============= kmod_t ==============
+allow kmod_t nsfs_t:file read;
+allow kmod_t self:capability dac_read_search;
+
+#============= load_policy_t ==============
+allow load_policy_t unlabeled_t:file { getattr open read };
+
+#============= local_login_t ==============
+allow local_login_t etc_t:file map;
+allow local_login_t init_t:unix_dgram_socket sendto;
+allow local_login_t syslogd_var_run_t:sock_file write;
+allow local_login_t unlabeled_t:file { getattr open read };
+
+#============= ntpd_t ==============
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow ntpd_t syslogd_var_run_t:dir search;
+allow ntpd_t systemd_networkd_var_run_t:file { getattr open read };
+
+#============= rdisc_t ==============
+allow rdisc_t bin_t:dir { getattr search };
+
+#============= semanage_t ==============
+allow semanage_t etc_t:file map;
+allow semanage_t init_t:unix_dgram_socket sendto;
+allow semanage_t syslogd_var_run_t:sock_file write;
+allow semanage_t unlabeled_t:file { getattr open read };
+
+#============= syslogd_t ==============
+
+#	Possible cause is the source level (s15:c0.c1023) and target level (s0-s15:c0.c1023) are different.
+allow syslogd_t init_t:unix_dgram_socket sendto;
+
+#	Possible cause is the source level (s15:c0.c1023) and target level (s0-s15:c0.c1023) are different.
+allow syslogd_t self:unix_stream_socket { setopt shutdown };
+
+#============= system_dbusd_t ==============
+allow system_dbusd_t etc_t:file map;
+allow system_dbusd_t syslogd_var_run_t:sock_file write;
+allow system_dbusd_t unlabeled_t:file { getattr open read };
+
+#============= systemd_backlight_t ==============
+allow systemd_backlight_t sysctl_kernel_t:dir search;
+allow systemd_backlight_t sysctl_kernel_t:file { getattr ioctl open read };
+allow systemd_backlight_t sysctl_t:dir search;
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow systemd_backlight_t syslogd_var_run_t:dir search;
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow systemd_backlight_t systemd_backlight_var_lib_t:file { getattr read };
+
+#============= systemd_logind_t ==============
+allow systemd_logind_t etc_t:file map;
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow systemd_logind_t syslogd_var_run_t:dir search;
+allow systemd_logind_t unlabeled_t:file { getattr open read };
+
+#============= systemd_networkd_t ==============
+allow systemd_networkd_t etc_t:file map;
+allow systemd_networkd_t self:netlink_generic_socket { bind create getattr getopt setopt };
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow systemd_networkd_t syslogd_var_run_t:dir search;
+
+#============= systemd_resolved_t ==============
+allow systemd_resolved_t etc_t:file map;
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow systemd_resolved_t syslogd_var_run_t:dir search;
+allow systemd_resolved_t unlabeled_t:file { getattr open read };
+
+#============= systemd_sessions_t ==============
+allow systemd_sessions_t sysctl_kernel_t:dir search;
+allow systemd_sessions_t sysctl_kernel_t:file { getattr ioctl open read };
+allow systemd_sessions_t sysctl_t:dir search;
+
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow systemd_sessions_t syslogd_var_run_t:dir search;
 allow systemd_sessions_t unlabeled_t:file { getattr open read };
 
 #============= systemd_tmpfiles_t ==============
-allow systemd_tmpfiles_t auditd_log_t:dir { create read getattr};
+allow systemd_tmpfiles_t auditd_log_t:dir getattr;
 allow systemd_tmpfiles_t etc_t:file map;
-allow systemd_tmpfiles_t unlabeled_t:file { getattr open read };
-allow systemd_tmpfiles_t tmpfs_t:dir { add_name write };
-allow systemd_tmpfiles_t var_log_t:lnk_file { relabelfrom relabelto };
 
-#============= udevadm_t ==============
-allow udevadm_t bin_t:dir search;
-allow udevadm_t self:capability { dac_override dac_read_search };
-allow udevadm_t sysctl_t:dir search;
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow systemd_tmpfiles_t syslogd_var_run_t:dir search;
 
-#============= user_t ==============
-allow user_t auditd_etc_t:dir search;
-allow user_t auditd_etc_t:file { getattr map open read };
-allow user_t auditd_log_t:dir { getattr open read search };
-allow user_t auditd_log_t:file { getattr map open read };
-allow user_t init_t:key search;
-allow user_t init_t:unix_dgram_socket sendto;
-allow user_t lib_t:dir { add_name write };
-allow user_t lib_t:file { create write };
-allow user_t pam_var_run_t:dir { add_name write };
-allow user_t pam_var_run_t:file { create lock open read write };
-allow user_t policy_config_t:dir { getattr open read search };
-allow user_t policy_config_t:file { getattr open read };
-allow user_t security_t:security read_policy;
-allow user_t self:capability { setuid sys_resource };
-allow user_t semanage_read_lock_t:file { lock open read };
-allow user_t semanage_store_t:dir write;
-allow user_t semanage_store_t:file { open read };
-allow user_t shadow_t:file { getattr map open read };
-allow user_t syslogd_var_run_t:sock_file write;
+#============= unconfined_t ==============
 
+#	Possible cause is the source user (unconfined_u) and target user (system_u) are different.
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow unconfined_t auditd_etc_t:dir search;
+
+#	Possible cause is the source user (unconfined_u) and target user (system_u) are different.
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow unconfined_t auditd_etc_t:file { getattr read };
+
+#	Possible cause is the source user (unconfined_u) and target user (system_u) are different.
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow unconfined_t auditd_log_t:dir { getattr read search };
+
+#	Possible cause is the source user (unconfined_u) and target user (system_u) are different.
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow unconfined_t auditd_log_t:file { getattr read };
+
+#	Possible cause is the source user (unconfined_u) and target user (system_u) are different.
+#	Possible cause is the source level (s0-s15:c0.c1023) and target level (s15:c0.c1023) are different.
+allow unconfined_t kmsg_device_t:chr_file read;
