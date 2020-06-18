@@ -24,8 +24,8 @@ B = "${WORKDIR}/build"
 inherit deploy
 
 DEPENDS += "dtc-native"
-DEPENDS_ledge-qemuarm += " optee-os u-boot-ledge-qemu "
-DEPENDS_ledge-qemuarm64 += " optee-os u-boot-ledge-qemu "
+DEPENDS_ledge-qemuarm += " optee-os u-boot-ledge "
+DEPENDS_ledge-qemuarm64 += " optee-os u-boot-ledge "
 
 # ledge-stm32mp157c-dk2 specific
 TF_A_PLATFORM_ledge-stm32mp157c-dk2 = "stm32mp1"
