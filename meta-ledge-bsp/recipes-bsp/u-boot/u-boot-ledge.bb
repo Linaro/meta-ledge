@@ -26,11 +26,16 @@ SRC_URI += " \
 
 S = "${WORKDIR}/git"
 
+SRC_URI_append_ledge-qemuarm = " file://ledge-qemuarm_defconfig"
+SRC_URI_append_ledge-qemuarm64 = " file://ledge-qemuarm64_defconfig"
+
+PACKAGE_ARCH = "${MACHINE_ARCH}"
+
 require recipes-bsp/u-boot/u-boot.inc
 
 DEPENDS += "bc-native dtc-native"
 
-do_compile_prepend_ledge-stm32mp157c-dk2() {
+do_compile_prepend() {
     for conf in ${UBOOT_MACHINE};
     do
         if [ -f ${WORKDIR}/$conf ] ;
@@ -86,5 +91,16 @@ if [ -n "${SPL_BINARY_LEDGE}" ]; then
             bbfatal "Wrong u-boot-ledge configuration: please make sure to use UBOOT_CONFIG through BOOTSCHEME_LABELS config"
     fi
 fi
+}
+do_deploy_append_ledge-qemuarm() {
+    cd ${DEPLOYDIR}
+    ln -sf u-boot-ledge-qemuarm.bin bl33.bin
+    cd -
+}
+
+do_deploy_append_ledge-qemuarm64() {
+    cd ${DEPLOYDIR}
+    ln -sf u-boot-ledge-qemuarm64.bin bl33.bin
+    cd -
 }
 
