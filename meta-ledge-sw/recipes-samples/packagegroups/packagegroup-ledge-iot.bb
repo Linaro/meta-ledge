@@ -165,6 +165,7 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	sqlite3 \
 	sudo \
 	systemd \
+	systemd-analyze \
 	tar \
 	tmux \
 	traceroute \
