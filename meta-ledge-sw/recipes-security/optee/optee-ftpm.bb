@@ -2,15 +2,14 @@ SUMMARY = "OPTEE fTPM Microsoft TA"
 DESCRIPTION = "OPTEE fTPM"
 HOMEPAGE = "https://github.com/microsoft/ms-tpm-20-ref/"
 
-inherit autotools-brokensep pkgconfig gettext python3native
+inherit autotools-brokensep pkgconfig gettext
 
 FTPM_UUID="bc50d971-d4c9-42c4-82cb-343fb7f37896"
-LICENSE = "BSD"
-LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=5a3925ece0806073ae9ebbb08ff6f11e"
+LICENSE = "MIT"
+LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=27e94c0280987ab296b0b8dd02ab9fe5"
 
 DEPENDS = "optee-client optee-os openssl"
 DEPENDS += "openssl-native autoconf-archive-native"
-DEPENDS += "python3-pycryptodomex-native python3-pycrypto-native"
 
 # SRC_URI = "git://github.com/Microsoft/ms-tpm-20-ref;branch=master"
 # Since this is not built as a pseudo TA, we can only use it as a kernel module and not built in.
@@ -18,47 +17,43 @@ DEPENDS += "python3-pycryptodomex-native python3-pycrypto-native"
 # Secure storage access required by OP-TEE fTPM TA
 # is provided via OP-TEE supplicant that's not available during boot.
 # Fix this once we replace this with the MS implementation
-SRC_URI = "git://github.com/apalos/ms-tpm-20-ref.git;branch=ftpm"
-SRCREV = "8b2a8eaf9a5f165bc6acc2388490d6237c0de116"
+SRC_URI = "git://github.com/microsoft/MSRSec"
+SRCREV = "81abeb9fa968340438b4b0c08aa6685833f0bfa1"
 
 S = "${WORKDIR}/git"
-CONFIGURE_SCRIPT = "${S}/TPMCmd/configure"
 
 OPTEE_CLIENT_EXPORT = "${STAGING_DIR_HOST}${prefix}"
 TEEC_EXPORT = "${STAGING_DIR_HOST}${prefix}"
 TA_DEV_KIT_DIR = "${STAGING_INCDIR}/optee/export-user_ta"
 
-EXTRA_OEMAKE += " TA_DEV_KIT_DIR=${TA_DEV_KIT_DIR} \
-                 OPTEE_CLIENT_EXPORT=${OPTEE_CLIENT_EXPORT} \
-                 TEEC_EXPORT=${TEEC_EXPORT} \
-                 HOST_CROSS_COMPILE=${TARGET_PREFIX} \
-                 TA_CROSS_COMPILE=${TARGET_PREFIX} \
-                 V=1 \
-               "
+EXTRA_OEMAKE += "\
+    CFG_FTPM_USE_WOLF=y \
+    TA_DEV_KIT_DIR=${TA_DEV_KIT_DIR} \
+    TA_CROSS_COMPILE=${TARGET_PREFIX} \
+"
+
+EXTRA_OEMAKE_append_aarch64 = "\
+    CFG_ARM64_ta_arm64=y \
+"
 
 B = "${S}"
 
 do_configure() {
-    git submodule init
-    git submodule update
-    # Uncomment for MS implementation
-    #cd TPMCmd
-    #./bootstrap
-    #oe_runconf
-    sed -i -n '/-mcpu/!p' sub.mk
+    cd ${S}
+    git submodule update --init
+    sed -i 's/-mcpu=$(TA_CPU)//' TAs/optee_ta/fTPM/sub.mk
 }
 
 do_compile() {
-    # Uncomment for MS implementation
-    #cd TPMCmd
-    oe_runmake
-    #cd ../Samples/ARM32-FirmwareTPM/optee_ta
-    #oe_runmake
+    # there's also a secure variable storage TA called authvars
+    cd ${S}/TAs/optee_ta
+    # fails with j > 1
+    oe_runmake -j1 ftpm
 }
 
 do_install () {
     mkdir -p ${D}/lib/optee_armtz
-    install -D -p -m0444 ${S}/out/${FTPM_UUID}.ta ${D}/lib/optee_armtz/
+    install -D -p -m0444 ${S}/TAs/optee_ta/out/fTPM/${FTPM_UUID}.ta ${D}/lib/optee_armtz/
 }
 
 FILES_${PN} += "/lib/optee_armtz/${FTPM_UUID}.ta"
