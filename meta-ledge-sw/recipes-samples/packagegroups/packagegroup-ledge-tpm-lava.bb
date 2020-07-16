@@ -4,7 +4,7 @@ inherit packagegroup
 
 RDEPENDS_packagegroup-ledge-tpm-lava = "\
     git \
-    python-pyyaml \
+    python3-pyyaml \
     vim \
     perl \
     openssl-bin \
