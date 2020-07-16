@@ -17,7 +17,6 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	ca-certificates \
 	cloud-init \
 	checkpolicy \
-	chkconfig \
 	chrony \
 	coreutils \
 	cpio \
@@ -25,7 +24,6 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	${@bb.utils.contains_any("TUNE_ARCH", [ "x86_64", "arm" ] , "criu", "", d)} \
 	curl \
 	diffutils \
-	dnf \
 	dnsmasq \
 	dracut \
 	e2fsprogs \
@@ -151,7 +149,6 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	python3-systemd \
 	python3-urllib3 \
 	python3-websocket-client \
-	python-setuptools \
 	qrencode \
 	readline \
 	rng-tools \
