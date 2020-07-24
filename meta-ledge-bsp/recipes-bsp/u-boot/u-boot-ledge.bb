@@ -30,8 +30,8 @@ SRC_URI_append_ledge-qemuarm64 = " file://ledge-qemuarm64_defconfig"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
 require recipes-bsp/u-boot/u-boot.inc
-PROVIDES += "u-boot"
-RPROVIDES_${PN} += "u-boot"
+PROVIDES += "u-boot virtual/bootloader"
+RPROVIDES_${PN} += "u-boot virtual/bootloader"
 
 DEPENDS += "bc-native dtc-native"
 
