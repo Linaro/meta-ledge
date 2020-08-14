@@ -1,5 +1,5 @@
-From a5ae2dcb57055f1e2059601ef7ca47b5f94ec554 Mon Sep 17 00:00:00 2001
-From: Christophe Priouzeau <christophe.priouzeau@st.com>
+From 16a9bf40fb7fc6f549bf1977b3510fe6f6a2998b Mon Sep 17 00:00:00 2001
+From: Maxim Uvarov <maxim.uvarov@linaro.org>
 Date: Thu, 11 Jun 2020 11:14:35 +0200
 Subject: [PATCH 6/6] tpm_ftpm_tee: register driver on TEE bus
 
@@ -16,7 +16,7 @@ Signed-off-by: Maxim Uvarov <maxim.uvarov@linaro.org>
  1 file changed, 67 insertions(+), 11 deletions(-)
 
 diff --git a/drivers/char/tpm/tpm_ftpm_tee.c b/drivers/char/tpm/tpm_ftpm_tee.c
-index 22bf553cc..fc2cfa293 100644
+index 2491a2cb54a2..01fe66711fa2 100644
 --- a/drivers/char/tpm/tpm_ftpm_tee.c
 +++ b/drivers/char/tpm/tpm_ftpm_tee.c
 @@ -214,11 +214,10 @@ static int ftpm_tee_match(struct tee_ioctl_version_data *ver, const void *data)
