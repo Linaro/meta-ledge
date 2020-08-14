@@ -1,5 +1,5 @@
-From 0945c2d25f32d383a8589b7607bd892e86e5c1ba Mon Sep 17 00:00:00 2001
-From: Christophe Priouzeau <christophe.priouzeau@st.com>
+From f6c9d8aa32b9984f2659cf5acc013942ab1b65ef Mon Sep 17 00:00:00 2001
+From: Maxim Uvarov <maxim.uvarov@linaro.org>
 Date: Thu, 11 Jun 2020 11:06:54 +0200
 Subject: [PATCH 5/6] optee: enable support for multi-stage bus enumeration
 MIME-Version: 1.0
@@ -24,7 +24,7 @@ Signed-off-by: Maxim Uvarov <maxim.uvarov@linaro.org>
  3 files changed, 44 insertions(+), 21 deletions(-)
 
 diff --git a/drivers/tee/optee/core.c b/drivers/tee/optee/core.c
-index 99698b8a3..d60f263da 100644
+index 99698b8a3a74..d60f263da072 100644
 --- a/drivers/tee/optee/core.c
 +++ b/drivers/tee/optee/core.c
 @@ -17,6 +17,7 @@
@@ -90,7 +90,7 @@ index 99698b8a3..d60f263da 100644
  		optee_remove(pdev);
  		return rc;
 diff --git a/drivers/tee/optee/device.c b/drivers/tee/optee/device.c
-index 23d264c81..1331e6dac 100644
+index e91b7db5f49e..7674c6d75719 100644
 --- a/drivers/tee/optee/device.c
 +++ b/drivers/tee/optee/device.c
 @@ -11,18 +11,6 @@
@@ -169,7 +169,7 @@ index 23d264c81..1331e6dac 100644
 +	return  __optee_enumerate_devices(func);
 +}
 diff --git a/drivers/tee/optee/optee_private.h b/drivers/tee/optee/optee_private.h
-index d9c5037b4..8b71839a3 100644
+index d9c5037b4e03..8b71839a357e 100644
 --- a/drivers/tee/optee/optee_private.h
 +++ b/drivers/tee/optee/optee_private.h
 @@ -78,6 +78,9 @@ struct optee_supp {

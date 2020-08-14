@@ -1,4 +1,4 @@
-From 9da28e684fe44df22c984cb1bd757091b635ee43 Mon Sep 17 00:00:00 2001
+From fc9c84e8761179216f6e91ed7d6720e874e5c9c8 Mon Sep 17 00:00:00 2001
 From: Christophe Priouzeau <christophe.priouzeau@st.com>
 Date: Tue, 26 May 2020 15:17:04 +0200
 Subject: [PATCH 1/6] STM32mp157c-dk2: optee, reboot
@@ -10,10 +10,10 @@ Signed-off-by: Christophe Priouzeau <christophe.priouzeau@st.com>
  2 files changed, 25 insertions(+), 4 deletions(-)
 
 diff --git a/arch/arm/boot/dts/stm32mp151.dtsi b/arch/arm/boot/dts/stm32mp151.dtsi
-index 3ea05ba48..bcf01309f 100644
+index 36f38a95b4de..145f16be619e 100644
 --- a/arch/arm/boot/dts/stm32mp151.dtsi
 +++ b/arch/arm/boot/dts/stm32mp151.dtsi
-@@ -110,6 +110,13 @@
+@@ -108,6 +108,13 @@
  		status = "disabled";
  	};
  
@@ -28,7 +28,7 @@ index 3ea05ba48..bcf01309f 100644
  		compatible = "simple-bus";
  		#address-cells = <1>;
 diff --git a/arch/arm/boot/dts/stm32mp15xx-dkx.dtsi b/arch/arm/boot/dts/stm32mp15xx-dkx.dtsi
-index d946e0a02..669e44c87 100644
+index 70db923a45f7..ea783603e0d9 100644
 --- a/arch/arm/boot/dts/stm32mp15xx-dkx.dtsi
 +++ b/arch/arm/boot/dts/stm32mp15xx-dkx.dtsi
 @@ -17,7 +17,7 @@

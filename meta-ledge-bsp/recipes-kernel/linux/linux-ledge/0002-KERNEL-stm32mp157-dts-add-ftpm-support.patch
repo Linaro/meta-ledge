@@ -1,4 +1,4 @@
-From ed6ae6812d88fc0722d348f9e9029704372ef39a Mon Sep 17 00:00:00 2001
+From 429afad859df2905201483fbb45d4e47830f4b2e Mon Sep 17 00:00:00 2001
 From: Christophe Priouzeau <christophe.priouzeau@st.com>
 Date: Tue, 26 May 2020 15:21:29 +0200
 Subject: [PATCH 2/6] KERNEL: stm32mp157: dts; add ftpm support
@@ -9,10 +9,10 @@ Signed-off-by: Christophe Priouzeau <christophe.priouzeau@st.com>
  1 file changed, 6 insertions(+)
 
 diff --git a/arch/arm/boot/dts/stm32mp151.dtsi b/arch/arm/boot/dts/stm32mp151.dtsi
-index bcf01309f..1c839c0d5 100644
+index 145f16be619e..dca522901a61 100644
 --- a/arch/arm/boot/dts/stm32mp151.dtsi
 +++ b/arch/arm/boot/dts/stm32mp151.dtsi
-@@ -1688,6 +1688,12 @@
+@@ -1702,6 +1702,12 @@
  				status = "disabled";
  			};
  		};
