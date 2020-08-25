@@ -1,21 +1,22 @@
-From 09676d79f7a667b2e32c079883cb5b84921f2e61 Mon Sep 17 00:00:00 2001
+From ec850b314cd5bdeb4d11da6e8385ceb020c6a908 Mon Sep 17 00:00:00 2001
 From: Christophe Priouzeau <christophe.priouzeau@st.com>
 Date: Tue, 26 May 2020 14:42:03 +0200
-Subject: [PATCH 1/2] STM32mp157c-DK2
+Subject: [PATCH 4/5] STM32mp157c-DK2
 
 Signed-off-by: Christophe Priouzeau <christophe.priouzeau@st.com>
 ---
- include/configs/stm32mp1.h | 17 ++++++-----------
- 1 file changed, 6 insertions(+), 11 deletions(-)
+ include/configs/stm32mp1.h | 20 ++++++--------------
+ 1 file changed, 6 insertions(+), 14 deletions(-)
 
 diff --git a/include/configs/stm32mp1.h b/include/configs/stm32mp1.h
-index f271b84a59..d1ae7dc8c9 100644
+index b937233797..73f48b5be3 100644
 --- a/include/configs/stm32mp1.h
 +++ b/include/configs/stm32mp1.h
-@@ -127,17 +127,11 @@
+@@ -125,20 +125,11 @@
+  * for nor boot, use SD card = mmc0
   */
  #define STM32MP_BOOTCMD "bootcmd_stm32mp=" \
- 	"echo \"Boot over ${boot_device}${boot_instance}!\";" \
+-	"echo \"Boot over ${boot_device}${boot_instance}!\";" \
 -	"if test ${boot_device} = serial || test ${boot_device} = usb;" \
 -	"then stm32prog ${boot_device} ${boot_instance}; " \
 -	"else " \
@@ -25,6 +26,8 @@ index f271b84a59..d1ae7dc8c9 100644
 -		"if test ${boot_device} = nand ||" \
 -		  " test ${boot_device} = spi-nand ;" \
 -		"then env set boot_targets ubifs0; fi;" \
+-		"if test ${boot_device} = nor;" \
+-		"then env set boot_targets mmc0; fi;" \
 -		"run distro_bootcmd;" \
 -	"fi;\0"
 +	"env set boot_instance \"0\";" \
@@ -35,14 +38,14 @@ index f271b84a59..d1ae7dc8c9 100644
  
  #include <config_distro_bootcmd.h>
  
-@@ -155,6 +149,7 @@
- 	"splashimage=0xc4300000\0"  \
+@@ -157,6 +148,7 @@
  	"ramdisk_addr_r=0xc4400000\0" \
  	"altbootcmd=run bootcmd\0" \
+ 	"env_check=if env info -p -d -q; then env save; fi\0" \
 +	"fdtfile=" CONFIG_DEFAULT_DEVICE_TREE ".dtb\0" \
- 	"env_default=1\0" \
- 	"env_check=if test $env_default -eq 1;"\
- 		" then env set env_default 0;env save;fi\0" \
+ 	STM32MP_BOOTCMD \
+ 	BOOTENV \
+ 	"boot_net_usb_start=true\0"
 -- 
 2.17.1
 
