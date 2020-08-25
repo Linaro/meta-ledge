@@ -3,26 +3,28 @@ SECTION = "bootloaders"
 DEPENDS += "flex-native bison-native"
 
 LICENSE = "GPLv2+"
-LIC_FILES_CHKSUM = "file://Licenses/README;md5=30503fd321432fc713238f582193b78e"
+LIC_FILES_CHKSUM = "file://Licenses/README;md5=5a7450c57ffe5ae63fd732446b988025"
 PE = "1"
 
 # We use the revision in order to avoid having to fetch it from the
 # repo during parse
-SRCREV = "868fb9969c85ce5a1b33c6bb713c8158c04acee9"
-PV = "2020.07-rc5"
+
+PV = "2020.10-rc1"
 
 SRC_URI = "git://git.denx.de/u-boot.git"
+SRCREV = "9f04a634ef331b4fc6b3e677f276156192a413c7"
 
 SRC_URI += " \
+	file://0001-efi_memory-do-not-overlap-non-ram-memory-on-efi-allo.patch \
+	file://0002-efi_memory-refine-overlap_only_ram-description.patch \
+	file://0003-efi-change-usage-syntax.patch \
+	file://0004-STM32mp157c-DK2.patch \
+	file://0005-ti-am572x-enable-boot_distrocmd.patch \
         file://ledge_stm32mp157c_dk2_trusted_defconfig \
     "
 
-SRC_URI += " \
-        file://0001-STM32mp157c-DK2.patch \
-        file://0002-ti-am572x-enable-boot_distrocmd.patch \
-    "
-
 S = "${WORKDIR}/git"
+B = "${WORKDIR}/build"
 
 SRC_URI_append_ledge-qemuarm = " file://ledge-qemuarm_defconfig"
 SRC_URI_append_ledge-qemuarm64 = " file://ledge-qemuarm64_defconfig"

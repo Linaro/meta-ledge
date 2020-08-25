@@ -1,7 +1,7 @@
-From 379d2541e506274e65cf5ba554aba00c368ea3f6 Mon Sep 17 00:00:00 2001
+From e4eeb6f219b54b5fab87eb61384154b5afb5034e Mon Sep 17 00:00:00 2001
 From: Christophe Priouzeau <christophe.priouzeau@st.com>
 Date: Tue, 26 May 2020 14:42:17 +0200
-Subject: [PATCH 2/2] ti: am572x enable boot_distrocmd
+Subject: [PATCH 5/5] ti: am572x enable boot_distrocmd
 
 Signed-off-by: Ilias Apalodimas <ilias.apalodimas@linaro.org>
 ---
@@ -11,10 +11,10 @@ Signed-off-by: Ilias Apalodimas <ilias.apalodimas@linaro.org>
  3 files changed, 18 insertions(+)
 
 diff --git a/include/configs/am57xx_evm.h b/include/configs/am57xx_evm.h
-index fea9300a67..60e882ffd6 100644
+index c47ffccff1..26a4438db7 100644
 --- a/include/configs/am57xx_evm.h
 +++ b/include/configs/am57xx_evm.h
-@@ -49,6 +49,15 @@
+@@ -43,6 +43,15 @@
  #endif
  #endif
  
