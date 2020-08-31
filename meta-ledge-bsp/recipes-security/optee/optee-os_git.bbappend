@@ -2,13 +2,11 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
 # 3.9
 LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=c1f21c4f72f372ef38a5a4aee55ec173"
-PV="3.9.0+git${SRCPV}"
-SRCREV = "af141c61fe7a2430f3b4bb89661d8414117013b3"
+PV="3.10"
+SRCREV = "d1c635434c55b7d75eadf471bde04926bd1e50a7"
 
 DEPENDS += "dtc-native"
 DEPENDS += "python3-pyelftools-native dtc-native python3-pycryptodomex-native python3-pycrypto-native"
-
-SRC_URI_append_ledgecommon = " file://0002-PTA-add-debug-information.patch "
 
 SRC_URI_append_ledge-qemuarm64 = " file://bc50d971-d4c9-42c4-82cb-343fb7f37896.stripped.elf "
 # random
