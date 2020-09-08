@@ -15,11 +15,9 @@ SRC_URI = "git://git.denx.de/u-boot.git"
 SRCREV = "9f04a634ef331b4fc6b3e677f276156192a413c7"
 
 SRC_URI += " \
-	file://0001-efi_memory-do-not-overlap-non-ram-memory-on-efi-allo.patch \
-	file://0002-efi_memory-refine-overlap_only_ram-description.patch \
-	file://0003-efi-change-usage-syntax.patch \
-	file://0004-STM32mp157c-DK2.patch \
-	file://0005-ti-am572x-enable-boot_distrocmd.patch \
+	file://0001-efi-change-usage-syntax.patch \
+	file://0002-STM32mp157c-DK2.patch \
+	file://0003-ti-am572x-enable-boot_distrocmd.patch \
         file://ledge_stm32mp157c_dk2_trusted_defconfig \
     "
 

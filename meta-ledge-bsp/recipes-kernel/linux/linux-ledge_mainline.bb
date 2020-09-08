@@ -26,6 +26,7 @@ SRC_URI += " \
     file://0003-optee-use-uuid-for-sysfs-driver-entry.patch \
     file://0004-optee-enable-support-for-multi-stage-bus-enumeration.patch \
     file://0005-tpm_ftpm_tee-register-driver-on-TEE-bus.patch \
+    file://0006-efi-libstub-DRAM-base-calculation.patch \
 "
 
 PV = "mainline-5.8"
