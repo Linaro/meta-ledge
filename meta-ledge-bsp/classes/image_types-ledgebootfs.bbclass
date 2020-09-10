@@ -17,16 +17,21 @@ python __anonymous () {
     import re
     target = d.getVar('TARGET_ARCH')
     if target == "x86_64":
-        kernel_efi_image = "bootx64.efi"
+        efi_shell = "bootx64.efi"
+        kernel_efi_image = "kernel-bootx64.efi"
     elif re.match('i.86', target):
-        kernel_efi_image = "bootia32.efi"
+        efi_shell = "bootia32.efi"
+        kernel_efi_image = "kernel-bootia32.efi"
     elif re.match('aarch64', target):
-        kernel_efi_image = "bootaa64.efi"
+        efi_shell = "bootaa64.efi"
+        kernel_efi_image = "kernel-bootaa64.efi"
     elif re.match('arm', target):
-        kernel_efi_image = "bootarm.efi"
+        efi_shell = "bootarm.efi"
+        kernel_efi_image = "kernel-bootarm.efi"
     else:
         raise bb.parse.SkipRecipe("kernel efi is incompatible with target %s" % target)
     d.setVar("KERNEL_EFI_IMAGE", kernel_efi_image)
+    d.setVar("EFI_SHELL", efi_shell)
 }
 
 IMAGE_CMD_ledgebootfs () {
@@ -53,25 +58,21 @@ IMAGE_CMD_ledgebootfs () {
         break;
     done
 
+    mcopy -i ${LEDGE_BOOTFS_NAME} -s ${DEPLOY_DIR_IMAGE}/edk2_shell.efi ::/EFI/BOOT/${EFI_SHELL}
+
     # put device tree
     mmd -i ${LEDGE_BOOTFS_NAME} ::/dtb
     find ${DEPLOY_DIR_IMAGE}/dtb/ -name "*.dtb" -type f -exec mcopy -i ${LEDGE_BOOTFS_NAME} -s {} ::/dtb/ \;
     # put initramfs
     mcopy -i ${LEDGE_BOOTFS_NAME} -s ${DEPLOY_DIR_IMAGE}/ledge-initramfs.rootfs.cpio.gz ::/
-}
 
-IMAGE_CMD_ledgebootfs_append_x86-64() {
-        # LEDGE: Pass initrd as bootloader parameter until
-        # kernel parameter initrd= with the uefi loader will be
-        # implemented for x86 and kernel patches are merged to mainline.
+    # Define initrd in EDK2 UEFI shell
+    echo "initrd ledge-initramfs.rootfs.cpio.gz" > startup.nsh
+    echo "${KERNEL_EFI_IMAGE} rootwait initrd=/ledge-initramfs.rootfs.cpio.gz root=UUID=6091b3a4-ce08-3020-93a6-f755a22ef03b console=ttyS2,115200 console=ttyS0,115200 console=ttyAMA0,115200  " >> startup.nsh
+    mcopy -i ${LEDGE_BOOTFS_NAME} -s startup.nsh ::/
+    rm startup.nsh
 
-        echo "bootx64.efi initrd=ledge-initramfs.rootfs.cpio.gz " > startup.nsh
-	mcopy -i ${LEDGE_BOOTFS_NAME} -s startup.nsh ::/
-	rm startup.nsh
-}
-
-# Final stage - compress and create symlinks
-IMAGE_CMD_ledgebootfs_append() {
+    # Final stage - compress and create symlinks
     (cd ${IMGDEPLOYDIR};ln -sf ${IMAGE_NAME}.bootfs.vfat ${IMAGE_LINK_NAME}.bootfs.vfat)
     (cd ${IMGDEPLOYDIR};gzip -f -9 -c ${IMAGE_NAME}.bootfs.vfat > ${IMAGE_NAME}.bootfs.vfat.gz)
     (cd ${IMGDEPLOYDIR};cp ${IMAGE_NAME}.bootfs.vfat.gz ${IMAGE_LINK_NAME}.bootfs.vfat.gz)
