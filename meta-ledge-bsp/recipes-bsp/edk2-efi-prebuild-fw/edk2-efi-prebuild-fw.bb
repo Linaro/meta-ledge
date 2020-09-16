@@ -65,6 +65,11 @@ do_deploy_append_ledge-qemuarm64() {
 	install -m 0644 ${B}/RELEASEAARCH64_QEMU_EFI.fd ${DEPLOYDIR}/firmware-edk2.fd
 }
 
+do_deploy_append_synquacer() {
+	install -m 0644 ${B}/RELEASEAARCH64_Shell.efi ${D}/boot/EFI/BOOT/${EFI_SHELL}
+	install -m 0644 ${B}/RELEASEAARCH64_Shell.efi ${DEPLOYDIR}/edk2_shell.efi
+}
+
 do_deploy_append_ledge-qemuarm() {
         install -m 0644 ${B}/RELEASEARM_Shell.efi ${D}/boot/EFI/BOOT/${EFI_SHELL}
 	install -m 0644 ${B}/RELEASEARM_Shell.efi ${DEPLOYDIR}/edk2_shell.efi
