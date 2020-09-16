@@ -109,21 +109,8 @@ do_install_append() {
     done
 }
 
-do_install_append_x86-64() {
-	# LEDGE: Pass initrd as bootloader parameter until
-	# kernel parameter initrd= with the uefi loader will be
-	# implemented for x86 and kernel patches are merged to mainline.
-
-	echo "bootx64.efi initrd=ledge-initramfs.rootfs.cpio.gz " > ${D}/boot/startup.nsh
-}
-
-do_deploy_append_x86-64() {
-	cp -rf ${WORKDIR}/package/boot/startup.nsh $deployDir/
-}
-
 FILES_${KERNEL_PACKAGE_NAME}-devicetree += "/${KERNEL_IMAGEDEST}/dtb"
 FILES_${KERNEL_PACKAGE_NAME}-base += "${nonarch_base_libdir}/modules/${KERNEL_VERSION}/modules.builtin.modinfo "
-FILES_${KERNEL_PACKAGE_NAME}-base_x86-64 += "/${KERNEL_IMAGEDEST}/startup.nsh"
 
 # for debian purpose
 do_deploy_append() {
