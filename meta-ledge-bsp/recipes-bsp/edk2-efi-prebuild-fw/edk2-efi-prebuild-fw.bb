@@ -76,6 +76,11 @@ do_deploy_append_ledge-stm32mp157c-dk2() {
 	install -m 0644 ${B}/RELEASEARM_Shell.efi ${DEPLOYDIR}/edk2_shell.efi
 }
 
+do_deploy_append_ledge-ti-am572x() {
+	install -m 0644 ${B}/RELEASEARM_Shell.efi ${D}/boot/EFI/BOOT/${EFI_SHELL}
+	install -m 0644 ${B}/RELEASEARM_Shell.efi ${DEPLOYDIR}/edk2_shell.efi
+}
+
 do_deploy_append_ledge-x86_64() {
         install -m 0644 ${B}/RELEASEX64_Shell.efi ${D}/boot/EFI/BOOT/${EFI_SHELL}
 	install -m 0644 ${B}/RELEASEX64_Shell.efi ${DEPLOYDIR}/edk2_shell.efi
