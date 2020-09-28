@@ -62,7 +62,7 @@ do_deploy() {
 do_deploy_append_ledge-qemuarm64() {
 	install -m 0644 ${B}/RELEASEAARCH64_Shell.efi ${D}/boot/EFI/BOOT/${EFI_SHELL}
 	install -m 0644 ${B}/RELEASEAARCH64_Shell.efi ${DEPLOYDIR}/edk2_shell.efi
-	install -m 0644 ${B}/RELEASEAARCH64_QEMU_EFI.fd ${DEPLOYDIR}/firmware-edk2.fd
+	install -m 0644 ${B}/RELEASEAARCH64_QEMU_EFI.fd ${DEPLOYDIR}/firmware.uefi-edk2.bin
 }
 
 do_deploy_append_synquacer() {
@@ -73,7 +73,7 @@ do_deploy_append_synquacer() {
 do_deploy_append_ledge-qemuarm() {
         install -m 0644 ${B}/RELEASEARM_Shell.efi ${D}/boot/EFI/BOOT/${EFI_SHELL}
 	install -m 0644 ${B}/RELEASEARM_Shell.efi ${DEPLOYDIR}/edk2_shell.efi
-	install -m 0644 ${B}/RELEASEARM_QEMU_EFI.fd ${DEPLOYDIR}/firmware-edk2.fd
+	install -m 0644 ${B}/RELEASEARM_QEMU_EFI.fd ${DEPLOYDIR}/firmware.uefi-edk2.bin
 }
 
 do_deploy_append_ledge-stm32mp157c-dk2() {
@@ -89,7 +89,7 @@ do_deploy_append_ledge-ti-am572x() {
 do_deploy_append_ledge-x86_64() {
         install -m 0644 ${B}/RELEASEX64_Shell.efi ${D}/boot/EFI/BOOT/${EFI_SHELL}
 	install -m 0644 ${B}/RELEASEX64_Shell.efi ${DEPLOYDIR}/edk2_shell.efi
-	install -m 0644 ${B}/RELEASEX64_OVMF.fd ${DEPLOYDIR}/firmware-edk2.fd
+	install -m 0644 ${B}/RELEASEX64_OVMF.fd ${DEPLOYDIR}/firmware.uefi-edk2.bin
 }
 
 addtask deploy after do_install
