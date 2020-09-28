@@ -131,8 +131,9 @@ do_deploy() {
 
     if [ -f ${B}/fip.bin ] ; then
         install -m 0644 ${B}/fip.bin ${DEPLOYDIR}/
-	dd if=${B}/bl1.bin of=${DEPLOYDIR}/firmware.bin bs=4096 conv=notrunc
-	dd if=${B}/fip.bin of=${DEPLOYDIR}/firmware.bin seek=64 bs=4096 conv=notrunc
+	dd if=${B}/bl1.bin of=${DEPLOYDIR}/firmware.uefi.uboot.bin bs=4096 conv=notrunc
+	dd if=${B}/fip.bin of=${DEPLOYDIR}/firmware.uefi.uboot.bin seek=64 bs=4096 conv=notrunc
+	ln -sf firmware.uefi.uboot.bin ${DEPLOYDIR}/firmware.bin
     fi
 }
 
