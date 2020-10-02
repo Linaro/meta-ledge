@@ -86,7 +86,7 @@ do_deploy_append_ledge-ti-am572x() {
 	install -m 0644 ${B}/RELEASEARM_Shell.efi ${DEPLOYDIR}/edk2_shell.efi
 }
 
-do_deploy_append_ledge-x86_64() {
+do_deploy_append_ledge-qemux86-64() {
         install -m 0644 ${B}/RELEASEX64_Shell.efi ${D}/boot/EFI/BOOT/${EFI_SHELL}
 	install -m 0644 ${B}/RELEASEX64_Shell.efi ${DEPLOYDIR}/edk2_shell.efi
 	install -m 0644 ${B}/RELEASEX64_OVMF.fd ${DEPLOYDIR}/firmware.uefi-edk2.bin
