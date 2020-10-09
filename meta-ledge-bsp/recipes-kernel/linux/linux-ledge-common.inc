@@ -11,6 +11,8 @@ SRC_URI_append = " file://fragment-13-cmdline.config "
 SRC_URI_append = " file://fragment-13-cmdline_x86.config "
 SRC_URI_append = " file://fragment-14-module-signature.config "
 SRC_URI_append = " file://fragment-15-cleanup.config "
+SRC_URI_append = " file://fragment-16-watchdog.config "
+SRC_URI_append = " file://i6300esb.conf "
 
 KERNEL_DEFCONFIG = "defconfig"
 KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-01-core.config "
@@ -25,6 +27,7 @@ KERNEL_CONFIG_FRAGMENTS_append_aarch64 = " ${WORKDIR}/fragment-13-cmdline.config
 KERNEL_CONFIG_FRAGMENTS_append_x86-64 = " ${WORKDIR}/fragment-13-cmdline_x86.config "
 KERNEL_CONFIG_FRAGMENTS_append = " ${@oe.utils.ifelse(d.getVar('KERNEL_SIGN_ENABLE') == '1', '${WORKDIR}/fragment-14-module-signature.config','')} "
 KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-15-cleanup.config "
+KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-16-watchdog.config "
 
 KERNEL_CONFIG_COMMAND = "oe_runmake -C ${S} O=${B} ${KERNEL_DEFCONFIG}"
 
@@ -107,10 +110,15 @@ do_install_append() {
             cd -
         fi
     done
+
+    install -d ${D}${sysconfdir}/modprobe.d/
+    install -c -m 644 ${WORKDIR}/i6300esb.conf ${D}${sysconfdir}/modprobe.d/
+
 }
 
 FILES_${KERNEL_PACKAGE_NAME}-devicetree += "/${KERNEL_IMAGEDEST}/dtb"
 FILES_${KERNEL_PACKAGE_NAME}-base += "${nonarch_base_libdir}/modules/${KERNEL_VERSION}/modules.builtin.modinfo "
+FILES_${KERNEL_PACKAGE_NAME}-base += "${base_libdir}/modprobe.d"
 
 # for debian purpose
 do_deploy_append() {
