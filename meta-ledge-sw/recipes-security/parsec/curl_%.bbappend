@@ -17,12 +17,10 @@ EXTRA_OECONF_append_class-target = " \
 "
 
 do_configure_prepend_class-native() {
-    mkdir -p ${WORKDIR}/certs
-    cp ${STAGING_ETCDIR_NATIVE}/ssl/certs/ca-certificates.crt ${WORKDIR}/certs/ca-certificates.crt
+    mkdir -p ${DEPLOY_DIR}
+    cp ${STAGING_ETCDIR_NATIVE}/ssl/certs/ca-certificates.crt ${DEPLOY_DIR}/ca-certificates.crt
 }
 
-RM_WORK_EXCLUDE_ITEMS +="certs"
-
 EXTRA_OECONF_append_class-native = " \
-    --with-ca-bundle=${WORKDIR}/certs/ca-certificates.crt \
+    --with-ca-bundle=${DEPLOY_DIR}/ca-certificates.crt \
 "
