@@ -9,8 +9,6 @@ DEPENDS += "dtc-native"
 DEPENDS += "python3-pyelftools-native dtc-native python3-pycryptodomex-native python3-pycrypto-native"
 
 SRC_URI_append_ledge-qemuarm64 = " file://bc50d971-d4c9-42c4-82cb-343fb7f37896.stripped.elf "
-# random
-SRC_URI_append_ledge-qemuarm64 = " file://b6c53aba-9669-4668-a7f2-205629d00f86.stripped.elf "
 
 inherit python3native
 
@@ -38,6 +36,9 @@ EXTRA_OEMAKE_append =  " CFG_TEE_CORE_DEBUG=n CFG_TEE_CORE_LOG_LEVEL=2 "
 
 OPTEE_ARCH_armv7a = "arm32"
 OPTEE_ARCH_armv7ve = "arm32"
+
+FTPM_UUID="bc50d971-d4c9-42c4-82cb-343fb7f37896"
+EXTRA_OEMAKE_append_ledge-qemuarm64='CFG_EARLY_TA=y EARLY_TA_PATHS="../${FTPM_UUID}.stripped.elf"'
 
 do_install_append_ledge-stm32mp157c-dk2() {
     # install optee bianries with stm32 images
