@@ -5,3 +5,8 @@
 RDEPENDS_packagegroup-security-tpm2_remove = " \
     cryptsetup-tpm-incubator \
     "
+
+RDEPENDS_packagegroup-security-tpm2 = " \
+    parsec \
+    parsec-tool \
+    "
