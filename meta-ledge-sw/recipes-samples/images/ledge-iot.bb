@@ -14,5 +14,4 @@ CORE_IMAGE_BASE_INSTALL += "\
     \
     efivar \
     systemd-analyze \
-    parsec \
     "
