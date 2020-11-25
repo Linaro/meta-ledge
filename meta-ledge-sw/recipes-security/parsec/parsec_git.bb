@@ -8,12 +8,11 @@ LIC_FILES_CHKSUM="file://LICENSE;md5=3b83ef96387f14655fc854ddc3c6bd57"
 SUMMARY = "Parsec security extension"
 LICENSE = "Apache-2.0"
 
-DEPENDS = "curl-native openssl-native"
-RDEPENDS_${PN} = "tpm2-tss mbedtls tpm2-pkcs11"
+DEPENDS = "curl-native openssl-native libtss2 tpm2-tss tpm2-pkcs11"
 
 S = "${WORKDIR}/git"
 
-CARGO_FEATURES_append = "tpm-provider"
+CARGO_BUILD_FLAGS += "--features tpm-provider"
 
 cargo_do_compile_prepend() {
     export CARGO_HOME=".cargo"
