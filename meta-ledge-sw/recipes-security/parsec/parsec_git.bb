@@ -1,8 +1,9 @@
 inherit cargo rust systemd
 
 SRC_URI = "git://github.com/parallaxsecond/parsec.git;protocol=https"
-SRCREV="0.4.0"
-SRC_URI_append = " file://parsec.service"
+SRCREV="0.6.0"
+SRC_URI_append = " file://parsec.service \
+                   file://config.toml "
 LIC_FILES_CHKSUM="file://LICENSE;md5=3b83ef96387f14655fc854ddc3c6bd57"
 
 SUMMARY = "Parsec security extension"
@@ -38,7 +39,7 @@ do_install() {
     install -m755 target/${HOST_SYS}/release/*.rlib ${D}${rustlibdir}/
 
     mkdir -p ${D}/etc/parsec
-    cp config.toml ${D}/etc/parsec/config.toml
+    cp ${WORKDIR}/config.toml ${D}/etc/parsec/config.toml
 
     install -d ${D}${systemd_system_unitdir}
     install -D -p -m0644 ${WORKDIR}/parsec.service ${D}${systemd_system_unitdir}/parsec.service
@@ -46,6 +47,14 @@ do_install() {
     install -d -m 755 ${D}/home/parsec
     chown -R parsec ${D}/home/parsec
     chgrp -R parsec ${D}/home/parsec
+
+    install -d -m 755 ${D}/var/lib/parsec
+    chown -R parsec ${D}/var/lib/parsec
+    chgrp -R parsec ${D}/var/lib/parsec
+
+    install -d -m 755 ${D}/run/parsec
+    chown -R parsec ${D}/run/parsec
+    chgrp -R parsec ${D}/run/parsec
 }
 
 inherit useradd
@@ -57,4 +66,4 @@ SYSTEMD_AUTO_ENABLE = "enable"
 SYSTEMD_SERVICE_${PN} = "parsec.service"
 
 FILES_${PN} += "${systemd_system_unitdir}/parsec.service"
-FILES_${PN} += "/lib/systemd /home/parsec"
+FILES_${PN} += "/lib/systemd /home/parsec /run"
