@@ -1,12 +1,19 @@
 [Unit]
 Description=Parsec Service
 Documentation=https://parallaxsecond.github.io/parsec-book/parsec_service/install_parsec_linux.html
+DefaultDependencies=no
+Requires=tpm2-abrmd.service
 
 [Service]
+Type=simple
+Restart=always
+RestartSec=15
 WorkingDirectory=/home/parsec/
-ExecStart=/usr/bin/parsec --config /etc/parsec/config.toml
+ExecStartPre=/bin/mkdir -p /run/parsec
+ExecStart=/bin/parsec --config /etc/parsec/config.toml
 User=parsec
 Group=parsec
+RuntimeDirectory=parsec
 
 [Install]
-WantedBy=default.target
+WantedBy=default.target tpm2-abrmd.service

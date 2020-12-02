@@ -81,25 +81,25 @@ manager_type = "OnDisk"
 # The order in which providers below are declared matters: providers should be listed in terms
 # of priority, the highest priority provider being declared first in this file.
 # The first provider will be used as default provider by the Parsec clients.
-#[[provider]]
+[[provider]]
 # (Required) Type of provider.
-#provider_type = "MbedCrypto"
+provider_type = "MbedCrypto"
 
 # (Required) Name of key info manager that will support this provider.
-#key_info_manager = "on-disk-manager"
+key_info_manager = "on-disk-manager"
 
 # Example of a PKCS 11 provider configuration
-#[[provider]]
-#provider_type = "Pkcs11"
-#key_info_manager = "on-disk-manager"
+[[provider]]
+provider_type = "Pkcs11"
+key_info_manager = "on-disk-manager"
 # (Required for this provider) Path to the location of the dynamic library loaded by this provider.
 # For the PKCS 11 provider, this library implements the PKCS 11 API on the target platform.
-#library_path = "/usr/local/lib/softhsm/libsofthsm2.so"
+library_path = "/usr/lib/softhsm/libsofthsm2.so"
 # (Required) PKCS 11 slot that will be used by Parsec.
-#slot_number = 123456789
+slot_number = 1234
 # (Optional) User pin for authentication with the specific slot. If not set, no authentication will
 # be used.
-#user_pin = "123456"
+user_pin = "1234"
 # (Optional) Control whether missing public key operation (such as verifying signatures or asymmetric
 # encryption) are fully performed in software. 
 #software_public_operations = false
@@ -118,10 +118,10 @@ key_info_manager = "on-disk-manager"
 # - "tabrmd": uses the TPM2 Access Broker & Resource Management Daemon; dbus name and type ("session" or 
 # "system") can be given as parameters: e.g. "tabrmd:bus_name=some.bus.Name,bus_type=session"; default
 # values are "com.intel.tss2.Tabrmd" for "bus_name" and "system" for "bus_type"
-tcti = "device:/dev/tpm0"
+tcti = "tabrmd:bus_name=com.intel.tss2.Tabrmd,bus_type=system"
 # (Required) Authentication value for performing operations on the TPM Owner Hierarchy. The string can
 # be empty, however we strongly suggest that you use a secure passcode.
 # To align with TPM tooling, PARSEC allows "owner_hierarchy_auth" to have a prefix indicating a string value,
 # e.g. "str:password", or to represent a string version of a hex value, e.g. "hex:1a2b3c". If no prefix is
 # provided, the value is considered to be a string.
-owner_hierarchy_auth = "password"
+owner_hierarchy_auth = ""
