@@ -9,11 +9,18 @@ LIC_FILES_CHKSUM="file://LICENSE;md5=3b83ef96387f14655fc854ddc3c6bd57"
 SUMMARY = "Parsec security extension"
 LICENSE = "Apache-2.0"
 
-DEPENDS = "curl-native openssl-native libtss2 tpm2-tss tpm2-pkcs11"
+DEPENDS = "curl-native openssl-native libtss2 tpm2-tss tpm2-pkcs11 \
+           libtss2 \
+           libtss2-dev \
+           libtss2-staticdev \
+           libtss2-tcti-device \
+"
+
+RDEPENDS_${PN} += " libtss2-tcti-device tpm2-abrmd "
 
 S = "${WORKDIR}/git"
 
-CARGO_BUILD_FLAGS += "--features tpm-provider"
+CARGO_BUILD_FLAGS += "--features all-providers "
 
 cargo_do_compile_prepend() {
     export CARGO_HOME=".cargo"
@@ -48,13 +55,9 @@ do_install() {
     chown -R parsec ${D}/home/parsec
     chgrp -R parsec ${D}/home/parsec
 
-    install -d -m 755 ${D}/var/lib/parsec
+    mkdir -p ${D}/var/lib/parsec
     chown -R parsec ${D}/var/lib/parsec
     chgrp -R parsec ${D}/var/lib/parsec
-
-    install -d -m 755 ${D}/run/parsec
-    chown -R parsec ${D}/run/parsec
-    chgrp -R parsec ${D}/run/parsec
 }
 
 inherit useradd
@@ -66,4 +69,4 @@ SYSTEMD_AUTO_ENABLE = "enable"
 SYSTEMD_SERVICE_${PN} = "parsec.service"
 
 FILES_${PN} += "${systemd_system_unitdir}/parsec.service"
-FILES_${PN} += "/lib/systemd /home/parsec /run"
+FILES_${PN} += "/lib/systemd /home/parsec /var/lib/parsec"
