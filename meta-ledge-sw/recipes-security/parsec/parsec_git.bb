@@ -24,6 +24,8 @@ S = "${WORKDIR}/git"
 CARGO_BUILD_FLAGS += "--features all-providers "
 
 cargo_do_compile_prepend() {
+    export CARGO_HTTP_CAINFO=`find ${WORKDIR} -name ca-certificates.crt`
+
     export CARGO_HOME=".cargo"
 
     export RUSTFLAGS="${RUSTFLAGS}"
