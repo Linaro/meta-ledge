@@ -16,6 +16,8 @@ PV = "2.3"
 SRC_URI = "git://github.com/ARM-software/arm-trusted-firmware.git;protocol=https;nobranch=1"
 SRCREV = "fc721f830855ab05f45d8f2024325601bbb4c783"
 
+SRC_URI += "file://0001-plat-qemu-trigger-reboot-with-secure-pl061.patch"
+
 ALLOW_EMPTY_${PN} = "1"
 
 S = "${WORKDIR}/git"
