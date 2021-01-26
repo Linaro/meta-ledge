@@ -1,0 +1,125 @@
+From ff02b3ff30780a52332acca9790abb33b039415c Mon Sep 17 00:00:00 2001
+From: Maxim Uvarov <maxim.uvarov@linaro.org>
+Date: Tue, 12 Jan 2021 13:22:05 +0000
+Subject: [PATCH 1/3] hw: gpio: implement gpio-pwr driver for qemu
+ reset/poweroff
+
+Implement gpio-pwr driver to allow reboot and poweroff machine.
+This is simple driver with just 2 gpios lines. Current use case
+is to reboot and poweroff virt machine in secure mode. Secure
+pl066 gpio chip is needed for that.
+
+Signed-off-by: Maxim Uvarov <maxim.uvarov@linaro.org>
+Reviewed-by: Hao Wu <wuhaotsh@google.com>
+Reviewed-by: Peter Maydell <peter.maydell@linaro.org>
+Signed-off-by: Maxim Uvarov <maxim.uvarov@linaro.org>
+---
+ hw/gpio/Kconfig     |  3 ++
+ hw/gpio/gpio_pwr.c  | 70 +++++++++++++++++++++++++++++++++++++++++++++
+ hw/gpio/meson.build |  1 +
+ 3 files changed, 74 insertions(+)
+ create mode 100644 hw/gpio/gpio_pwr.c
+
+diff --git a/hw/gpio/Kconfig b/hw/gpio/Kconfig
+index b6fdaa258..f0e7405f6 100644
+--- a/hw/gpio/Kconfig
++++ b/hw/gpio/Kconfig
+@@ -8,5 +8,8 @@ config PL061
+ config GPIO_KEY
+     bool
+ 
++config GPIO_PWR
++    bool
++
+ config SIFIVE_GPIO
+     bool
+diff --git a/hw/gpio/gpio_pwr.c b/hw/gpio/gpio_pwr.c
+new file mode 100644
+index 000000000..7714fa0dc
+--- /dev/null
++++ b/hw/gpio/gpio_pwr.c
+@@ -0,0 +1,70 @@
++/*
++ * GPIO qemu power controller
++ *
++ * Copyright (c) 2020 Linaro Limited
++ *
++ * Author: Maxim Uvarov <maxim.uvarov@linaro.org>
++ *
++ * Virtual gpio driver which can be used on top of pl061
++ * to reboot and shutdown qemu virtual machine. One of use
++ * case is gpio driver for secure world application (ARM
++ * Trusted Firmware.).
++ *
++ * This work is licensed under the terms of the GNU GPL, version 2 or later.
++ * See the COPYING file in the top-level directory.
++ * SPDX-License-Identifier: GPL-2.0-or-later
++ */
++
++/*
++ * QEMU interface:
++ * two named input GPIO lines:
++ *   'reset' : when asserted, trigger system reset
++ *   'shutdown' : when asserted, trigger system shutdown
++ */
++
++#include "qemu/osdep.h"
++#include "hw/sysbus.h"
++#include "sysemu/runstate.h"
++
++#define TYPE_GPIOPWR "gpio-pwr"
++OBJECT_DECLARE_SIMPLE_TYPE(GPIO_PWR_State, GPIOPWR)
++
++struct GPIO_PWR_State {
++    SysBusDevice parent_obj;
++};
++
++static void gpio_pwr_reset(void *opaque, int n, int level)
++{
++    if (level) {
++        qemu_system_reset_request(SHUTDOWN_CAUSE_GUEST_RESET);
++    }
++}
++
++static void gpio_pwr_shutdown(void *opaque, int n, int level)
++{
++    if (level) {
++        qemu_system_reset_request(SHUTDOWN_CAUSE_GUEST_SHUTDOWN);
++    }
++}
++
++static void gpio_pwr_init(Object *obj)
++{
++    DeviceState *dev = DEVICE(obj);
++
++    qdev_init_gpio_in_named(dev, gpio_pwr_reset, "reset", 1);
++    qdev_init_gpio_in_named(dev, gpio_pwr_shutdown, "shutdown", 1);
++}
++
++static const TypeInfo gpio_pwr_info = {
++    .name          = TYPE_GPIOPWR,
++    .parent        = TYPE_SYS_BUS_DEVICE,
++    .instance_size = sizeof(GPIO_PWR_State),
++    .instance_init = gpio_pwr_init,
++};
++
++static void gpio_pwr_register_types(void)
++{
++    type_register_static(&gpio_pwr_info);
++}
++
++type_init(gpio_pwr_register_types)
+diff --git a/hw/gpio/meson.build b/hw/gpio/meson.build
+index 5c0a7d7b9..79568f00c 100644
+--- a/hw/gpio/meson.build
++++ b/hw/gpio/meson.build
+@@ -1,5 +1,6 @@
+ softmmu_ss.add(when: 'CONFIG_E500', if_true: files('mpc8xxx.c'))
+ softmmu_ss.add(when: 'CONFIG_GPIO_KEY', if_true: files('gpio_key.c'))
++softmmu_ss.add(when: 'CONFIG_GPIO_PWR', if_true: files('gpio_pwr.c'))
+ softmmu_ss.add(when: 'CONFIG_MAX7310', if_true: files('max7310.c'))
+ softmmu_ss.add(when: 'CONFIG_PL061', if_true: files('pl061.c'))
+ softmmu_ss.add(when: 'CONFIG_PUV3', if_true: files('puv3_gpio.c'))
+-- 
+2.17.1
+

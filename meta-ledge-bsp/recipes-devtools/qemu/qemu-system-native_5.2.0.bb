@@ -17,8 +17,6 @@ PACKAGECONFIG ??= "fdt alsa kvm \
 PACKAGECONFIG_remove = "${@'kvm' if not os.path.exists('/usr/include/linux/kvm.h') else ''}"
 
 do_install_append() {
-    install -Dm 0755 ${WORKDIR}/powerpc_rom.bin ${D}${datadir}/qemu
-
     # The following is also installed by qemu-native
     rm -f ${D}${datadir}/qemu/trace-events-all
     rm -rf ${D}${datadir}/qemu/keymaps

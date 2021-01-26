@@ -1,0 +1,157 @@
+From 6da490f341fa79fa0253d819c133aa399b17ee4e Mon Sep 17 00:00:00 2001
+From: Maxim Uvarov <maxim.uvarov@linaro.org>
+Date: Fri, 15 Jan 2021 09:08:03 +0000
+Subject: [PATCH 3/3] arm-virt: add secure pl061 for reset/power down
+
+Add secure pl061 for reset/power down machine from
+the secure world (Arm Trusted Firmware). Connect it
+with gpio-pwr driver.
+
+Signed-off-by: Maxim Uvarov <maxim.uvarov@linaro.org>
+Reviewed-by: Andrew Jones <drjones@redhat.com>
+Signed-off-by: Maxim Uvarov <maxim.uvarov@linaro.org>
+---
+ hw/arm/Kconfig        |  1 +
+ hw/arm/virt.c         | 55 ++++++++++++++++++++++++++++++++++++++++++-
+ include/hw/arm/virt.h |  2 ++
+ 3 files changed, 57 insertions(+), 1 deletion(-)
+
+diff --git a/hw/arm/Kconfig b/hw/arm/Kconfig
+index e69a9009c..0d54f34b7 100644
+--- a/hw/arm/Kconfig
++++ b/hw/arm/Kconfig
+@@ -17,6 +17,7 @@ config ARM_VIRT
+     select PL011 # UART
+     select PL031 # RTC
+     select PL061 # GPIO
++    select GPIO_PWR
+     select PLATFORM_BUS
+     select SMBIOS
+     select VIRTIO_MMIO
+diff --git a/hw/arm/virt.c b/hw/arm/virt.c
+index d73eb2cd0..df6968487 100644
+--- a/hw/arm/virt.c
++++ b/hw/arm/virt.c
+@@ -152,6 +152,7 @@ static const MemMapEntry base_memmap[] = {
+     [VIRT_ACPI_GED] =           { 0x09080000, ACPI_GED_EVT_SEL_LEN },
+     [VIRT_NVDIMM_ACPI] =        { 0x09090000, NVDIMM_ACPI_IO_LEN},
+     [VIRT_PVTIME] =             { 0x090a0000, 0x00010000 },
++    [VIRT_SECURE_GPIO] =        { 0x090b0000, 0x00001000 },
+     [VIRT_MMIO] =               { 0x0a000000, 0x00000200 },
+     /* ...repeating for a total of NUM_VIRTIO_TRANSPORTS, each of that size */
+     [VIRT_PLATFORM_BUS] =       { 0x0c000000, 0x02000000 },
+@@ -840,6 +841,43 @@ static void create_gpio_keys(const VirtMachineState *vms,
+                            "gpios", phandle, 3, 0);
+ }
+ 
++#define SECURE_GPIO_POWEROFF 0
++#define SECURE_GPIO_RESET    1
++
++static void create_secure_gpio_pwr(const VirtMachineState *vms,
++                                   DeviceState *pl061_dev,
++                                   uint32_t phandle)
++{
++    DeviceState *gpio_pwr_dev;
++
++    /* gpio-pwr */
++    gpio_pwr_dev = sysbus_create_simple("gpio-pwr", -1, NULL);
++
++    /* connect secure pl061 to gpio-pwr */
++    qdev_connect_gpio_out(pl061_dev, SECURE_GPIO_RESET,
++                          qdev_get_gpio_in_named(gpio_pwr_dev, "reset", 0));
++    qdev_connect_gpio_out(pl061_dev, SECURE_GPIO_POWEROFF,
++                          qdev_get_gpio_in_named(gpio_pwr_dev, "shutdown", 0));
++
++    qemu_fdt_add_subnode(vms->fdt, "/gpio-poweroff");
++    qemu_fdt_setprop_string(vms->fdt, "/gpio-poweroff", "compatible",
++                            "gpio-poweroff");
++    qemu_fdt_setprop_cells(vms->fdt, "/gpio-poweroff",
++                           "gpios", phandle, SECURE_GPIO_POWEROFF, 0);
++    qemu_fdt_setprop_string(vms->fdt, "/gpio-poweroff", "status", "disabled");
++    qemu_fdt_setprop_string(vms->fdt, "/gpio-poweroff", "secure-status",
++                            "okay");
++
++    qemu_fdt_add_subnode(vms->fdt, "/gpio-restart");
++    qemu_fdt_setprop_string(vms->fdt, "/gpio-restart", "compatible",
++                            "gpio-restart");
++    qemu_fdt_setprop_cells(vms->fdt, "/gpio-restart",
++                           "gpios", phandle, SECURE_GPIO_RESET, 0);
++    qemu_fdt_setprop_string(vms->fdt, "/gpio-restart", "status", "disabled");
++    qemu_fdt_setprop_string(vms->fdt, "/gpio-restart", "secure-status",
++                            "okay");
++}
++
+ static void create_gpio_devices(const VirtMachineState *vms, int gpio,
+                                 MemoryRegion *mem)
+ {
+@@ -872,10 +910,19 @@ static void create_gpio_devices(const VirtMachineState *vms, int gpio,
+     qemu_fdt_setprop_string(vms->fdt, nodename, "clock-names", "apb_pclk");
+     qemu_fdt_setprop_cell(vms->fdt, nodename, "phandle", phandle);
+ 
++    if (gpio != VIRT_GPIO) {
++        /* Mark as not usable by the normal world */
++        qemu_fdt_setprop_string(vms->fdt, nodename, "status", "disabled");
++        qemu_fdt_setprop_string(vms->fdt, nodename, "secure-status", "okay");
++    }
+     g_free(nodename);
+ 
+     /* Child gpio devices */
+-    create_gpio_keys(vms, pl061_dev, phandle);
++    if (gpio == VIRT_GPIO) {
++        create_gpio_keys(vms, pl061_dev, phandle);
++    } else {
++        create_secure_gpio_pwr(vms, pl061_dev, phandle);
++    }
+ }
+ 
+ static void create_virtio_devices(const VirtMachineState *vms)
+@@ -2002,6 +2049,10 @@ static void machvirt_init(MachineState *machine)
+         create_gpio_devices(vms, VIRT_GPIO, sysmem);
+     }
+ 
++    if (vms->secure && !vmc->no_secure_gpio) {
++        create_gpio_devices(vms, VIRT_SECURE_GPIO, secure_sysmem);
++    }
++
+      /* connect powerdown request */
+      vms->powerdown_notifier.notify = virt_powerdown_req;
+      qemu_register_powerdown_notifier(&vms->powerdown_notifier);
+@@ -2604,6 +2655,7 @@ type_init(machvirt_machine_init);
+ 
+ static void virt_machine_5_2_options(MachineClass *mc)
+ {
++
+ }
+ DEFINE_VIRT_MACHINE_AS_LATEST(5, 2)
+ 
+@@ -2614,6 +2666,7 @@ static void virt_machine_5_1_options(MachineClass *mc)
+     virt_machine_5_2_options(mc);
+     compat_props_add(mc->compat_props, hw_compat_5_1, hw_compat_5_1_len);
+     vmc->no_kvm_steal_time = true;
++    vmc->no_secure_gpio = true;
+ }
+ DEFINE_VIRT_MACHINE(5, 1)
+ 
+diff --git a/include/hw/arm/virt.h b/include/hw/arm/virt.h
+index aad6d6984..21bd03e1c 100644
+--- a/include/hw/arm/virt.h
++++ b/include/hw/arm/virt.h
+@@ -81,6 +81,7 @@ enum {
+     VIRT_GPIO,
+     VIRT_SECURE_UART,
+     VIRT_SECURE_MEM,
++    VIRT_SECURE_GPIO,
+     VIRT_PCDIMM_ACPI,
+     VIRT_ACPI_GED,
+     VIRT_NVDIMM_ACPI,
+@@ -127,6 +128,7 @@ struct VirtMachineClass {
+     bool kvm_no_adjvtime;
+     bool no_kvm_steal_time;
+     bool acpi_expose_flash;
++    bool no_secure_gpio;
+ };
+ 
+ struct VirtMachineState {
+-- 
+2.17.1
+

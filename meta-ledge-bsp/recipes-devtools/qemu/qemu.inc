@@ -11,31 +11,22 @@ RDEPENDS_${PN}-ptest = "bash make"
 require qemu-targets.inc
 inherit pkgconfig ptest
 
+DEPENDS += "python3-native"
+
+PR = "ledge-01"
+
 LIC_FILES_CHKSUM = "file://COPYING;md5=441c28d2cf86e15a37fa47e15a72fbac \
                     file://COPYING.LIB;endline=24;md5=8c5efda6cf1e1b03dcfd0e6c0d271c7f"
 
 SRC_URI = "https://download.qemu.org/${BPN}-${PV}.tar.xz \
-           file://powerpc_rom.bin \
-           file://run-ptest \
-           file://0001-qemu-Add-missing-wacom-HID-descriptor.patch \
-           file://0002-Add-subpackage-ptest-which-runs-all-unit-test-cases-.patch \
-           file://0003-qemu-Add-addition-environment-space-to-boot-loader-q.patch \
-           file://0004-qemu-disable-Valgrind.patch \
-           file://0005-qemu-native-set-ld.bfd-fix-cflags-and-set-some-envir.patch \
-           file://0006-chardev-connect-socket-to-a-spawned-command.patch \
-           file://0007-apic-fixup-fallthrough-to-PIC.patch \
-           file://0008-linux-user-Fix-webkitgtk-hangs-on-32-bit-x86-target.patch \
-           file://0009-Fix-webkitgtk-builds.patch \
-           file://0010-configure-Add-pkg-config-handling-for-libgcrypt.patch \
-           file://0001-Add-enable-disable-udev.patch \
-	   file://0001-qemu-Do-not-include-file-if-not-exists.patch \
-	   file://CVE-2020-13361.patch \
-	   file://find_datadir.patch \
+       file://0001-hw-gpio-implement-gpio-pwr-driver-for-qemu-reset-pow.patch \
+       file://0002-arm-virt-refactor-gpios-creation.patch \
+       file://0003-arm-virt-add-secure-pl061-for-reset-power-down.patch \
 	   "
 UPSTREAM_CHECK_REGEX = "qemu-(?P<pver>\d+(\.\d+)+)\.tar"
 
-SRC_URI[md5sum] = "ede6005d7143fe994dd089d31dc2cf6c"
-SRC_URI[sha256sum] = "2f13a92a0fa5c8b69ff0796b59b86b080bbb92ebad5d301a7724dd06b5e78cb6"
+SRC_URI[md5sum] = "179f86928835da857c237b42f4b2df73"
+SRC_URI[sha256sum] = "cb18d889b628fbe637672b0326789d9b0e3b8027e0445b936537c78549df17bc"
 
 COMPATIBLE_HOST_mipsarchn32 = "null"
 COMPATIBLE_HOST_mipsarchn64 = "null"
@@ -75,7 +66,6 @@ EXTRA_OECONF = " \
     --sysconfdir=${sysconfdir} \
     --libexecdir=${libexecdir} \
     --localstatedir=${localstatedir} \
-    --with-confsuffix=/${BPN} \
     --disable-strip \
     --disable-werror \
     --extra-cflags='${CFLAGS}' \
