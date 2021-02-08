@@ -149,6 +149,11 @@ do_deploy_append_ledge-qemuarm64() {
     ln -sf arm-trusted-firmware/bl1.bin  bl1.bin
     ln -sf arm-trusted-firmware/bl2.bin  bl2.bin
     ln -sf arm-trusted-firmware/bl31.bin bl31.bin
+    if [ ! -f sec_nor_flash.bin ] ; then
+        dd if=/dev/zero of=sec_nor_flash.bin count=131072
+    fi
+    dd if=bl1.bin of=sec_nor_flash.bin bs=4096 conv=notrunc
+    dd if=fip.bin of=sec_nor_flash.bin seek=64 bs=4096 conv=notrunc
     cd -
 }
 
