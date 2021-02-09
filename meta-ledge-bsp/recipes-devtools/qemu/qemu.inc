@@ -10,7 +10,8 @@ RDEPENDS_${PN}-ptest = "bash make"
 
 require qemu-targets.inc
 inherit pkgconfig ptest
-inherit python3native
+
+DEPENDS += "python3-native"
 
 PR = "ledge-01"
 
