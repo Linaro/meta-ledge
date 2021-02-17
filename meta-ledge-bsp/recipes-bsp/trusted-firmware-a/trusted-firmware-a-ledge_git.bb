@@ -133,9 +133,10 @@ do_deploy() {
 
     if [ -f ${B}/fip.bin ] ; then
         install -m 0644 ${B}/fip.bin ${DEPLOYDIR}/
-	dd if=${B}/bl1.bin of=${DEPLOYDIR}/firmware.uefi.uboot.bin bs=4096 conv=notrunc
-	dd if=${B}/fip.bin of=${DEPLOYDIR}/firmware.uefi.uboot.bin seek=64 bs=4096 conv=notrunc
-	ln -sf firmware.uefi.uboot.bin ${DEPLOYDIR}/firmware.bin
+        dd if=/dev/zero of=${DEPLOYDIR}/firmware.uefi.uboot.bin count=131072
+        dd if=${B}/bl1.bin of=${DEPLOYDIR}/firmware.uefi.uboot.bin bs=4096 conv=notrunc
+        dd if=${B}/fip.bin of=${DEPLOYDIR}/firmware.uefi.uboot.bin seek=64 bs=4096 conv=notrunc
+        ln -sf firmware.uefi.uboot.bin ${DEPLOYDIR}/firmware.bin
     fi
 }
 
@@ -151,11 +152,6 @@ do_deploy_append_ledge-qemuarm64() {
     ln -sf arm-trusted-firmware/bl1.bin  bl1.bin
     ln -sf arm-trusted-firmware/bl2.bin  bl2.bin
     ln -sf arm-trusted-firmware/bl31.bin bl31.bin
-    if [ ! -f sec_nor_flash.bin ] ; then
-        dd if=/dev/zero of=sec_nor_flash.bin count=131072
-    fi
-    dd if=bl1.bin of=sec_nor_flash.bin bs=4096 conv=notrunc
-    dd if=fip.bin of=sec_nor_flash.bin seek=64 bs=4096 conv=notrunc
     cd -
 }
 
