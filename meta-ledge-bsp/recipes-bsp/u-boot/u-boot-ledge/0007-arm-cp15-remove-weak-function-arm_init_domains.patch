@@ -1,0 +1,69 @@
+From eb9e5de3acf92b04d27198a4c7cd24da46800001 Mon Sep 17 00:00:00 2001
+From: Patrick Delaunay <patrick.delaunay@foss.st.com>
+Date: Fri, 5 Feb 2021 13:53:38 +0100
+Subject: [PATCH 7/8] arm: cp15: remove weak function arm_init_domains
+
+Remove the unused weak function arm_init_domains used to change the
+DACR value.
+
+Signed-off-by: Patrick Delaunay <patrick.delaunay@foss.st.com>
+Signed-off-by: Ilias Apalodimas <ilias.apalodimas@linaro.org>
+---
+ arch/arm/cpu/armv7/cache_v7.c | 3 ---
+ arch/arm/include/asm/cache.h  | 1 -
+ arch/arm/lib/cache-cp15.c     | 6 ------
+ 3 files changed, 10 deletions(-)
+
+diff --git a/arch/arm/cpu/armv7/cache_v7.c b/arch/arm/cpu/armv7/cache_v7.c
+index 146cf526089f..19ff4323528b 100644
+--- a/arch/arm/cpu/armv7/cache_v7.c
++++ b/arch/arm/cpu/armv7/cache_v7.c
+@@ -176,9 +176,6 @@ void mmu_page_table_flush(unsigned long start, unsigned long stop)
+ {
+ }
+ 
+-void arm_init_domains(void)
+-{
+-}
+ #endif /* #if !CONFIG_IS_ENABLED(SYS_DCACHE_OFF) */
+ 
+ #if !CONFIG_IS_ENABLED(SYS_ICACHE_OFF)
+diff --git a/arch/arm/include/asm/cache.h b/arch/arm/include/asm/cache.h
+index c20e05ec7fdb..b10edf805b93 100644
+--- a/arch/arm/include/asm/cache.h
++++ b/arch/arm/include/asm/cache.h
+@@ -35,7 +35,6 @@ void l2_cache_disable(void);
+ void set_section_dcache(int section, enum dcache_option option);
+ 
+ void arm_init_before_mmu(void);
+-void arm_init_domains(void);
+ void cpu_cache_initialization(void);
+ void dram_bank_mmu_setup(int bank);
+ 
+diff --git a/arch/arm/lib/cache-cp15.c b/arch/arm/lib/cache-cp15.c
+index f78ce33b1845..8a49e5217cc1 100644
+--- a/arch/arm/lib/cache-cp15.c
++++ b/arch/arm/lib/cache-cp15.c
+@@ -21,10 +21,6 @@ __weak void arm_init_before_mmu(void)
+ {
+ }
+ 
+-__weak void arm_init_domains(void)
+-{
+-}
+-
+ static void set_section_phys(int section, phys_addr_t phys,
+ 			     enum dcache_option option)
+ {
+@@ -209,8 +205,6 @@ static inline void mmu_setup(void)
+ 	asm volatile("mcr p15, 0, %0, c3, c0, 0"
+ 		     : : "r" (0x55555555));
+ 
+-	arm_init_domains();
+-
+ 	/* and enable the mmu */
+ 	reg = get_cr();	/* get control reg. */
+ 	set_cr(reg | CR_M);
+-- 
+2.30.1
+

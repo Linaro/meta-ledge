@@ -1,0 +1,52 @@
+From 8d0dfc60d6c9355c05864fda3e1403cf0c02e1d1 Mon Sep 17 00:00:00 2001
+From: Patrick Delaunay <patrick.delaunay@foss.st.com>
+Date: Fri, 5 Feb 2021 13:53:36 +0100
+Subject: [PATCH 5/8] arm: cp15: update DACR value to activate access control
+
+Update the initial value of Domain Access Control Register (DACR)
+and set by default the access permission to client (DACR_Dn_CLIENT = 1U)
+for each of the 16 domains and no more to all-supervisor
+(DACR_Dn_MANAGER = 3U).
+
+This patch allows to activate the domain checking in MMU against the
+permission bits in the translation tables and avoids prefetching issue
+on ARMv7 [1].
+
+Today it was already done for OMAP2 architecture
+./arch/arm/mach-omap2/omap-cache.c::arm_init_domains
+introduced by commit de63ac278cba ("ARM: mmu: Set domain permissions
+to client access") which fixes lot of speculative prefetch aborts seen
+on OMAP5 secure devices.
+
+[1] https://developer.arm.com/documentation/ddi0406/b/System-Level-Architecture/Virtual-Memory-System-Architecture--VMSA-/Memory-access-control/The-Execute-Never--XN--attribute-and-instruction-prefetching
+
+Signed-off-by: Patrick Delaunay <patrick.delaunay@st.com>
+Reported-by: Ard Biesheuvel <ardb@kernel.org>
+Signed-off-by: Patrick Delaunay <patrick.delaunay@foss.st.com>
+Signed-off-by: Ilias Apalodimas <ilias.apalodimas@linaro.org>
+---
+ arch/arm/lib/cache-cp15.c | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/lib/cache-cp15.c b/arch/arm/lib/cache-cp15.c
+index abd81d21c73c..f78ce33b1845 100644
+--- a/arch/arm/lib/cache-cp15.c
++++ b/arch/arm/lib/cache-cp15.c
+@@ -202,9 +202,12 @@ static inline void mmu_setup(void)
+ 	asm volatile("mcr p15, 0, %0, c2, c0, 0"
+ 		     : : "r" (gd->arch.tlb_addr) : "memory");
+ #endif
+-	/* Set the access control to all-supervisor */
++	/*
++	 * initial value of Domain Access Control Register (DACR)
++	 * Set the access control to client (1U) for each of the 16 domains
++	 */
+ 	asm volatile("mcr p15, 0, %0, c3, c0, 0"
+-		     : : "r" (~0));
++		     : : "r" (0x55555555)); printf("DACR SET CORRECTLY\n");
+ 
+ 	arm_init_domains();
+ 
+-- 
+2.30.1
+
