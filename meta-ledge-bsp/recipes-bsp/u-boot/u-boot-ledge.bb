@@ -35,7 +35,7 @@ RPROVIDES_${PN} += "u-boot virtual/bootloader"
 
 DEPENDS += "bc-native dtc-native"
 
-do_compile_prepend() {
+do_configure_prepend() {
     for conf in ${UBOOT_MACHINE};
     do
         if [ -f ${WORKDIR}/$conf ] ;
