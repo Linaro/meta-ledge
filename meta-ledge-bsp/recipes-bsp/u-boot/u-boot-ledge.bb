@@ -15,7 +15,7 @@ SRC_URI = "git://git.denx.de/u-boot.git"
 SRCREV = "c4fddedc48f336eabc4ce3f74940e6aa372de18c"
 
 SRC_URI += " \
-    file://0003-ti-am572x-enable-boot_distrocmd.patch \
+    file://0000-ti-am572x-enable-boot_distrocmd.patch \
     file://0001-stm32mp-update-MMU-config-before-the-relocation.patch \
     file://0002-stm32mp-update-the-mmu-configuration-for-SPL-and-pre.patch \
     file://0003-arm-remove-TTB_SECT_XN_MASK-in-DCACHE_WRITETHROUGH.patch \
