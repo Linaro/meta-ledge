@@ -2,7 +2,7 @@ SUMMARY = "OPTEE fTPM Microsoft TA"
 DESCRIPTION = "OPTEE fTPM"
 HOMEPAGE = "https://github.com/microsoft/ms-tpm-20-ref/"
 
-inherit autotools-brokensep pkgconfig gettext
+inherit autotools-brokensep pkgconfig gettext python3native
 
 FTPM_UUID="bc50d971-d4c9-42c4-82cb-343fb7f37896"
 LICENSE = "MIT"
@@ -10,6 +10,7 @@ LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=27e94c0280987ab296b0b8dd02ab9fe5"
 
 DEPENDS = "optee-client optee-os openssl"
 DEPENDS += "openssl-native autoconf-archive-native"
+DEPENDS += "python3-pycryptodomex-native python3-pycrypto-native"
 
 # SRC_URI = "git://github.com/Microsoft/ms-tpm-20-ref;branch=master"
 # Since this is not built as a pseudo TA, we can only use it as a kernel module and not built in.
@@ -18,7 +19,8 @@ DEPENDS += "openssl-native autoconf-archive-native"
 # is provided via OP-TEE supplicant that's not available during boot.
 # Fix this once we replace this with the MS implementation
 SRC_URI = "git://github.com/microsoft/MSRSec"
-SRCREV = "81abeb9fa968340438b4b0c08aa6685833f0bfa1"
+SRC_URI += "file://0000-fix-ssl-fallthrough.patch"
+SRCREV = "76f81b36efbb1a366b0d382bc0defe677f1f0534"
 
 S = "${WORKDIR}/git"
 
@@ -39,7 +41,11 @@ EXTRA_OEMAKE_append_aarch64 = "\
 
 B = "${S}"
 
-do_configure() {
+do_unpack_append() {
+    bb.build.exec_func('source_fixup_patch', d)
+}
+
+source_fixup_patch() {
     cd ${S}
     git submodule update --init
     sed -i 's/-mcpu=$(TA_CPU)//' TAs/optee_ta/fTPM/sub.mk
