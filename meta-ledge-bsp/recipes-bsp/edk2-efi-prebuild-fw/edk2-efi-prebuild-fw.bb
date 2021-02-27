@@ -29,28 +29,6 @@ SRC_URI = "\
 	file://RELEASEX64_Shell.efi \
 	"
 
-
-python __anonymous () {
-    import re
-    target = d.getVar('TARGET_ARCH')
-    if target == "x86_64":
-        efi_shell = "bootx64.efi"
-        kernel_efi_image = "kernel-bootx64.efi"
-    elif re.match('i.86', target):
-        efi_shell = "bootia32.efi"
-        kernel_efi_image = "kernel-bootia32.efi"
-    elif re.match('aarch64', target):
-        efi_shell = "bootaa64.efi"
-        kernel_efi_image = "kernel-bootaa64.efi"
-    elif re.match('arm', target):
-        efi_shell = "bootarm.efi"
-        kernel_efi_image = "kernel-bootarm.efi"
-    else:
-        raise bb.parse.SkipRecipe("kernel efi is incompatible with target %s" % target)
-    d.setVar("KERNEL_EFI_IMAGE", kernel_efi_image)
-    d.setVar("EFI_SHELL", efi_shell)
-}
-
 do_deploy() {
 	mkdir -p ${D}/boot/EFI/BOOT
 	mkdir -p ${DEPLOYDIR}

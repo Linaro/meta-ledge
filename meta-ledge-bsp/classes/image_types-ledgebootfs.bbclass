@@ -18,21 +18,16 @@ python __anonymous () {
     import re
     target = d.getVar('TARGET_ARCH')
     if target == "x86_64":
-        efi_shell = "bootx64.efi"
-        kernel_efi_image = "kernel-bootx64.efi"
+        kernel_efi_image = "bootx64.efi"
     elif re.match('i.86', target):
-        efi_shell = "bootia32.efi"
-        kernel_efi_image = "kernel-bootia32.efi"
+        kernel_efi_image = "bootia32.efi"
     elif re.match('aarch64', target):
-        efi_shell = "bootaa64.efi"
-        kernel_efi_image = "kernel-bootaa64.efi"
+        kernel_efi_image = "bootaa64.efi"
     elif re.match('arm', target):
-        efi_shell = "bootarm.efi"
-        kernel_efi_image = "kernel-bootarm.efi"
+        kernel_efi_image = "bootarm.efi"
     else:
         raise bb.parse.SkipRecipe("kernel efi is incompatible with target %s" % target)
     d.setVar("KERNEL_EFI_IMAGE", kernel_efi_image)
-    d.setVar("EFI_SHELL", efi_shell)
 }
 
 IMAGE_CMD_ledgebootfs () {
@@ -59,21 +54,15 @@ IMAGE_CMD_ledgebootfs () {
         break;
     done
 
-    mcopy -i ${LEDGE_BOOTFS_NAME} -s ${DEPLOY_DIR_IMAGE}/edk2_shell.efi ::/EFI/BOOT/${EFI_SHELL}
-
     # put device tree
     mmd -i ${LEDGE_BOOTFS_NAME} ::/dtb
     find ${DEPLOY_DIR_IMAGE}/dtb/ -name "*.dtb" -type f -exec mcopy -i ${LEDGE_BOOTFS_NAME} -s {} ::/dtb/ \;
     # put initramfs
     mcopy -i ${LEDGE_BOOTFS_NAME} -s ${DEPLOY_DIR_IMAGE}/ledge-initramfs.rootfs.cpio.gz ::/
+}
 
-    # Define initrd in EDK2 UEFI shell
-    echo "initrd ledge-initramfs.rootfs.cpio.gz" > startup.nsh
-    echo "${KERNEL_EFI_IMAGE} rootwait initrd=/ledge-initramfs.rootfs.cpio.gz root=UUID=6091b3a4-ce08-3020-93a6-f755a22ef03b console=ttyS2,115200 console=ttyS0,115200 console=ttyAMA0,115200  " >> startup.nsh
-    mcopy -i ${LEDGE_BOOTFS_NAME} -s startup.nsh ::/
-    rm startup.nsh
-
-    # Final stage - compress and create symlinks
+# Final stage - compress and create symlinks
+IMAGE_CMD_ledgebootfs_append() {
     (cd ${IMGDEPLOYDIR};ln -sf ${IMAGE_NAME}.bootfs.vfat ${IMAGE_LINK_NAME}.bootfs.vfat)
     (cd ${IMGDEPLOYDIR};gzip -f -9 -c ${IMAGE_NAME}.bootfs.vfat > ${IMAGE_NAME}.bootfs.vfat.gz)
     (cd ${IMGDEPLOYDIR};cp ${IMAGE_NAME}.bootfs.vfat.gz ${IMAGE_LINK_NAME}.bootfs.vfat.gz)
