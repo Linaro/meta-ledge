@@ -1,0 +1,31 @@
+From ed5bef4fd9e7ce29bd98e025fa05fd4d5d077879 Mon Sep 17 00:00:00 2001
+From: Patrick Delaunay <patrick.delaunay@foss.st.com>
+Date: Fri, 5 Feb 2021 13:53:34 +0100
+Subject: [PATCH 3/8] arm: remove TTB_SECT_XN_MASK in DCACHE_WRITETHROUGH
+
+The normal memory (other that DCACHE_OFF) should be executable by default,
+only the device memory (DCACHE_OFF) used for peripheral access should have
+the bit execute never (TTB_SECT_XN_MASK).
+
+Signed-off-by: Patrick Delaunay <patrick.delaunay@foss.st.com>
+Signed-off-by: Ilias Apalodimas <ilias.apalodimas@linaro.org>
+---
+ arch/arm/include/asm/system.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/include/asm/system.h b/arch/arm/include/asm/system.h
+index ce552944b701..abe9244cd048 100644
+--- a/arch/arm/include/asm/system.h
++++ b/arch/arm/include/asm/system.h
+@@ -489,7 +489,7 @@ enum dcache_option {
+  */
+ enum dcache_option {
+ 	DCACHE_OFF = TTB_SECT_DOMAIN(0) | TTB_SECT_XN_MASK | TTB_SECT,
+-	DCACHE_WRITETHROUGH = DCACHE_OFF | TTB_SECT_C_MASK,
++	DCACHE_WRITETHROUGH = TTB_SECT_DOMAIN(0) | TTB_SECT | TTB_SECT_C_MASK,
+ 	DCACHE_WRITEBACK = DCACHE_WRITETHROUGH | TTB_SECT_B_MASK,
+ 	DCACHE_WRITEALLOC = DCACHE_WRITEBACK | TTB_SECT_TEX(1),
+ };
+-- 
+2.30.1
+

@@ -1,0 +1,43 @@
+From a0384f55cdbef9175982e3e4ae94fe112aec1c99 Mon Sep 17 00:00:00 2001
+From: Patrick Delaunay <patrick.delaunay@foss.st.com>
+Date: Fri, 5 Feb 2021 13:53:39 +0100
+Subject: [PATCH 8/8] arm: remove set_dacr/get_dacr functions
+
+Remove the unused function set_dacr/get_dacr
+
+Serie-cc: Ard Biesheuvel <ardb@kernel.org>
+Serie-cc: R Sricharan <r.sricharan@ti.com>
+Signed-off-by: Patrick Delaunay <patrick.delaunay@foss.st.com>
+Signed-off-by: Ilias Apalodimas <ilias.apalodimas@linaro.org>
+---
+ arch/arm/include/asm/system.h | 14 --------------
+ 1 file changed, 14 deletions(-)
+
+diff --git a/arch/arm/include/asm/system.h b/arch/arm/include/asm/system.h
+index db5a19b17c19..86ae4d3992f6 100644
+--- a/arch/arm/include/asm/system.h
++++ b/arch/arm/include/asm/system.h
+@@ -397,20 +397,6 @@ static inline void set_cr(unsigned int val)
+ 	isb();
+ }
+ 
+-static inline unsigned int get_dacr(void)
+-{
+-	unsigned int val;
+-	asm("mrc p15, 0, %0, c3, c0, 0	@ get DACR" : "=r" (val) : : "cc");
+-	return val;
+-}
+-
+-static inline void set_dacr(unsigned int val)
+-{
+-	asm volatile("mcr p15, 0, %0, c3, c0, 0	@ set DACR"
+-	  : : "r" (val) : "cc");
+-	isb();
+-}
+-
+ #ifdef CONFIG_ARMV7_LPAE
+ /* Long-Descriptor Translation Table Level 1/2 Bits */
+ #define TTB_SECT_XN_MASK	(1ULL << 54)
+-- 
+2.30.1
+

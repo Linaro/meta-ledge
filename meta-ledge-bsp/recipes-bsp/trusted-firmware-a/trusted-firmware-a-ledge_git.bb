@@ -11,10 +11,10 @@ LIC_FILES_CHKSUM = "file://license.rst;md5=1dd070c98a281d18d9eefd938729b031"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
-PV = "2.3"
+PV = "2.4"
 
 SRC_URI = "git://github.com/ARM-software/arm-trusted-firmware.git;protocol=https;nobranch=1"
-SRCREV = "fc721f830855ab05f45d8f2024325601bbb4c783"
+SRCREV = "e2c509a39c6cc4dda8734e6509cdbe6e3603cdfc"
 
 SRC_URI += "file://0001-plat-qemu-trigger-reboot-with-secure-pl061.patch"
 

@@ -1,0 +1,61 @@
+From ab26c82c95f64bb7aeb31f90f9aa6a82f78e331f Mon Sep 17 00:00:00 2001
+From: Patrick Delaunay <patrick.delaunay@foss.st.com>
+Date: Fri, 5 Feb 2021 13:53:32 +0100
+Subject: [PATCH 1/8] stm32mp: update MMU config before the relocation
+
+Mark the top of ram, used for relocated U-Boot as a normal memory
+(cacheable and executable) to avoid permission access issue when
+U-Boot jumps to this relocated code.
+
+When MMU is activated in pre-reloc stage; only the beginning of
+DDR is marked executable.
+
+This patch avoids access issue when DACR is correctly managed.
+
+Signed-off-by: Patrick Delaunay <patrick.delaunay@foss.st.com>
+Signed-off-by: Ilias Apalodimas <ilias.apalodimas@linaro.org>
+---
+ arch/arm/mach-stm32mp/dram_init.c | 13 +++++++++----
+ 1 file changed, 9 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm/mach-stm32mp/dram_init.c b/arch/arm/mach-stm32mp/dram_init.c
+index 0e8ce63f4a29..6fddde3738d7 100644
+--- a/arch/arm/mach-stm32mp/dram_init.c
++++ b/arch/arm/mach-stm32mp/dram_init.c
+@@ -10,6 +10,7 @@
+ #include <lmb.h>
+ #include <log.h>
+ #include <ram.h>
++#include <asm/system.h>
+ 
+ DECLARE_GLOBAL_DATA_PTR;
+ 
+@@ -38,6 +39,7 @@ int dram_init(void)
+ 
+ ulong board_get_usable_ram_top(ulong total_size)
+ {
++	phys_size_t size;
+ 	phys_addr_t reg;
+ 	struct lmb lmb;
+ 
+@@ -45,10 +47,13 @@ ulong board_get_usable_ram_top(ulong total_size)
+ 	lmb_init(&lmb);
+ 	lmb_add(&lmb, gd->ram_base, gd->ram_size);
+ 	boot_fdt_add_mem_rsv_regions(&lmb, (void *)gd->fdt_blob);
+-	reg = lmb_alloc(&lmb, CONFIG_SYS_MALLOC_LEN + total_size, SZ_4K);
++	size = ALIGN(CONFIG_SYS_MALLOC_LEN + total_size, MMU_SECTION_SIZE),
++	reg = lmb_alloc(&lmb, size, MMU_SECTION_SIZE);
+ 
+-	if (reg)
+-		return ALIGN(reg + CONFIG_SYS_MALLOC_LEN + total_size, SZ_4K);
++	if (!reg)
++		reg = gd->ram_top - size;
+ 
+-	return gd->ram_top;
++	mmu_set_region_dcache_behaviour(reg, size, DCACHE_DEFAULT_OPTION);
++
++	return reg + size;
+ }
+-- 
+2.30.1
+
