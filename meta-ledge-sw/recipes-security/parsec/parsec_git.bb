@@ -14,7 +14,6 @@ DEPENDS = "curl-native openssl-native libtss2 tpm2-tss tpm2-pkcs11 \
            libtss2-dev \
            libtss2-staticdev \
            libtss2-tcti-device \
-	   llvm-native \
 "
 
 RDEPENDS_${PN} += " libtss2-tcti-device tpm2-abrmd "
