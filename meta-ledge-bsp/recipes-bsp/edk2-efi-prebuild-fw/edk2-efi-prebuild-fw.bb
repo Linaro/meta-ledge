@@ -17,12 +17,11 @@ inherit deploy
 S = "${WORKDIR}/"
 
 SRC_URI = "\
-	file://RELEASEAARCH64_QEMU_EFI.fd \
+	file://RELEASEAARCH64_QEMU_EFI.fd.gz \
 	file://LEDGE_AARCH64_QEMU_VARS.fd.gz \
-	file://RELEASEARM_QEMU_EFI.fd \
+	file://RELEASEARM_QEMU_EFI.fd.gz \
 	file://LEDGE_ARM_QEMU_VARS.fd.gz \
-	file://RELEASEX64_OVMF.fd \
-	file://LEDGE_X64_QEMU_VARS.fd.gz \
+	file://LEDGE_RELEASEX64_OVMF.fd.gz \
 	"
 
 do_deploy() {
@@ -30,20 +29,19 @@ do_deploy() {
 }
 
 do_deploy_append_ledge-qemuarm64() {
-	dd if=/dev/zero bs=1M count=64 of=${DEPLOYDIR}/firmware.uefi-edk2.bin
-	dd if=${B}/RELEASEAARCH64_QEMU_EFI.fd  bs=1M of=${DEPLOYDIR}/firmware.uefi-edk2.bin conv=notrunc
-	install -m 0644  ${B}/LEDGE_AARCH64_QEMU_VARS.fd ${DEPLOYDIR}/LEDGE_AARCH64_QEMU_VARS.bin
+    dd if=/dev/zero bs=1M count=64 of=${DEPLOYDIR}/firmware.uefi-edk2.bin
+    dd if=${B}/RELEASEAARCH64_QEMU_EFI.fd  bs=1M of=${DEPLOYDIR}/firmware.uefi-edk2.bin conv=notrunc
+    install -m 0644  ${B}/LEDGE_AARCH64_QEMU_VARS.fd ${DEPLOYDIR}/LEDGE_AARCH64_QEMU_VARS.bin
 }
 
 do_deploy_append_ledge-qemuarm() {
-	dd if=/dev/zero bs=1M count=64 of=${DEPLOYDIR}/firmware.uefi-edk2.bin
-	dd if=${B}/RELEASEARM_QEMU_EFI.fd bs=1M of=${DEPLOYDIR}/firmware.uefi-edk2.bin conv=notrunc
-	install -m 0644 ${B}/LEDGE_ARM_QEMU_VARS.fd ${DEPLOYDIR}/LEDGE_ARM_QEMU_VARS.bin
+    dd if=/dev/zero bs=1M count=64 of=${DEPLOYDIR}/firmware.uefi-edk2.bin
+    dd if=${B}/RELEASEARM_QEMU_EFI.fd bs=1M of=${DEPLOYDIR}/firmware.uefi-edk2.bin conv=notrunc
+    install -m 0644 ${B}/LEDGE_ARM_QEMU_VARS.fd ${DEPLOYDIR}/LEDGE_ARM_QEMU_VARS.bin
 }
 
 do_deploy_append_ledge-qemux86-64() {
-	install -m 0644 ${B}/RELEASEX64_OVMF.fd ${DEPLOYDIR}/firmware.uefi-edk2.bin
-	install -m 0644 ${B}/LEDGE_X64_QEMU_VARS.fd ${DEPLOYDIR}/LEDGE_X64_QEMU_VARS.bin
+    install -m 0644 ${B}/LEDGE_RELEASEX64_OVMF.fd ${DEPLOYDIR}/firmware.uefi-edk2.bin
 }
 
 addtask deploy after do_install
