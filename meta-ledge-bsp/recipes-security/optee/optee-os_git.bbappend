@@ -8,6 +8,8 @@ SRCREV = "3d47a131bca1d9ed511bfd516aa5e70269e12c1d"
 DEPENDS += "dtc-native"
 DEPENDS += "python3-pyelftools-native dtc-native python3-pycryptodomex-native python3-pycrypto-native"
 
+SRC_URI_append_ledge-qemuarm = " file://arm32_bc50d971-d4c9-42c4-82cb-343fb7f37896.stripped.elf "
+
 SRC_URI_append_ledge-qemuarm64 = " file://bc50d971-d4c9-42c4-82cb-343fb7f37896.stripped.elf "
 SRC_URI_append_ledge-qemuarm64 = " file://3ffb8563-ee28-4047-a7cd-d0e038aa6230.fd "
 SRC_URI_append_ledge-qemuarm64 = " file://0001-HACK-enable-pl011-and-secure-flash.patch \
@@ -43,9 +45,19 @@ OPTEE_ARCH_armv7ve = "arm32"
 
 FTPM_UUID="bc50d971-d4c9-42c4-82cb-343fb7f37896"
 STMM_UUID="3ffb8563-ee28-4047-a7cd-d0e038aa6230"
+EXTRA_OEMAKE_append_ledge-qemuarm='CFG_EARLY_TA=y EARLY_TA_PATHS="./${FTPM_UUID}.stripped.elf"'
+
 EXTRA_OEMAKE_append_ledge-qemuarm64='CFG_EARLY_TA=y EARLY_TA_PATHS="../${FTPM_UUID}.stripped.elf"'
 EXTRA_OEMAKE_append_ledge-qemuarm64=' CFG_STMM_PATH="../${STMM_UUID}.fd"'
 EXTRA_OEMAKE_append_ledge-qemuarm64=' CFG_CORE_HEAP_SIZE=524288 CFG_TEE_CORE_LOG_LEVEL=3 DEBUG=1'
+
+do_configure_append_ledge-qemuarm() {
+    cp ../arm32_${FTPM_UUID}.stripped.elf ${FTPM_UUID}.stripped.elf
+}
+
+do_configure_append_ledge-qemuarm64() {
+    cp ../${FTPM_UUID}.stripped.elf ${FTPM_UUID}.stripped.elf
+}
 
 do_install_append_ledge-stm32mp157c-dk2() {
     # install optee bianries with stm32 images
