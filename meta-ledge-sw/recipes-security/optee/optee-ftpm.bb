@@ -20,6 +20,7 @@ DEPENDS += "python3-pycryptodomex-native python3-pycrypto-native"
 # Fix this once we replace this with the MS implementation
 SRC_URI = "git://github.com/microsoft/MSRSec"
 SRC_URI += "file://0000-fix-ssl-fallthrough.patch"
+SRC_URI += "file://0002-add-enum-to-ta-flags.patch"
 SRCREV = "76f81b36efbb1a366b0d382bc0defe677f1f0534"
 
 S = "${WORKDIR}/git"
