@@ -7,6 +7,8 @@ DEPENDS = ""
 include linux-ledge-common.inc
 include linux-ledge-sign.inc
 
+PR = "r2.ledge"
+
 LEDGE_KVERSION = "5.8"
 
 # Stable kernel URL
