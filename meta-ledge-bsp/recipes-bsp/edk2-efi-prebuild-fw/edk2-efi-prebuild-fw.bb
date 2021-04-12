@@ -29,13 +29,13 @@ do_deploy() {
 }
 
 do_deploy_append_ledge-qemuarm64() {
-    dd if=/dev/zero bs=1M count=64 of=${DEPLOYDIR}/firmware.uefi-edk2.bin
+    dd if=/dev/zero bs=1M count=64 of=${DEPLOYDIR}/firmware.uefi.edk2.bin
     dd if=${B}/RELEASEAARCH64_QEMU_EFI.fd  bs=1M of=${DEPLOYDIR}/firmware.uefi.edk2.bin conv=notrunc
     install -m 0644  ${B}/LEDGE_AARCH64_QEMU_VARS.fd ${DEPLOYDIR}/LEDGE_AARCH64_QEMU_VARS.bin
 }
 
 do_deploy_append_ledge-qemuarm() {
-    dd if=/dev/zero bs=1M count=64 of=${DEPLOYDIR}/firmware.uefi-edk2.bin
+    dd if=/dev/zero bs=1M count=64 of=${DEPLOYDIR}/firmware.uefi.edk2.bin
     dd if=${B}/RELEASEARM_QEMU_EFI.fd bs=1M of=${DEPLOYDIR}/firmware.uefi.edk2.bin conv=notrunc
     install -m 0644 ${B}/LEDGE_ARM_QEMU_VARS.fd ${DEPLOYDIR}/LEDGE_ARM_QEMU_VARS.bin
 }
