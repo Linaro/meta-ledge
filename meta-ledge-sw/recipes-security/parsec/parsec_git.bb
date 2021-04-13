@@ -1,6 +1,6 @@
 inherit cargo rust systemd
 
-SRC_URI = "git://github.com/parallaxsecond/parsec.git;protocol=https"
+SRC_URI = "git://github.com/parallaxsecond/parsec.git;protocol=https;branch=main"
 SRCREV="0.6.0"
 SRC_URI_append = " file://parsec.service \
                    file://config.toml "
