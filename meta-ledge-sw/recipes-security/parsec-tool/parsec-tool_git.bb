@@ -1,6 +1,6 @@
 inherit cargo rust systemd
 
-SRC_URI = "git://github.com/parallaxsecond/parsec-tool.git;protocol=https"
+SRC_URI = "git://github.com/parallaxsecond/parsec-tool.git;protocol=https;branch=main"
 SRCREV="1a11b0ade3bca02c57d798ca68ea2d76bf2d6c98"
 LIC_FILES_CHKSUM="file://LICENSE;md5=3b83ef96387f14655fc854ddc3c6bd57"
 
