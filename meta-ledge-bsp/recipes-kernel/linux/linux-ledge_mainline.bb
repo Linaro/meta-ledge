@@ -2,7 +2,7 @@ DESCRIPTION = "Linux Kernel"
 HOMEPAGE = "www.kernel.org"
 LICENSE = "GPLv2"
 SECTION = "kernel"
-DEPENDS = ""
+DEPENDS = "${@bb.utils.contains('ARCH', 'x86', 'elfutils-native', '', d)}"
 
 include linux-ledge-common.inc
 include linux-ledge-sign.inc
