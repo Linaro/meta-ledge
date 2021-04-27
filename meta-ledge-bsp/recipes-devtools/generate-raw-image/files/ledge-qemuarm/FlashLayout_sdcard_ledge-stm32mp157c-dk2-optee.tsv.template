@@ -1,5 +1,3 @@
-PARTITION	GPT
-UUID	6091b3a4-ce08-3020-93a6-f755a22ef03b
 #Opt	Id	Name	Type	IP	Offset	Binary
 -	0x01	fsbl1-boot	Binary	none	0x0	tf-a-stm32mp157c-dk2-flasher.stm32
 -	0x03	ssbl-boot	Binary	none	0x0	u-boot-stm32mp157c-dk2-flasher.stm32
