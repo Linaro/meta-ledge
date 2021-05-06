@@ -32,6 +32,7 @@ B = "${WORKDIR}/build"
 
 SRC_URI_append_ledge-qemuarm = " file://ledge-qemuarm_defconfig"
 SRC_URI_append_ledge-qemuarm64 = " file://ledge-qemuarm64_defconfig"
+SRC_URI_append_ledge-ti-am572x = " file://ledge-ti-am572x_defconfig"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
