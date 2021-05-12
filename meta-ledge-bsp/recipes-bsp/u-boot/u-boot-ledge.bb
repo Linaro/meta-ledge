@@ -25,6 +25,7 @@ SRC_URI += " \
     file://0007-arm-cp15-remove-weak-function-arm_init_domains.patch \
     file://0008-arm-remove-set_dacr-get_dacr-functions.patch \
     file://ledge_stm32mp157c_dk2_trusted_defconfig \
+    file://ubootefi.var \
     "
 
 S = "${WORKDIR}/git"
@@ -50,6 +51,7 @@ do_configure_prepend() {
             cp ${WORKDIR}/$conf ${S}/configs/
         fi
     done
+    cp ${WORKDIR}/ubootefi.var ${S}/
 }
 
 # -----------------------------------------------------------------------------
