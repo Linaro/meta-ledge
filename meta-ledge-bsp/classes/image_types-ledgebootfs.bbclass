@@ -50,7 +50,7 @@ IMAGE_CMD_ledgebootfs () {
     mmd -i ${LEDGE_BOOTFS_NAME} ::/EFI
     mmd -i ${LEDGE_BOOTFS_NAME} ::/EFI/BOOT
     for img in ${KERNEL_IMAGETYPE}; do
-        mcopy -i ${LEDGE_BOOTFS_NAME} -s ${DEPLOY_DIR_IMAGE}/$img ::/EFI/BOOT/${KERNEL_EFI_IMAGE}
+        mcopy -i ${LEDGE_BOOTFS_NAME} -s ${DEPLOY_DIR_IMAGE}/$img.signed ::/EFI/BOOT/${KERNEL_EFI_IMAGE}
         break;
     done
 
