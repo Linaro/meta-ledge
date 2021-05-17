@@ -11,7 +11,7 @@ SRC_URI_append = " file://uefi-certificates/db.auth "
 inherit kernel siteinfo
 
 do_compile_append() {
-	KERNEL_IMAGE=`find ${B} -name ${KERNEL_IMAGETYPE}`
+	KERNEL_IMAGE=`find ${B} -name ${KERNEL_IMAGETYPE} -print -quit`
 
 	${STAGING_BINDIR_NATIVE}/sbsign --key ${WORKDIR}/uefi-certificates/db.key --cert ${WORKDIR}/uefi-certificates/db.crt ${KERNEL_IMAGE} --output  ${KERNEL_IMAGETYPE}.signed
 	cp ${KERNEL_IMAGETYPE}.signed ${KERNEL_IMAGE}
