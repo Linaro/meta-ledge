@@ -11,17 +11,17 @@ SRC_URI_append = " file://uefi-certificates/db.auth "
 inherit kernel siteinfo
 
 do_compile_append() {
-	if [ ${TUNE_ARCH} != "x86_64" ]; then
-		KERNEL_IMAGE=`find ${B} -name ${KERNEL_IMAGETYPE}`
-		${STAGING_BINDIR_NATIVE}/sbsign --key ${WORKDIR}/uefi-certificates/db.key --cert ${WORKDIR}/uefi-certificates/db.crt ${KERNEL_IMAGE} --output  ${KERNEL_IMAGETYPE}.signed
-		cp ${KERNEL_IMAGETYPE}.signed ${KERNEL_IMAGE}
-	fi
+	KERNEL_IMAGE=`find ${B} -name ${KERNEL_IMAGETYPE}`
+
+	${STAGING_BINDIR_NATIVE}/sbsign --key ${WORKDIR}/uefi-certificates/db.key --cert ${WORKDIR}/uefi-certificates/db.crt ${KERNEL_IMAGE} --output  ${KERNEL_IMAGETYPE}.signed
+	cp ${KERNEL_IMAGETYPE}.signed ${KERNEL_IMAGE}
 }
 
 do_deploy_append() {
-	if [ ${TUNE_ARCH} != "x86_64" ]; then
-		install -m 0644 ${KERNEL_IMAGETYPE}.signed ${DEPLOYDIR}/
-	fi
+	KERNEL_IMAGE="${D}/boot/${img}"
+
+	install -m 0644 ${KERNEL_IMAGETYPE}.signed ${DEPLOYDIR}/
+
 	mkdir -p certimage
 	cp ${WORKDIR}/uefi-certificates/PK.auth ${WORKDIR}/uefi-certificates/KEK.auth ${WORKDIR}/uefi-certificates/db.auth ${WORKDIR}/uefi-certificates/db.crt ./certimage
 	truncate -s 4M certimage.ext4
