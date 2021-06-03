@@ -153,7 +153,6 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	readline \
 	rng-tools \
 	rsync \
-	runc-docker \
 	satyr \
 	screen \
 	sed \
