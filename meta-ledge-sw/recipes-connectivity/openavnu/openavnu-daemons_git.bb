@@ -15,7 +15,7 @@ DEPENDS = " libpcap alsa-lib glib-2.0 libsndfile1 cmake-native jack \
     ${@bb.utils.contains('DISTRO_FEATURES', 'gstreamer', 'gstreamer1.0 gstreamer1.0-plugins-base', '', d)} \
     "
 
-SRCREV_openavnu = "736ed600ab6c5bf962a093c8111e8f6e5246cd02"
+SRCREV_openavnu = "ff076e83234d2207f33447b9bd6d1646d9245566"
 SRCREV_cpputest = "1d95a3905413d99fddb5bcbd30be35a16dbf9119"
 SRCREV_avdecc = "a04fef499f843b8a7f596bc15441a847b9a18b7a"
 SRCREV_igb = "797496806aed8be065a55417e07b7ccd170429dd"
@@ -67,7 +67,7 @@ do_install_append() {
     install -d ${D}${datadir}/openavnu/examples
 
     # install gptp
-    install -m 0755 ${B}/daemons/gptp/gptp ${D}${bindir}/
+    # install -m 0755 ${B}/daemons/gptp/gptp ${D}${bindir}/
 
     # install mrpd
     install -m 0755 ${B}/daemons/mrpd/mrpd ${D}${bindir}/
