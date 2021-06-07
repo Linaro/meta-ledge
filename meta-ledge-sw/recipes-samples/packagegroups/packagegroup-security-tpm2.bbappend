@@ -7,6 +7,6 @@ RDEPENDS_packagegroup-security-tpm2_remove = " \
     "
 
 RDEPENDS_packagegroup-security-tpm2_append = " \
-    parsec \
+    parsec-service \
     parsec-tool \
     "
