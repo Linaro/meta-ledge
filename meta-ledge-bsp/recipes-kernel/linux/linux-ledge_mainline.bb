@@ -3,6 +3,7 @@ HOMEPAGE = "www.kernel.org"
 LICENSE = "GPLv2"
 SECTION = "kernel"
 DEPENDS = "${@bb.utils.contains('ARCH', 'x86', 'elfutils-native', '', d)}"
+DEPENDS += "gmp-native"
 
 include linux-ledge-common.inc
 include linux-ledge-sign.inc
