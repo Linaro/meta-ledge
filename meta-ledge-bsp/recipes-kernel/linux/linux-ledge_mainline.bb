@@ -3,6 +3,7 @@ HOMEPAGE = "www.kernel.org"
 LICENSE = "GPLv2"
 SECTION = "kernel"
 DEPENDS = "${@bb.utils.contains('ARCH', 'x86', 'elfutils-native', '', d)}"
+DEPENDS += "openssl-native util-linux-native"
 DEPENDS += "gmp-native"
 
 include linux-ledge-common.inc
@@ -10,11 +11,11 @@ include linux-ledge-sign.inc
 
 PR = "r2.ledge"
 
-LEDGE_KVERSION = "5.8"
+LEDGE_KVERSION = "5.12.9"
 
 # Stable kernel URL
 SRC_URI = "https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-${LEDGE_KVERSION}.tar.xz;name=kernel"
-SRC_URI[kernel.sha256sum] = "e7f75186aa0642114af8f19d99559937300ca27acaf7451b36d4f9b0f85cf1f5"
+SRC_URI[kernel.sha256sum] = "c7fabef5754271cd12f2d3a9ae237ed91c6fce09cec3895400d48194110ce76d"
 
 # force SOURCE_DATE_EPOCH for build reproductible
 # SOURCE_DATE_EPOCH = "1557103378"
@@ -26,10 +27,6 @@ SRC_URI[kernel.sha256sum] = "e7f75186aa0642114af8f19d99559937300ca27acaf7451b36d
 SRC_URI += " \
     file://0001-STM32mp157c-dk2-optee-reboot.patch \
     file://0002-KERNEL-stm32mp157-dts-add-ftpm-support.patch \
-    file://0003-optee-use-uuid-for-sysfs-driver-entry.patch \
-    file://0004-optee-enable-support-for-multi-stage-bus-enumeration.patch \
-    file://0005-tpm_ftpm_tee-register-driver-on-TEE-bus.patch \
-    file://0006-efi-libstub-DRAM-base-calculation.patch \
 "
 
 PV = "mainline-5.8"

@@ -32,6 +32,7 @@ KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-16-watchdog.config "
 KERNEL_CONFIG_COMMAND = "oe_runmake -C ${S} O=${B} ${KERNEL_DEFCONFIG}"
 
 EXTRA_OEMAKE += "${@oe.utils.ifelse(d.getVar('KERNEL_SIGN_ENABLE') == '1', 'INSTALL_MOD_STRIP=1','')}"
+EXTRA_OEMAKE += " HOSTCXX="${BUILD_CXX} ${BUILD_CXXFLAGS} ${BUILD_LDFLAGS}" HOSTCPP="${BUILD_CPP}""
 
 do_configure() {
     touch ${B}/.scmversion ${S}/.scmversion
