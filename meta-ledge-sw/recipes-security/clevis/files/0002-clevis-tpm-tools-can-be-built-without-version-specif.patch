@@ -1,0 +1,54 @@
+From 1ce25beb7a9aab8691424f06e69a531c0a87eb93 Mon Sep 17 00:00:00 2001
+From: Maxim Uvarov <maxim.uvarov@linaro.org>
+Date: Tue, 27 Jul 2021 12:47:48 +0100
+Subject: [PATCH 2/4] clevis: tpm tools can be built without version specified
+
+Probably for security reasons tpm2-tools can be build
+without version print support. In case of OE we know
+version at the build time.
+
+Signed-off-by: Maxim Uvarov <maxim.uvarov@linaro.org>
+---
+ src/pins/tpm2/clevis-decrypt-tpm2 | 7 +------
+ src/pins/tpm2/clevis-encrypt-tpm2 | 7 +------
+ 2 files changed, 2 insertions(+), 12 deletions(-)
+
+diff --git a/src/pins/tpm2/clevis-decrypt-tpm2 b/src/pins/tpm2/clevis-decrypt-tpm2
+index 90c6252..8bacfb8 100755
+--- a/src/pins/tpm2/clevis-decrypt-tpm2
++++ b/src/pins/tpm2/clevis-decrypt-tpm2
+@@ -47,12 +47,7 @@ fi
+ 
+ TPM2TOOLS_INFO="$(tpm2_createprimary -v)"
+ 
+-match='version="(.)\.'
+-[[ $TPM2TOOLS_INFO =~ $match ]] && TPM2TOOLS_VERSION="${BASH_REMATCH[1]}"
+-if [[ $TPM2TOOLS_VERSION -lt 3 ]] || [[ $TPM2TOOLS_VERSION -gt 5 ]]; then
+-    echo "The tpm2 pin requires a tpm2-tools version between 3 and 5" >&2
+-    exit 1
+-fi
++TPM2TOOLS_VERSION=5
+ 
+ # Old environment variables for tpm2-tools 3.0
+ export TPM2TOOLS_TCTI_NAME=device
+diff --git a/src/pins/tpm2/clevis-encrypt-tpm2 b/src/pins/tpm2/clevis-encrypt-tpm2
+index ec4ce4f..41db15d 100755
+--- a/src/pins/tpm2/clevis-encrypt-tpm2
++++ b/src/pins/tpm2/clevis-encrypt-tpm2
+@@ -69,12 +69,7 @@ fi
+ 
+ TPM2TOOLS_INFO="$(tpm2_createprimary -v)"
+ 
+-match='version="(.)\.'
+-[[ $TPM2TOOLS_INFO =~ $match ]] && TPM2TOOLS_VERSION="${BASH_REMATCH[1]}"
+-if [[ $TPM2TOOLS_VERSION -lt 3 ]] || [[ $TPM2TOOLS_VERSION -gt 5 ]]; then
+-    echo "The tpm2 pin requires a tpm2-tools version between 3 and 5" >&2
+-    exit 1
+-fi
++TPM2TOOLS_VERSION=5
+ 
+ # Old environment variables for tpm2-tools 3.0
+ export TPM2TOOLS_TCTI_NAME=device
+-- 
+2.17.1
+

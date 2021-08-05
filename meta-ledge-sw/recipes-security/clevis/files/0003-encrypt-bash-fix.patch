@@ -1,0 +1,29 @@
+From bdeb3875abcd41669419017f739cbe6d9fcd5806 Mon Sep 17 00:00:00 2001
+From: Maxim Uvarov <maxim.uvarov@linaro.org>
+Date: Tue, 3 Aug 2021 15:04:00 +0100
+Subject: [PATCH] encrypt bash fix
+
+Signed-off-by: Maxim Uvarov <maxim.uvarov@linaro.org>
+---
+ src/pins/tpm2/clevis-encrypt-tpm2 | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/src/pins/tpm2/clevis-encrypt-tpm2 b/src/pins/tpm2/clevis-encrypt-tpm2
+index 41db15d..97d32df 100755
+--- a/src/pins/tpm2/clevis-encrypt-tpm2
++++ b/src/pins/tpm2/clevis-encrypt-tpm2
+@@ -227,8 +227,10 @@ fi
+ jwe="$(jose fmt -j "$jwe" -g protected -g clevis -g tpm2 -q "$jwk_pub" -s jwk_pub -UUUUo-)"
+ jwe="$(jose fmt -j "$jwe" -g protected -g clevis -g tpm2 -q "$jwk_priv" -s jwk_priv -UUUUo-)"
+ 
++(echo -n "$jwe$jwk"; /bin/cat) | jose jwe enc -i- -k- -I- -c
++
+ # The on_exit() trap will not be fired after exec, so let's clean up the temp
+ # directory at this point.
+ [ -d "${TMP}" ] && rm -rf "${TMP}"
+ 
+-exec jose jwe enc -i- -k- -I- -c < <(echo -n "$jwe$jwk"; /bin/cat)
++#exec jose jwe enc -i- -k- -I- -c < <(echo -n "$jwe$jwk"; /bin/cat)
+-- 
+2.17.1
+

@@ -1,0 +1,89 @@
+From 91d7915a7ca23cc5738edf702816ee781969854f Mon Sep 17 00:00:00 2001
+From: Maxim Uvarov <maxim.uvarov@linaro.org>
+Date: Tue, 20 Jul 2021 13:52:04 +0100
+Subject: [PATCH 1/4] do not search for installed binaries
+
+Signed-off-by: Maxim Uvarov <maxim.uvarov@linaro.org>
+---
+ src/luks/meson.build         | 2 +-
+ src/luks/systemd/meson.build | 6 ++++--
+ src/luks/tests/meson.build   | 4 ----
+ src/luks/udisks2/meson.build | 2 +-
+ src/pins/tpm2/meson.build    | 3 ---
+ 5 files changed, 6 insertions(+), 11 deletions(-)
+
+diff --git a/src/luks/meson.build b/src/luks/meson.build
+index e989439..7e6cf85 100644
+--- a/src/luks/meson.build
++++ b/src/luks/meson.build
+@@ -24,7 +24,7 @@ clevis_luks_unbind = configure_file(input: 'clevis-luks-unbind.in',
+                output: 'clevis-luks-unbind',
+                configuration: luksmeta_data)
+ 
+-if libcryptsetup.found() and luksmeta.found() and pwmake.found()
++if true
+   subdir('systemd')
+   subdir('udisks2')
+ 
+diff --git a/src/luks/systemd/meson.build b/src/luks/systemd/meson.build
+index e3b3d91..d254716 100644
+--- a/src/luks/systemd/meson.build
++++ b/src/luks/systemd/meson.build
+@@ -8,8 +8,10 @@ sd_reply_pass = find_program(
+   required: false
+ )
+ 
+-if systemd.found() and sd_reply_pass.found()
+-  data.set('SYSTEMD_REPLY_PASS', sd_reply_pass.path())
++sd_reply_pass_oe = '/lib/systemd/systemd-reply-password'
++
++if true
++  data.set('SYSTEMD_REPLY_PASS', sd_reply_pass_oe)
+   subdir('dracut')
+ 
+   unitdir = systemd.get_pkgconfig_variable('systemdsystemunitdir')
+diff --git a/src/luks/tests/meson.build b/src/luks/tests/meson.build
+index 2505b28..8638967 100644
+--- a/src/luks/tests/meson.build
++++ b/src/luks/tests/meson.build
+@@ -1,10 +1,6 @@
+ # We use jq for comparing the pin config in the clevis luks list tests.
+ jq = find_program('jq', required: false)
+ 
+-# We use cryptsetup for testing LUKS2 binding and saving the token in a
+-# given token slot.
+-cryptsetup = find_program('cryptsetup', required: true)
+-
+ common_functions = configure_file(input: 'tests-common-functions.in',
+   output: 'tests-common-functions',
+   configuration: luksmeta_data,
+diff --git a/src/luks/udisks2/meson.build b/src/luks/udisks2/meson.build
+index e747d4b..d8c70e2 100644
+--- a/src/luks/udisks2/meson.build
++++ b/src/luks/udisks2/meson.build
+@@ -2,7 +2,7 @@ audit = dependency('audit', version: '>=2.7.8', required: false)
+ udisks2 = dependency('udisks2', required: false)
+ gio = dependency('gio-2.0', required: false)
+ 
+-if udisks2.found() and audit.found() and gio.found()
++if true
+   autostartdir = join_paths(sysconfdir, 'xdg', 'autostart')
+ 
+   configure_file(
+diff --git a/src/pins/tpm2/meson.build b/src/pins/tpm2/meson.build
+index 26e6c48..b2e9940 100644
+--- a/src/pins/tpm2/meson.build
++++ b/src/pins/tpm2/meson.build
+@@ -2,9 +2,6 @@ cmds = ['tpm2_createprimary', ['tpm2_pcrread', 'tpm2_pcrlist'],
+         'tpm2_createpolicy', 'tpm2_create', 'tpm2_load', 'tpm2_unseal']
+ 
+ all = true
+-foreach cmd : cmds
+-  all = all and find_program(cmd, required: false).found()
+-endforeach
+ 
+ if all
+   bins += join_paths(meson.current_source_dir(), 'clevis-decrypt-tpm2')
+-- 
+2.17.1
+
