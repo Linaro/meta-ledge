@@ -1,0 +1,84 @@
+#!/bin/sh
+
+# Idea is:
+# - Storage already encrypted:
+# 1. watch for ROOT_UUID in all blk devices. If exist decrypt, mount and boot.
+# - Storage not encrypted (first boot):
+# 1. watch for root=UUID=<> in /proc/cmdline
+# 2. backup rootfs files to tmpfs
+# 3. encrypts this device with password 'ledge'
+# 4. add tpm luks signature for crypto device
+# 5. mount and boot
+
+ARG_MNT_TARGET=$1
+ARG_ROOT=$2
+
+/usr/sbin/rngd
+#tee-supplicant &
+#modprobe tpm_ftpm_tee
+modprobe tpm_tis
+
+# encrypted luks uuid
+ROOT_UUID="310919c2-aec9-4641-b3d2-111111111111"
+
+cryptfs_create_enc_rootfs() {
+	uuid=$(echo $ARG_ROOT | sed s/UUID=//)
+	ROOT_BLK=$(blkid | grep ${uuid} | cut -d":" -f 1)
+	if [ -z "${ROOT_BLK}" ]; then
+		echo "No rootfs with label rootfs check you /proc/cmdline:"
+		cat /proc/cmdline
+		sleep 120
+		/sbin/reboot
+		return 1
+	fi
+	set -e
+	tpm2_dictionarylockout -c 2> /dev/null
+
+	mount -t tmpfs none /tmp
+	mount ${ROOT_BLK} /mnt
+	cd /mnt/
+	echo "backup filesystem to tmpfs..."
+	tar -czf /tmp/rootfs.tar.gz .
+	cd -
+	umount /mnt
+
+	echo "erase rootfs..."
+	cat /dev/zero > ${ROOT_BLK} 2>/dev/null || true
+
+	echo "encrypt rootfs..."
+	echo -n ledge > pfile
+	printf 'YES\n' | cryptsetup --type luks --cipher aes-xts-plain --hash sha256 --use-random --key-file pfile --uuid=${ROOT_UUID} luksFormat ${ROOT_BLK}
+
+	printf 'ledge\ny\n' |  clevis luks bind -d ${ROOT_BLK} tpm2 '{"pcr_ids":"0,1,2,3,4,5,6,7"}' -s 1
+	#cryptsetup luksDump ${ROOT_BLK}
+
+	clevis luks pass -d ${ROOT_BLK} -s 1| cryptsetup luksOpen --key-file - ${ROOT_BLK} rootfs
+
+	echo "create filesystem and unpack files..."
+	mkfs.ext4 /dev/mapper/rootfs
+	mount /dev/mapper/rootfs /rootfs
+	cd /rootfs
+	tar xpfz /tmp/rootfs.tar.gz
+	cd -
+	sync
+	echo "init.cryptfs: root mounted to /rootfs"
+}
+
+# Search for block device matching ROOT_UUID and mount it
+for d in /sys/class/block/*; do
+	dev="/dev/$(basename $d)"
+	uuid=$(cryptsetup luksUUID $dev)
+	if [ -z "$uuid" ]; then
+		continue
+	fi
+	if [ "$uuid" = "${ROOT_UUID}" ]; then
+		clevis luks pass -d $dev -s 1| cryptsetup luksOpen --key-file - $dev rootfs
+		mount /dev/mapper/rootfs /rootfs
+		echo "init.cryptfs: root mounted to /rootfs"
+		exit 0
+	fi
+done
+
+# No mounted luks, it looks like it's first boot. Then create luks partition
+# for device specified in /proc/cmdline
+cryptfs_create_enc_rootfs
