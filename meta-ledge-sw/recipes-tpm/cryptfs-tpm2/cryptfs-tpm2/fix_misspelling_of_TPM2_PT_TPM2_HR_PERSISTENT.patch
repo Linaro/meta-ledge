@@ -1,0 +1,37 @@
+From 888c46c8279a390f2fca7284443ce5fbe35d18db Mon Sep 17 00:00:00 2001
+From: Jia Zhang <zhang.jia@linux.alibaba.com>
+Date: Fri, 27 Dec 2019 19:11:00 +0800
+Subject: [PATCH] types: fix misspelling of TPM2_PT_TPM2_HR_PERSISTENT
+
+Signed-off-by: Jia Zhang <zhang.jia@linux.alibaba.com>
+---
+ src/include/cryptfs_tpm2.h | 2 +-
+ src/lib/capability.c       | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/include/cryptfs_tpm2.h b/src/include/cryptfs_tpm2.h
+index ec60694..780ad54 100644
+--- a/src/include/cryptfs_tpm2.h
++++ b/src/include/cryptfs_tpm2.h
+@@ -152,7 +152,7 @@
+ 
+ #define TPM2_PT                                 TPM_PT
+ #define TPM2_PT_NONE                            TPM_PT_NONE
+-#define TPM2_PT_TPM2_HR_PERSISTENT              TPM_PT_HR_PERSISTENT
++#define TPM2_PT_HR_PERSISTENT                   TPM_PT_HR_PERSISTENT
+ #define TPM2_PT_LOCKOUT_INTERVAL                TPM_PT_LOCKOUT_INTERVAL
+ #define TPM2_PT_LOCKOUT_COUNTER                 TPM_PT_LOCKOUT_COUNTER
+ #define TPM2_PT_MAX_AUTH_FAIL                   TPM_PT_MAX_AUTH_FAIL
+diff --git a/src/lib/capability.c b/src/lib/capability.c
+index ae69698..9e07556 100644
+--- a/src/lib/capability.c
++++ b/src/lib/capability.c
+@@ -50,7 +50,7 @@ capability_read_public(TPMI_DH_OBJECT handle, TPM2B_PUBLIC *public_out)
+ 
+ 	UINT32 rc = Tss2_Sys_GetCapability(cryptfs_tpm2_sys_context, NULL,
+ 					   TPM2_CAP_HANDLES, TPM2_HT_PERSISTENT,
+-					   TPM2_PT_TPM2_HR_PERSISTENT, &more_data,
++					   TPM2_PT_HR_PERSISTENT, &more_data,
+ 					   &capability_data, NULL);
+ 	if (rc != TPM2_RC_SUCCESS) {
+ 		err("Unable to get the TPM persistent handles (%#x)", rc);
