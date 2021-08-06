@@ -25,8 +25,6 @@ PACKAGE_INSTALL = " \
    kernel-module-dm-crypt \
    kernel-module-tpm-ftpm-tee \
    kernel-module-tpm-tis \
-   kernel-module-tpm-tis-spi \
-   kernel-module-tpm-crb \
    kernel-module-tpm-tis-core \
    optee-client \
    e2fsprogs-mke2fs \
