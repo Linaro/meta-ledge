@@ -14,9 +14,10 @@ ARG_MNT_TARGET=$1
 ARG_ROOT=$2
 
 /usr/sbin/rngd
-#tee-supplicant &
-#modprobe tpm_ftpm_tee
 modprobe tpm_tis
+tee-supplicant &
+modprobe tpm_ftpm_tee
+
 
 # encrypted luks uuid
 ROOT_UUID="310919c2-aec9-4641-b3d2-111111111111"
@@ -63,6 +64,25 @@ cryptfs_create_enc_rootfs() {
 	sync
 	echo "init.cryptfs: root mounted to /rootfs"
 }
+
+# For ftpm TPM pcrs are empty after reboot, no not encrypt rootfs
+# for ftpm untill it will be fixed.
+readlink /sys/class/tpm/tpm0/device/driver | grep optee-ftpm > /dev/null
+if [ $? -eq 0 ]; then
+	uuid=$(echo $ARG_ROOT | sed s/UUID=//)
+	ROOT_BLK=$(blkid | grep ${uuid} | cut -d":" -f 1)
+	if [ -z "${ROOT_BLK}" ]; then
+		echo "No rootfs with label rootfs check you /proc/cmdline:"
+		cat /proc/cmdline
+		sleep 120
+		/sbin/reboot
+		exit 1
+	fi
+	mount ${ROOT_BLK} /rootfs
+	echo "Detected TPM: ftpm: does not support persistant PRCs on reboot"
+	echo "Using not encrypted rootfs."
+	exit 0
+fi
 
 # Search for block device matching ROOT_UUID and mount it
 for d in /sys/class/block/*; do
