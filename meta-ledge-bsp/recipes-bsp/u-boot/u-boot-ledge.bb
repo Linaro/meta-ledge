@@ -24,6 +24,8 @@ SRC_URI += " \
     file://0006-arm-omap2-remove-arm_init_domains.patch \
     file://0007-arm-cp15-remove-weak-function-arm_init_domains.patch \
     file://0008-arm-remove-set_dacr-get_dacr-functions.patch \
+    file://0009-tpm2-Introduce-TIS-tpm-core.patch \
+    file://0010-tpm2-Add-a-TPMv2-MMIO-TIS-driver.patch \
     file://ledge_stm32mp157c_dk2_trusted_defconfig \
     file://ubootefi.var \
     "
