@@ -6,8 +6,6 @@ PR="r3.ledge"
 # Always fetch the latest initramfs image
 do_install[nostamp] = "1"
 
-#   busybox
-
 # packagegroup-luks-initramfs
 PACKAGE_INSTALL = " \
    packagegroup-tpm2-initramfs \
@@ -23,7 +21,6 @@ PACKAGE_INSTALL = " \
    ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'udev', 'eudev', d)} \
    rng-tools \
    kernel-module-dm-crypt \
-   kernel-module-tpm-ftpm-tee \
    kernel-module-tpm-tis \
    kernel-module-tpm-tis-core \
    optee-client \
@@ -35,7 +32,12 @@ PACKAGE_INSTALL = " \
    clevis \
    ledge-init \
 "
-#    initrdscripts-secure-core
+
+PACKAGE_INSTALL_ledge-qemuarm += " \
+		kernel-module-tpm-ftpm-tee "
+
+PACKAGE_INSTALL_ledge-qemuarm64 += " \
+		kernel-module-tpm-ftpm-tee "
 
 
 # Do not pollute the initrd image with rootfs features
