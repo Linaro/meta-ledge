@@ -33,10 +33,10 @@ PACKAGE_INSTALL = " \
    ledge-init \
 "
 
-PACKAGE_INSTALL_ledge-qemuarm += " \
+PACKAGE_INSTALL_append_ledge-qemuarm += " \
 		kernel-module-tpm-ftpm-tee "
 
-PACKAGE_INSTALL_ledge-qemuarm64 += " \
+PACKAGE_INSTALL_append_ledge-qemuarm64 += " \
 		kernel-module-tpm-ftpm-tee "
 
 

@@ -65,10 +65,10 @@ cryptfs_create_enc_rootfs() {
 	echo "init.cryptfs: root mounted to /rootfs"
 }
 
-# For ftpm TPM pcrs are empty after reboot, no not encrypt rootfs
-# for ftpm untill it will be fixed.
-readlink /sys/class/tpm/tpm0/device/driver | grep optee-ftpm > /dev/null
-if [ $? -eq 0 ]; then
+# For ftpm TPM pcrs are empty after reboot, do not encrypt rootfs
+# for ftpm untill it will be fixed. For now tested only tpm_tis version.
+readlink /sys/class/tpm/tpm0/device/driver | grep tpm_tis > /dev/null
+if [ $? -ne 0 ]; then
 	uuid=$(echo $ARG_ROOT | sed s/UUID=//)
 	ROOT_BLK=$(blkid | grep ${uuid} | cut -d":" -f 1)
 	if [ -z "${ROOT_BLK}" ]; then
