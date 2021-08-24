@@ -72,7 +72,7 @@ if [ $? -ne 0 ]; then
 	uuid=$(echo $ARG_ROOT | sed s/UUID=//)
 	ROOT_BLK=$(blkid | grep ${uuid} | cut -d":" -f 1)
 	if [ -z "${ROOT_BLK}" ]; then
-		echo "No rootfs with label rootfs check you /proc/cmdline:"
+		echo "No blk dev matching root=UUID=${uuid} check your /proc/cmdline:"
 		cat /proc/cmdline
 		sleep 120
 		/sbin/reboot
