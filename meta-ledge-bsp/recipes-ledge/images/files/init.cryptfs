@@ -32,6 +32,12 @@ cryptfs_create_enc_rootfs() {
 		/sbin/reboot
 		return 1
 	fi
+
+	echo ""
+	echo "!!!! Warning: erase and encryption is in progress.!!!!"
+	echo "!!!! Do not reset/power off your machine until this process compile.!!!!"
+	echo ""
+
 	set -e
 	tpm2_dictionarylockout -c 2> /dev/null
 
