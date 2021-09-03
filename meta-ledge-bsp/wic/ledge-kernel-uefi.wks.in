@@ -1,3 +1,3 @@
 bootloader  --ptable gpt --timeout=0  --append="rootwait"
 part /boot --source bootimg-efi --sourceparams="loader=kernel" --fstype=vfat --label bootfs --active --align 4 --include-path "${DEPLOY_DIR_IMAGE}/dtb ${DEPLOY_DIR_IMAGE}/ledge-initramfs.rootfs.cpio.gz" --uuid 00112233-1234-1111-2222-000123456789 --use-label --part-name="ESP" --part-type 0xef00  --fixed-size 128M
-part / --source rootfs --fstype=ext4 --label rootfs --align 4 --fsuuid 6091b3a4-ce08-3020-93a6-f755a22ef03b --exclude-path boot/ --use-label
+part / --source rootfs --fstype=ext4 --label rootfs --align 4 --fsuuid 6091b3a4-ce08-3020-93a6-f755a22ef03b --exclude-path boot/ --use-label --fixed-size 1024M
