@@ -25,11 +25,11 @@ EXTRA_OEMAKE = " TA_DEV_KIT_DIR=${TA_DEV_KIT_DIR} \
                  HOST_CROSS_COMPILE=${TARGET_PREFIX} \
                  TA_CROSS_COMPILE=${TARGET_PREFIX} \
                  V=1 \
-                 LIBGCC_LOCATE_CFLAGS=--sysroot=${STAGING_DIR_HOST} \
                "
 
 B = "${S}"
 do_compile() {
+    export CFLAGS="${CFLAGS} --sysroot=${STAGING_DIR_HOST}"
     oe_runmake
 }
 
