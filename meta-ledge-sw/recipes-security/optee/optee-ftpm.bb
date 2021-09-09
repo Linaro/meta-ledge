@@ -29,12 +29,12 @@ OPTEE_CLIENT_EXPORT = "${STAGING_DIR_HOST}${prefix}"
 TEEC_EXPORT = "${STAGING_DIR_HOST}${prefix}"
 TA_DEV_KIT_DIR = "${STAGING_INCDIR}/optee/export-user_ta"
 
-EXTRA_OEMAKE += "\
+EXTRA_OEMAKE += '\
     CFG_FTPM_USE_WOLF=y \
     TA_DEV_KIT_DIR=${TA_DEV_KIT_DIR} \
     TA_CROSS_COMPILE=${TARGET_PREFIX} \
-    LIBGCC_LOCATE_CFLAGS=--sysroot=${STAGING_DIR_HOST} \
-"
+    CFLAGS="${CFLAGS} --sysroot=${STAGING_DIR_HOST}" \
+'
 
 EXTRA_OEMAKE_append_aarch64 = "\
     CFG_ARM64_ta_arm64=y \
