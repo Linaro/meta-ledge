@@ -97,6 +97,7 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	audit-python \
 	audispd-plugins \
 	selinux-ledge \
+	podman \
 	popt \
 	procps \
 	protobuf \
@@ -174,8 +175,6 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	zlib \
 	zram \
 	"
-# TODO:
-#  podman
 
 # Missing packages for Fedora-IoT sync
 # INFO about rpm fedora package: https://rpmfind.net/linux/rpm2html/search.php
