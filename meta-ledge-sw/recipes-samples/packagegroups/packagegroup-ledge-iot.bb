@@ -56,6 +56,7 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	jansson \
 	json-c \
 	json-glib \
+	k3s \
 	kbd \
 	kbd-keymaps \
 	kmod \
