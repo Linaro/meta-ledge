@@ -1,5 +1,4 @@
-SUMMARY = "Enable systemd watchdog"
-FILESEXTRAPATH_prepend := "${THISDIR}/${PN}"
+#  "Enable systemd watchdog"
 
 do_install_append() {
     if ${@bb.utils.contains('MACHINE_FEATURES', 'watchdog', 'true', 'false', d)}; then
