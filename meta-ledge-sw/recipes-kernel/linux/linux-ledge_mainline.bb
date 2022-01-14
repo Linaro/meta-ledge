@@ -9,13 +9,13 @@ DEPENDS += "gmp-native"
 include linux-ledge-common.inc
 include linux-ledge-sign.inc
 
-PR = "r2.ledge"
+PR = "r3.ledge"
 
-LEDGE_KVERSION = "5.12.9"
+LEDGE_KVERSION = "5.15"
 
 # Stable kernel URL
 SRC_URI = "https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-${LEDGE_KVERSION}.tar.xz;name=kernel"
-SRC_URI[kernel.sha256sum] = "c7fabef5754271cd12f2d3a9ae237ed91c6fce09cec3895400d48194110ce76d"
+SRC_URI[kernel.sha256sum] = "57b2cf6991910e3b67a1b3490022e8a0674b6965c74c12da1e99d138d1991ee8"
 
 # force SOURCE_DATE_EPOCH for build reproductible
 # SOURCE_DATE_EPOCH = "1557103378"

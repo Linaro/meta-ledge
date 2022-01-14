@@ -1,7 +1,7 @@
 inherit image_types
 
-# 60 MB
-LEDGE_BOOTFS_IMG_SIZE_KB ??= "61440"
+# 120 MB
+LEDGE_BOOTFS_IMG_SIZE_KB ??= "122660"
 
 do_image_ledgebootfs[depends] += " \
         mtools-native:do_populate_sysroot \
