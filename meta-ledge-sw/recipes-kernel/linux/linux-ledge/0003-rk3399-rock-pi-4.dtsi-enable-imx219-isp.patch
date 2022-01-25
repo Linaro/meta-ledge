@@ -1,0 +1,154 @@
+From 4b64234345652482d3a21e84d4dbb1852938534a Mon Sep 17 00:00:00 2001
+From: Peter Griffin <peter.griffin@linaro.org>
+Date: Thu, 13 Jan 2022 23:19:05 +0000
+Subject: [PATCH] rk3399-rock-pi-4.dtsi: enable imx219 & isp
+
+Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
+---
+ .../boot/dts/rockchip/rk3399-rock-pi-4.dtsi   | 104 +++++++++++++++++-
+ 1 file changed, 102 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/rockchip/rk3399-rock-pi-4.dtsi b/arch/arm64/boot/dts/rockchip/rk3399-rock-pi-4.dtsi
+index b28888ea9262..bf0aef11ffb1 100644
+--- a/arch/arm64/boot/dts/rockchip/rk3399-rock-pi-4.dtsi
++++ b/arch/arm64/boot/dts/rockchip/rk3399-rock-pi-4.dtsi
+@@ -36,6 +36,33 @@ sdio_pwrseq: sdio-pwrseq {
+ 		reset-gpios = <&gpio0 RK_PB2 GPIO_ACTIVE_LOW>;
+ 	};
+ 
++	cam_v_ana:  camera-reg@0 {
++		compatible = "regulator-fixed";
++		regulator-name = "cam_v_ana";
++		regulator-always-on;
++		regulator-boot-on;
++		regulator-min-microvolt = <2800000>;
++		regulator-max-microvolt = <2800000>;
++	};
++
++	cam_v_dig: camera-reg@1 {
++		compatible = "regulator-fixed";
++		regulator-name = "cam_v_dig";
++		regulator-always-on;
++		regulator-boot-on;
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <1800000>;
++	};
++
++	cam_v_ddl: camera-reg@2 {
++		compatible = "regulator-fixed";
++		regulator-name = "cam_v_ddl";
++		regulator-always-on;
++		regulator-boot-on;
++		regulator-min-microvolt = <1200000>;
++		regulator-max-microvolt = <1200000>;
++	};
++
+ 	vcc12v_dcin: dc-12v {
+ 		compatible = "regulator-fixed";
+ 		regulator-name = "vcc12v_dcin";
+@@ -431,9 +458,39 @@ &i2c3 {
+ };
+ 
+ &i2c4 {
+-	i2c-scl-rising-time-ns = <600>;
+-	i2c-scl-falling-time-ns = <20>;
+ 	status = "okay";
++	clock-frequency = <400000>;
++
++	imx219: sensor@10 {
++		status = "okay";
++		compatible = "sony,imx219";
++		reg = <0x10>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&cam_en>;
++		clocks = <&imx219_clk>;
++		clock-names = "xclk";
++		xclr-gpios = <&gpio1 RK_PB5 GPIO_ACTIVE_HIGH>;
++		VANA-supply = <&cam_v_ana>;
++		VDIG-supply = <&cam_v_dig>;
++		VDDL-supply = <&cam_v_ddl>;
++
++		imx219_clk: camera-clk {
++			compatible = "fixed-clock";
++			#clock-cells = <0>;
++			clock-frequency = <24000000>;
++		};
++
++		port {
++			csi1_out_1: endpoint {
++				remote-endpoint = <&csi1_ep1>;
++				clock-lanes = <0>;
++				data-lanes = <1 2>;
++				clock-noncontinuous;
++				link-frequencies = /bits/ 64 <456000000>;
++			};
++		};
++	};
++
+ };
+ 
+ &i2s0 {
+@@ -547,6 +604,13 @@ vcc5v0_host_en: vcc5v0-host-en {
+ 		};
+ 	};
+ 
++	cam_pins {
++		cam_en: i2c4-enable-pins {
++			rockchip,pins =
++				<1 RK_PB5 RK_FUNC_GPIO &pcfg_pull_up>;
++		};
++	};
++
+ 	wifi {
+ 		wifi_enable_h: wifi-enable-h {
+ 			rockchip,pins = <0 RK_PB2 RK_FUNC_GPIO &pcfg_pull_none>;
+@@ -556,6 +620,17 @@ wifi_host_wake_l: wifi-host-wake-l {
+ 			rockchip,pins = <0 RK_PA3 RK_FUNC_GPIO &pcfg_pull_none>;
+ 		};
+ 	};
++	cam_pins {
++		enable: enable-pins {
++			rockchip,pins =
++				<1 RK_PB5 RK_FUNC_GPIO &pcfg_pull_none>;
++		};
++		camled: cam_led_pins {
++			rockchip,pins =
++				<2 RK_PB3 RK_FUNC_GPIO &pcfg_pull_up>;
++		};
++	};
++
+ };
+ 
+ &pwm2 {
+@@ -704,3 +779,28 @@ &vopl {
+ &vopl_mmu {
+ 	status = "okay";
+ };
++
++&i2c6 {
++	status = "okay";
++};
++
++&i2c4 {
++};
++
++&mipi_dphy_rx0 {
++	status = "okay";
++};
++
++&isp0 {
++	status = "okay";
++
++	ports {
++		port@0 {
++			csi1_ep1: endpoint@1 {
++				reg = <1>;
++				remote-endpoint = <&csi1_out_1>;
++				data-lanes = <1 2>;
++			};
++		};
++	};
++};
+-- 
+2.25.1
+
