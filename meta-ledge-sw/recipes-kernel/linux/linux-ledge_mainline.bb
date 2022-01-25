@@ -30,7 +30,7 @@ SRC_URI += " \
     file://0003-rk3399-rock-pi-4.dtsi-enable-imx219-isp.patch \
 "
 
-PV = "mainline-5.8"
+PV = "mainline-5.15"
 S = "${WORKDIR}/linux-${LEDGE_KVERSION}"
 LIC_FILES_CHKSUM = "file://${S}/LICENSES/preferred/GPL-2.0;md5=e6a75371ba4d16749254a51215d13f97"
 
