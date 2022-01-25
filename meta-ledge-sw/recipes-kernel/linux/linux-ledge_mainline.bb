@@ -27,6 +27,7 @@ SRC_URI[kernel.sha256sum] = "57b2cf6991910e3b67a1b3490022e8a0674b6965c74c12da1e9
 SRC_URI += " \
     file://0001-STM32mp157c-dk2-optee-reboot.patch \
     file://0002-KERNEL-stm32mp157-dts-add-ftpm-support.patch \
+    file://0003-rk3399-rock-pi-4.dtsi-enable-imx219-isp.patch \
 "
 
 PV = "mainline-5.8"
