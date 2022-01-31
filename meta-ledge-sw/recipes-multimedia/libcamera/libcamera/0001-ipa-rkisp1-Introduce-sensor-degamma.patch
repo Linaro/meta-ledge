@@ -1,0 +1,145 @@
+From 09bd16b68912e0c9d33102eed777221837f8e61d Mon Sep 17 00:00:00 2001
+From: Jean-Michel Hautbois <jeanmichel.hautbois@ideasonboard.com>
+Date: Thu, 2 Dec 2021 19:04:05 +0100
+Subject: [PATCH 1/6] ipa: rkisp1: Introduce sensor degamma
+
+The RkISP1 has a sensor degamma control. Introduce the algorithm, but
+only implement the prepare function as it is a static table to be set.
+The table used is the one found in the imx219 tuning data in RPi as this
+is the only sensor I have right now and it looks like a decent default
+table.
+
+Signed-off-by: Jean-Michel Hautbois <jeanmichel.hautbois@ideasonboard.com>
+---
+ src/ipa/rkisp1/algorithms/meson.build |  1 +
+ src/ipa/rkisp1/algorithms/sdg.cpp     | 49 +++++++++++++++++++++++++++
+ src/ipa/rkisp1/algorithms/sdg.h       | 30 ++++++++++++++++
+ src/ipa/rkisp1/rkisp1.cpp             |  2 ++
+ 4 files changed, 82 insertions(+)
+ create mode 100644 src/ipa/rkisp1/algorithms/sdg.cpp
+ create mode 100644 src/ipa/rkisp1/algorithms/sdg.h
+
+diff --git a/src/ipa/rkisp1/algorithms/meson.build b/src/ipa/rkisp1/algorithms/meson.build
+index a19c1a4f..0678518d 100644
+--- a/src/ipa/rkisp1/algorithms/meson.build
++++ b/src/ipa/rkisp1/algorithms/meson.build
+@@ -2,4 +2,5 @@
+ 
+ rkisp1_ipa_algorithms = files([
+     'agc.cpp',
++    'sdg.cpp',
+ ])
+diff --git a/src/ipa/rkisp1/algorithms/sdg.cpp b/src/ipa/rkisp1/algorithms/sdg.cpp
+new file mode 100644
+index 00000000..3f6b3e20
+--- /dev/null
++++ b/src/ipa/rkisp1/algorithms/sdg.cpp
+@@ -0,0 +1,49 @@
++/* SPDX-License-Identifier: LGPL-2.1-or-later */
++/*
++ * Copyright (C) 2021, Ideas On Board
++ *
++ * sdg.cpp - Sensor degamma control algorithm
++ */
++
++#include "sdg.h"
++
++/**
++ * \file sdg.h
++ */
++
++namespace libcamera {
++
++namespace ipa::rkisp1::algorithms {
++
++/**
++ * \class SensorDeGamma
++ * \brief A sensor degamma algorithm
++ */
++
++static const uint16_t imx219DeGammaCurve[] = { 0, 583, 957, 1299, 1609, 1877,
++					       2123, 2350, 2540, 2859, 3101, 3293,
++					       3429, 3666, 3823, 3963, 4095 };
++
++/**
++ * \copydoc libcamera::ipa::Algorithm::prepare
++ */
++void SensorDeGamma::prepare([[maybe_unused]] IPAContext &context,
++			    rkisp1_params_cfg *params)
++{
++	for (uint32_t i = 0; i < RKISP1_CIF_ISP_DEGAMMA_CURVE_SIZE; i++) {
++		params->others.sdg_config.curve_r.gamma_y[i] = imx219DeGammaCurve[i];
++		params->others.sdg_config.curve_b.gamma_y[i] = imx219DeGammaCurve[i];
++		params->others.sdg_config.curve_g.gamma_y[i] = imx219DeGammaCurve[i];
++	}
++
++	params->others.sdg_config.xa_pnts.gamma_dx0 = 0x44444444;
++	params->others.sdg_config.xa_pnts.gamma_dx1 = 0x44444444;
++
++	params->module_en_update |= RKISP1_CIF_ISP_MODULE_SDG;
++	params->module_ens |= RKISP1_CIF_ISP_MODULE_SDG;
++	params->module_cfg_update |= RKISP1_CIF_ISP_MODULE_SDG;
++}
++
++} /* namespace ipa::rkisp1::algorithms */
++
++} /* namespace libcamera */
+diff --git a/src/ipa/rkisp1/algorithms/sdg.h b/src/ipa/rkisp1/algorithms/sdg.h
+new file mode 100644
+index 00000000..24c41627
+--- /dev/null
++++ b/src/ipa/rkisp1/algorithms/sdg.h
+@@ -0,0 +1,30 @@
++/* SPDX-License-Identifier: LGPL-2.1-or-later */
++/*
++ * Copyright (C) 2021, Ideas On Board
++ *
++ * sdg.h - Sensor degamma control algorithm
++ */
++
++#pragma once
++
++#include <linux/rkisp1-config.h>
++
++#include "algorithm.h"
++
++namespace libcamera {
++
++struct IPACameraSensorInfo;
++
++namespace ipa::rkisp1::algorithms {
++
++class SensorDeGamma : public Algorithm
++{
++public:
++	SensorDeGamma() = default;
++	~SensorDeGamma() = default;
++
++	void prepare(IPAContext &context, rkisp1_params_cfg *params) override;
++};
++
++} /* namespace ipa::rkisp1::algorithms */
++} /* namespace libcamera */
+diff --git a/src/ipa/rkisp1/rkisp1.cpp b/src/ipa/rkisp1/rkisp1.cpp
+index 2d79f15f..07f1f1c8 100644
+--- a/src/ipa/rkisp1/rkisp1.cpp
++++ b/src/ipa/rkisp1/rkisp1.cpp
+@@ -27,6 +27,7 @@
+ 
+ #include "algorithms/agc.h"
+ #include "algorithms/algorithm.h"
++#include "algorithms/sdg.h"
+ #include "libipa/camera_sensor_helper.h"
+ 
+ #include "ipa_context.h"
+@@ -126,6 +127,7 @@ int IPARkISP1::init(const IPASettings &settings, unsigned int hwRevision)
+ 
+ 	/* Construct our Algorithms */
+ 	algorithms_.push_back(std::make_unique<algorithms::Agc>());
++	algorithms_.push_back(std::make_unique<algorithms::SensorDeGamma>());
+ 
+ 	return 0;
+ }
+-- 
+2.25.1
+

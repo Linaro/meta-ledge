@@ -1,0 +1,123 @@
+From d0b40e519f09b1390820165acedf0cf71feab6be Mon Sep 17 00:00:00 2001
+From: Jean-Michel Hautbois <jeanmichel.hautbois@ideasonboard.com>
+Date: Thu, 2 Dec 2021 19:04:06 +0100
+Subject: [PATCH 2/6] ipa: rkisp1: Use frame index
+
+Instead of incrementing the frameCount manually, use the frame index on
+the EventStatReay event and store it in a new IPAFrameContext variable
+named frameId.
+
+Signed-off-by: Jean-Michel Hautbois <jeanmichel.hautbois@ideasonboard.com>
+---
+ src/ipa/rkisp1/algorithms/agc.cpp |  5 ++---
+ src/ipa/rkisp1/ipa_context.cpp    |  5 +++++
+ src/ipa/rkisp1/ipa_context.h      |  2 ++
+ src/ipa/rkisp1/rkisp1.cpp         | 11 +++++------
+ 4 files changed, 14 insertions(+), 9 deletions(-)
+
+diff --git a/src/ipa/rkisp1/algorithms/agc.cpp b/src/ipa/rkisp1/algorithms/agc.cpp
+index dd97afc0..50980835 100644
+--- a/src/ipa/rkisp1/algorithms/agc.cpp
++++ b/src/ipa/rkisp1/algorithms/agc.cpp
+@@ -82,8 +82,6 @@ int Agc::configure(IPAContext &context,
+ 	else
+ 		numCells_ = RKISP1_CIF_ISP_AE_MEAN_MAX_V12;
+ 
+-	/* \todo Use actual frame index by populating it in the frameContext. */
+-	frameCount_ = 0;
+ 	return 0;
+ }
+ 
+@@ -255,6 +253,8 @@ void Agc::process(IPAContext &context, const rkisp1_stat_buffer *stats)
+ 
+ 	const rkisp1_cif_isp_ae_stat *ae = &params->ae;
+ 
++	frameCount_ = context.frameContext.frameId;
++
+ 	/*
+ 	 * Estimate the gain needed to achieve a relative luminance target. To
+ 	 * account for non-linearity caused by saturation, the value needs to be
+@@ -278,7 +278,6 @@ void Agc::process(IPAContext &context, const rkisp1_stat_buffer *stats)
+ 	}
+ 
+ 	computeExposure(context, yGain);
+-	frameCount_++;
+ }
+ 
+ void Agc::prepare([[maybe_unused]] IPAContext &context,
+diff --git a/src/ipa/rkisp1/ipa_context.cpp b/src/ipa/rkisp1/ipa_context.cpp
+index 9cb2a9fd..992c9225 100644
+--- a/src/ipa/rkisp1/ipa_context.cpp
++++ b/src/ipa/rkisp1/ipa_context.cpp
+@@ -113,4 +113,9 @@ namespace libcamera::ipa::rkisp1 {
+  * \brief Analogue gain multiplier
+  */
+ 
++/**
++ * \var IPAFrameContext::frameId
++ * \brief Frame number for this frame context
++ */
++
+ } /* namespace libcamera::ipa::rkisp1 */
+diff --git a/src/ipa/rkisp1/ipa_context.h b/src/ipa/rkisp1/ipa_context.h
+index b94ade0c..c447369f 100644
+--- a/src/ipa/rkisp1/ipa_context.h
++++ b/src/ipa/rkisp1/ipa_context.h
+@@ -43,6 +43,8 @@ struct IPAFrameContext {
+ 		uint32_t exposure;
+ 		double gain;
+ 	} sensor;
++
++	unsigned int frameId;
+ };
+ 
+ struct IPAContext {
+diff --git a/src/ipa/rkisp1/rkisp1.cpp b/src/ipa/rkisp1/rkisp1.cpp
+index 07f1f1c8..cd425a2e 100644
+--- a/src/ipa/rkisp1/rkisp1.cpp
++++ b/src/ipa/rkisp1/rkisp1.cpp
+@@ -57,8 +57,7 @@ public:
+ private:
+ 	void queueRequest(unsigned int frame, rkisp1_params_cfg *params,
+ 			  const ControlList &controls);
+-	void updateStatistics(unsigned int frame,
+-			      const rkisp1_stat_buffer *stats);
++	void updateStatistics(const rkisp1_stat_buffer *stats);
+ 
+ 	void setControls(unsigned int frame);
+ 	void metadataReady(unsigned int frame, unsigned int aeState);
+@@ -241,7 +240,6 @@ void IPARkISP1::processEvent(const RkISP1Event &event)
+ {
+ 	switch (event.op) {
+ 	case EventSignalStatBuffer: {
+-		unsigned int frame = event.frame;
+ 		unsigned int bufferId = event.bufferId;
+ 
+ 		const rkisp1_stat_buffer *stats =
+@@ -252,8 +250,9 @@ void IPARkISP1::processEvent(const RkISP1Event &event)
+ 			event.sensorControls.get(V4L2_CID_EXPOSURE).get<int32_t>();
+ 		context_.frameContext.sensor.gain =
+ 			camHelper_->gain(event.sensorControls.get(V4L2_CID_ANALOGUE_GAIN).get<int32_t>());
++		context_.frameContext.frameId = event.frame;
+ 
+-		updateStatistics(frame, stats);
++		updateStatistics(stats);
+ 		break;
+ 	}
+ 	case EventQueueRequest: {
+@@ -288,10 +287,10 @@ void IPARkISP1::queueRequest(unsigned int frame, rkisp1_params_cfg *params,
+ 	queueFrameAction.emit(frame, op);
+ }
+ 
+-void IPARkISP1::updateStatistics(unsigned int frame,
+-				 const rkisp1_stat_buffer *stats)
++void IPARkISP1::updateStatistics(const rkisp1_stat_buffer *stats)
+ {
+ 	unsigned int aeState = 0;
++	unsigned int frame = context_.frameContext.frameId;
+ 
+ 	for (auto const &algo : algorithms_)
+ 		algo->process(context_, stats);
+-- 
+2.25.1
+
