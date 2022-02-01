@@ -1,0 +1,153 @@
+From 5ff50c69028dfc3bb2abd5b525f8cc40b0c9f5e5 Mon Sep 17 00:00:00 2001
+From: Jean-Michel Hautbois <jeanmichel.hautbois@ideasonboard.com>
+Date: Thu, 2 Dec 2021 19:04:09 +0100
+Subject: [PATCH 5/6] ipa: rkisp1: Introduce crosstalk correction
+
+Introduce the color correction matrix for the RkISP1 based on a simple
+assumptions on the gains until we can tune the sensor properly.
+
+Signed-off-by: Jean-Michel Hautbois <jeanmichel.hautbois@ideasonboard.com>
+---
+ src/ipa/rkisp1/algorithms/ctk.cpp     | 59 +++++++++++++++++++++++++++
+ src/ipa/rkisp1/algorithms/ctk.h       | 30 ++++++++++++++
+ src/ipa/rkisp1/algorithms/meson.build |  1 +
+ src/ipa/rkisp1/rkisp1.cpp             |  2 +
+ 4 files changed, 92 insertions(+)
+ create mode 100644 src/ipa/rkisp1/algorithms/ctk.cpp
+ create mode 100644 src/ipa/rkisp1/algorithms/ctk.h
+
+diff --git a/src/ipa/rkisp1/algorithms/ctk.cpp b/src/ipa/rkisp1/algorithms/ctk.cpp
+new file mode 100644
+index 00000000..81600e77
+--- /dev/null
++++ b/src/ipa/rkisp1/algorithms/ctk.cpp
+@@ -0,0 +1,59 @@
++/* SPDX-License-Identifier: LGPL-2.1-or-later */
++/*
++ * Copyright (C) 2021, Ideas On Board
++ *
++ * ctk.cpp - RkISP1 Cross-Talk Correction control
++ */
++
++#include "ctk.h"
++
++/**
++ * \file ctk.h
++ */
++
++namespace libcamera {
++
++namespace ipa::rkisp1::algorithms {
++
++/**
++ * \class CrossTalkCorrection
++ * \brief RkISP1 Cross-Talk Correction control (color correction matrix)
++ *
++ * The crosstalk in image sensor is an effect when signal from a specific pixel
++ * is affected by its adjacent pixels. An image sensor can be considered as a
++ * linear system, with linear crosstalk existing only between horizontal and
++ * vertical neighboring pixels. This matrix should be calculated based on tuning
++ * but a first approximation can be obtained by using the grey-world gains and
++ * applying them to their respective channel.
++ */
++
++/**
++ * \copydoc libcamera::ipa::Algorithm::prepare
++ */
++void CrossTalkCorrection::prepare([[maybe_unused]] IPAContext &context,
++				  rkisp1_params_cfg *params)
++{
++	params->others.ctk_config.coeff[0][0] = 128 * context.frameContext.awb.gains.red;
++	params->others.ctk_config.coeff[0][1] = 0;
++	params->others.ctk_config.coeff[0][2] = 0;
++
++	params->others.ctk_config.coeff[1][0] = 0;
++	params->others.ctk_config.coeff[1][1] = 128 * context.frameContext.awb.gains.green;
++	params->others.ctk_config.coeff[1][2] = 0;
++
++	params->others.ctk_config.coeff[2][0] = 0;
++	params->others.ctk_config.coeff[2][1] = 0;
++	params->others.ctk_config.coeff[2][2] = 128 * context.frameContext.awb.gains.blue;
++
++	params->others.ctk_config.ct_offset[0] = 0;
++	params->others.ctk_config.ct_offset[1] = 0;
++	params->others.ctk_config.ct_offset[2] = 0;
++
++	params->module_en_update |= RKISP1_CIF_ISP_MODULE_CTK;
++	params->module_ens |= RKISP1_CIF_ISP_MODULE_CTK;
++	params->module_cfg_update |= RKISP1_CIF_ISP_MODULE_CTK;
++}
++
++} /* namespace ipa::rkisp1::algorithms */
++
++} /* namespace libcamera */
+diff --git a/src/ipa/rkisp1/algorithms/ctk.h b/src/ipa/rkisp1/algorithms/ctk.h
+new file mode 100644
+index 00000000..c4d240e2
+--- /dev/null
++++ b/src/ipa/rkisp1/algorithms/ctk.h
+@@ -0,0 +1,30 @@
++/* SPDX-License-Identifier: LGPL-2.1-or-later */
++/*
++ * Copyright (C) 2021, Ideas On Board
++ *
++ * blc.h - RkISP1 Cross-Talk Correction control
++ */
++
++#pragma once
++
++#include <linux/rkisp1-config.h>
++
++#include "algorithm.h"
++
++namespace libcamera {
++
++struct IPACameraSensorInfo;
++
++namespace ipa::rkisp1::algorithms {
++
++class CrossTalkCorrection : public Algorithm
++{
++public:
++	CrossTalkCorrection() = default;
++	~CrossTalkCorrection() = default;
++
++	void prepare(IPAContext &context, rkisp1_params_cfg *params) override;
++};
++
++} /* namespace ipa::rkisp1::algorithms */
++} /* namespace libcamera */
+diff --git a/src/ipa/rkisp1/algorithms/meson.build b/src/ipa/rkisp1/algorithms/meson.build
+index faec0eb3..482e8847 100644
+--- a/src/ipa/rkisp1/algorithms/meson.build
++++ b/src/ipa/rkisp1/algorithms/meson.build
+@@ -4,5 +4,6 @@ rkisp1_ipa_algorithms = files([
+     'agc.cpp',
+     'awb.cpp',
+     'blc.cpp',
++    'ctk.cpp',
+     'sdg.cpp',
+ ])
+diff --git a/src/ipa/rkisp1/rkisp1.cpp b/src/ipa/rkisp1/rkisp1.cpp
+index 979f2842..21a9d15b 100644
+--- a/src/ipa/rkisp1/rkisp1.cpp
++++ b/src/ipa/rkisp1/rkisp1.cpp
+@@ -29,6 +29,7 @@
+ #include "algorithms/algorithm.h"
+ #include "algorithms/awb.h"
+ #include "algorithms/blc.h"
++#include "algorithms/ctk.h"
+ #include "algorithms/sdg.h"
+ #include "libipa/camera_sensor_helper.h"
+ 
+@@ -130,6 +131,7 @@ int IPARkISP1::init(const IPASettings &settings, unsigned int hwRevision)
+ 	algorithms_.push_back(std::make_unique<algorithms::Agc>());
+ 	algorithms_.push_back(std::make_unique<algorithms::Awb>());
+ 	algorithms_.push_back(std::make_unique<algorithms::BlackLevelCorrection>());
++	algorithms_.push_back(std::make_unique<algorithms::CrossTalkCorrection>());
+ 	algorithms_.push_back(std::make_unique<algorithms::SensorDeGamma>());
+ 
+ 	return 0;
+-- 
+2.25.1
+

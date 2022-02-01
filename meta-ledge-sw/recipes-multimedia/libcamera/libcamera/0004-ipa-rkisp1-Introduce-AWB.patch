@@ -1,0 +1,343 @@
+From 24a3f9e55ca84ecb6f58657be6ae31fc0d7cdff8 Mon Sep 17 00:00:00 2001
+From: Jean-Michel Hautbois <jeanmichel.hautbois@ideasonboard.com>
+Date: Thu, 2 Dec 2021 19:04:08 +0100
+Subject: [PATCH 4/6] ipa: rkisp1: Introduce AWB
+
+The RkISP1 ISP calculates a mean value for Y, Cr and Cb at each frame.
+There is a RGB mode which could theoretically give us the values for R,
+G and B directly, but it seems to be failing right now.
+
+Convert those values into R, G and B and estimate the gain to apply in a
+grey world.
+
+Signed-off-by: Jean-Michel Hautbois <jeanmichel.hautbois@ideasonboard.com>
+---
+ src/ipa/rkisp1/algorithms/awb.cpp     | 149 ++++++++++++++++++++++++++
+ src/ipa/rkisp1/algorithms/awb.h       |  33 ++++++
+ src/ipa/rkisp1/algorithms/meson.build |   1 +
+ src/ipa/rkisp1/ipa_context.cpp        |  28 +++++
+ src/ipa/rkisp1/ipa_context.h          |  17 +++
+ src/ipa/rkisp1/rkisp1.cpp             |   2 +
+ 6 files changed, 230 insertions(+)
+ create mode 100644 src/ipa/rkisp1/algorithms/awb.cpp
+ create mode 100644 src/ipa/rkisp1/algorithms/awb.h
+
+diff --git a/src/ipa/rkisp1/algorithms/awb.cpp b/src/ipa/rkisp1/algorithms/awb.cpp
+new file mode 100644
+index 00000000..0ec94764
+--- /dev/null
++++ b/src/ipa/rkisp1/algorithms/awb.cpp
+@@ -0,0 +1,149 @@
++/* SPDX-License-Identifier: LGPL-2.1-or-later */
++/*
++ * Copyright (C) 2021, Ideas On Board
++ *
++ * awb.cpp - AWB control algorithm
++ */
++
++#include "awb.h"
++
++#include <algorithm>
++#include <cmath>
++
++#include <libcamera/base/log.h>
++
++#include <libcamera/ipa/core_ipa_interface.h>
++
++/**
++ * \file awb.h
++ */
++
++namespace libcamera {
++
++namespace ipa::rkisp1::algorithms {
++
++/**
++ * \class Awb
++ * \brief A Grey world white balance correction algorithm
++ */
++
++LOG_DEFINE_CATEGORY(RkISP1Awb)
++
++/**
++ * \copydoc libcamera::ipa::Algorithm::configure
++ */
++int Awb::configure(IPAContext &context,
++		   const IPACameraSensorInfo &configInfo)
++{
++	context.frameContext.awb.gains.red = 1.0;
++	context.frameContext.awb.gains.blue = 1.0;
++	context.frameContext.awb.gains.green = 1.0;
++
++	/* Define the measurement window for AGC. */
++	context.configuration.awb.measureWindow.h_offs = configInfo.outputSize.width / 8;
++	context.configuration.awb.measureWindow.v_offs = configInfo.outputSize.height / 8;
++	context.configuration.awb.measureWindow.h_size = 3 * configInfo.outputSize.width / 4;
++	context.configuration.awb.measureWindow.v_size = 3 * configInfo.outputSize.height / 4;
++
++	return 0;
++}
++
++uint32_t Awb::estimateCCT(double red, double green, double blue)
++{
++	/* Convert the RGB values to CIE tristimulus values (XYZ) */
++	double X = (-0.14282) * (red) + (1.54924) * (green) + (-0.95641) * (blue);
++	double Y = (-0.32466) * (red) + (1.57837) * (green) + (-0.73191) * (blue);
++	double Z = (-0.68202) * (red) + (0.77073) * (green) + (0.56332) * (blue);
++
++	/* Calculate the normalized chromaticity values */
++	double x = X / (X + Y + Z);
++	double y = Y / (X + Y + Z);
++
++	/* Calculate CCT */
++	double n = (x - 0.3320) / (0.1858 - y);
++	return 449 * n * n * n + 3525 * n * n + 6823.3 * n + 5520.33;
++}
++
++/**
++ * \copydoc libcamera::ipa::Algorithm::process
++ */
++void Awb::process([[maybe_unused]] IPAContext &context, const rkisp1_stat_buffer *stats)
++{
++	const rkisp1_cif_isp_stat *params = &stats->params;
++	const rkisp1_cif_isp_awb_stat *awb = &params->awb;
++
++	/* Get the YCbCr mean values */
++	double yMean = awb->awb_mean[0].mean_y_or_g;
++	double crMean = awb->awb_mean[0].mean_cr_or_r;
++	double cbMean = awb->awb_mean[0].mean_cb_or_b;
++
++	/* Convert from YCbCr to RGB. */
++	double redMean = yMean + 1.402 * (crMean - 128);
++	double blueMean = yMean + 1.772 * (cbMean - 128);
++	double greenMean = yMean - 0.34414 * (cbMean - 128) - 0.71414 * (crMean - 128);
++
++	/* Estimate the red and blue gains to apply in a grey world. */
++	double redGain = greenMean / (redMean + 1);
++	double blueGain = greenMean / (blueMean + 1);
++
++	/* Filter the values to avoid oscillations. */
++	IPAFrameContext &frameContext = context.frameContext;
++
++	frameContext.awb.temperatureK = estimateCCT(redMean, greenMean, blueMean);
++	frameContext.awb.gains.red = 0.2 * redGain +
++				     0.8 * frameContext.awb.gains.red;
++	frameContext.awb.gains.blue = 0.2 * blueGain +
++				      0.8 * frameContext.awb.gains.blue;
++	/* Hardcode the green gain to 1.0. */
++	frameContext.awb.gains.green = 1.0;
++
++	LOG(RkISP1Awb, Debug) << "Gain found for red: " << context.frameContext.awb.gains.red
++			      << " and for blue: " << context.frameContext.awb.gains.blue;
++}
++
++/**
++ * \copydoc libcamera::ipa::Algorithm::prepare
++ */
++void Awb::prepare([[maybe_unused]] IPAContext &context,
++		  rkisp1_params_cfg *params)
++{
++	params->others.awb_gain_config.gain_green_b = 256 * context.frameContext.awb.gains.green;
++	params->others.awb_gain_config.gain_blue = 256 * context.frameContext.awb.gains.blue;
++	params->others.awb_gain_config.gain_red = 256 * context.frameContext.awb.gains.red;
++	params->others.awb_gain_config.gain_green_r = 256 * context.frameContext.awb.gains.green;
++
++	/* Configure the gains to apply. */
++	params->module_en_update |= RKISP1_CIF_ISP_MODULE_AWB_GAIN;
++	/* Update the ISP to apply the gains configured. */
++	params->module_ens |= RKISP1_CIF_ISP_MODULE_AWB_GAIN;
++	params->module_cfg_update |= RKISP1_CIF_ISP_MODULE_AWB_GAIN;
++
++	/* Configure the measure window for AWB. */
++	params->meas.awb_meas_config.awb_wnd = context.configuration.awb.measureWindow;
++	/*
++	 * Measure Y, Cr and Cb means.
++	 * \todo RGB is not working, the kernel seems to not configure it ?
++	 */
++	params->meas.awb_meas_config.awb_mode = RKISP1_CIF_ISP_AWB_MODE_YCBCR;
++	/* Reference Cr and Cb. */
++	params->meas.awb_meas_config.awb_ref_cb = 128;
++	params->meas.awb_meas_config.awb_ref_cr = 128;
++	/* Y values to include are between min_y and max_y only. */
++	params->meas.awb_meas_config.min_y = 16;
++	params->meas.awb_meas_config.max_y = 250;
++	/* Maximum Cr+Cb value to take into account for awb. */
++	params->meas.awb_meas_config.max_csum = 250;
++	/* Minimum Cr and Cb values to take into account. */
++	params->meas.awb_meas_config.min_c = 16;
++	/* Number of frames to use to estimate the mean (0 means 1 frame). */
++	params->meas.awb_meas_config.frames = 0;
++	/* Update AWB measurement unit configuration. */
++	params->module_cfg_update |= RKISP1_CIF_ISP_MODULE_AWB;
++	/* Make sure the ISP is measuring the means for the next frame. */
++	params->module_en_update |= RKISP1_CIF_ISP_MODULE_AWB;
++	params->module_ens |= RKISP1_CIF_ISP_MODULE_AWB;
++}
++
++} /* namespace ipa::rkisp1::algorithms */
++
++} /* namespace libcamera */
+diff --git a/src/ipa/rkisp1/algorithms/awb.h b/src/ipa/rkisp1/algorithms/awb.h
+new file mode 100644
+index 00000000..0a9fb82c
+--- /dev/null
++++ b/src/ipa/rkisp1/algorithms/awb.h
+@@ -0,0 +1,33 @@
++/* SPDX-License-Identifier: LGPL-2.1-or-later */
++/*
++ * Copyright (C) 2021, Ideas On Board
++ *
++ * awb.h - AWB control algorithm
++ */
++
++#pragma once
++
++#include <linux/rkisp1-config.h>
++
++#include "algorithm.h"
++
++namespace libcamera {
++
++namespace ipa::rkisp1::algorithms {
++
++class Awb : public Algorithm
++{
++public:
++	Awb() = default;
++	~Awb() = default;
++
++	int configure(IPAContext &context, const IPACameraSensorInfo &configInfo) override;
++	void prepare(IPAContext &context, rkisp1_params_cfg *params) override;
++	void process(IPAContext &context, const rkisp1_stat_buffer *stats) override;
++
++private:
++	uint32_t estimateCCT(double red, double green, double blue);
++};
++
++} /* namespace ipa::rkisp1::algorithms */
++} /* namespace libcamera */
+diff --git a/src/ipa/rkisp1/algorithms/meson.build b/src/ipa/rkisp1/algorithms/meson.build
+index e6767aa5..faec0eb3 100644
+--- a/src/ipa/rkisp1/algorithms/meson.build
++++ b/src/ipa/rkisp1/algorithms/meson.build
+@@ -2,6 +2,7 @@
+ 
+ rkisp1_ipa_algorithms = files([
+     'agc.cpp',
++    'awb.cpp',
+     'blc.cpp',
+     'sdg.cpp',
+ ])
+diff --git a/src/ipa/rkisp1/ipa_context.cpp b/src/ipa/rkisp1/ipa_context.cpp
+index 992c9225..2f53eb2f 100644
+--- a/src/ipa/rkisp1/ipa_context.cpp
++++ b/src/ipa/rkisp1/ipa_context.cpp
+@@ -78,6 +78,14 @@ namespace libcamera::ipa::rkisp1 {
+  * \brief Hardware revision of the ISP
+  */
+ 
++/**
++ * \var IPASessionConfiguration::awb
++ * \brief AWB parameters configuration of the IPA
++ *
++ * \var IPASessionConfiguration::awb.measureWindow
++ * \brief AWB measure window
++ */
++
+ /**
+  * \var IPASessionConfiguration::sensor
+  * \brief Sensor-specific configuration of the IPA
+@@ -102,6 +110,26 @@ namespace libcamera::ipa::rkisp1 {
+  * The gain should be adapted to the sensor specific gain code before applying.
+  */
+ 
++/**
++ * \var IPAFrameContext::awb
++ * \brief Context for the Automatic White Balance algorithm
++ *
++ * \struct IPAFrameContext::awb.gains
++ * \brief White balance gains
++ *
++ * \var IPAFrameContext::awb.gains.red
++ * \brief White balance gain for R channel
++ *
++ * \var IPAFrameContext::awb.gains.green
++ * \brief White balance gain for G channel
++ *
++ * \var IPAFrameContext::awb.gains.blue
++ * \brief White balance gain for B channel
++ *
++ * \var IPAFrameContext::awb.temperatureK
++ * \brief Estimated color temperature
++ */
++
+ /**
+  * \var IPAFrameContext::sensor
+  * \brief Effective sensor values
+diff --git a/src/ipa/rkisp1/ipa_context.h b/src/ipa/rkisp1/ipa_context.h
+index c447369f..51eae8b6 100644
+--- a/src/ipa/rkisp1/ipa_context.h
++++ b/src/ipa/rkisp1/ipa_context.h
+@@ -12,6 +12,8 @@
+ 
+ #include <libcamera/base/utils.h>
+ 
++#include <libcamera/geometry.h>
++
+ namespace libcamera {
+ 
+ namespace ipa::rkisp1 {
+@@ -22,8 +24,13 @@ struct IPASessionConfiguration {
+ 		utils::Duration maxShutterSpeed;
+ 		double minAnalogueGain;
+ 		double maxAnalogueGain;
++		struct rkisp1_cif_isp_window measureWindow;
+ 	} agc;
+ 
++	struct {
++		struct rkisp1_cif_isp_window measureWindow;
++	} awb;
++
+ 	struct {
+ 		utils::Duration lineDuration;
+ 	} sensor;
+@@ -39,6 +46,16 @@ struct IPAFrameContext {
+ 		double gain;
+ 	} agc;
+ 
++	struct {
++		struct {
++			double red;
++			double green;
++			double blue;
++		} gains;
++
++		double temperatureK;
++	} awb;
++
+ 	struct {
+ 		uint32_t exposure;
+ 		double gain;
+diff --git a/src/ipa/rkisp1/rkisp1.cpp b/src/ipa/rkisp1/rkisp1.cpp
+index ec879ba3..979f2842 100644
+--- a/src/ipa/rkisp1/rkisp1.cpp
++++ b/src/ipa/rkisp1/rkisp1.cpp
+@@ -27,6 +27,7 @@
+ 
+ #include "algorithms/agc.h"
+ #include "algorithms/algorithm.h"
++#include "algorithms/awb.h"
+ #include "algorithms/blc.h"
+ #include "algorithms/sdg.h"
+ #include "libipa/camera_sensor_helper.h"
+@@ -127,6 +128,7 @@ int IPARkISP1::init(const IPASettings &settings, unsigned int hwRevision)
+ 
+ 	/* Construct our Algorithms */
+ 	algorithms_.push_back(std::make_unique<algorithms::Agc>());
++	algorithms_.push_back(std::make_unique<algorithms::Awb>());
+ 	algorithms_.push_back(std::make_unique<algorithms::BlackLevelCorrection>());
+ 	algorithms_.push_back(std::make_unique<algorithms::SensorDeGamma>());
+ 
+-- 
+2.25.1
+
