@@ -74,20 +74,31 @@ do_configure() {
     cp -a ${B}/defconfig ${DEPLOYDIR}
 }
 
-do_compile_append() {
-    config="${B}/.config"
-    if grep -q 'CONFIG_ARM_APPENDED_DTB=y' $config; then
-        oe_runmake -C ${B} dtbs
-    fi
+do_compile_append_armv7a() {
+    oe_runmake -C ${B} dtbs
+}
+
+do_compile_append_armv7e() {
+    oe_runmake -C ${B} dtbs
+}
+
+do_compile_append_aarch64() {
+    oe_runmake -C ${B} dtbs
+}
+
+do_install_append_armv7a() {
+    oe_runmake -C ${B} DEPMOD=echo INSTALL_DTBS_PATH=${D}/boot/dtb dtbs_install
+}
+
+do_install_append_armv7e() {
+    oe_runmake -C ${B} DEPMOD=echo INSTALL_DTBS_PATH=${D}/boot/dtb dtbs_install
+}
+
+do_install_append_aarch64() {
+    oe_runmake -C ${B} DEPMOD=echo INSTALL_DTBS_PATH=${D}/boot/dtb dtbs_install
 }
 
 do_install_append() {
-    config="${B}/.config"
-
-    if grep -q 'CONFIG_ARM_APPENDED_DTB=y' $config; then
-        oe_runmake -C ${B} DEPMOD=echo INSTALL_DTBS_PATH=${D}/boot/dtb dtbs_install
-    fi
-
     if [ ! -d ${D}/boot/dtb ]; then
         # force the creation of dtb directory on boot to have
         install -d ${D}/boot/dtb
