@@ -2,8 +2,8 @@ inherit kernel siteinfo
 
 DEPENDS += "coreutils-native"
 
-SRC_URI_append = " file://fragment-01-core.config "
 SRC_URI_append = " file://fragment-02-systemd.config "
+SRC_URI_append = " file://fragment-03-rpi4.config "
 SRC_URI_append = " file://fragment-10-ledge.config "
 SRC_URI_append = " file://fragment-11-virtio.config "
 SRC_URI_append = " file://fragment-12-security.config "
@@ -15,8 +15,8 @@ SRC_URI_append = " file://fragment-16-watchdog.config "
 SRC_URI_append = " file://i6300esb.conf "
 
 KERNEL_DEFCONFIG = "defconfig"
-KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-01-core.config "
 KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-02-systemd.config "
+KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-03-rpi4.config "
 KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-10-ledge.config "
 KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-11-virtio.config "
 KERNEL_CONFIG_FRAGMENTS_append = " ${WORKDIR}/fragment-12-security.config "

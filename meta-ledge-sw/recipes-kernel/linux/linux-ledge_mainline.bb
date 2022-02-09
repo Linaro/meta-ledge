@@ -9,7 +9,7 @@ DEPENDS += "gmp-native"
 include linux-ledge-common.inc
 include linux-ledge-sign.inc
 
-PR = "r3.ledge"
+PR = "r4.ledge"
 
 LEDGE_KVERSION = "5.15"
 
