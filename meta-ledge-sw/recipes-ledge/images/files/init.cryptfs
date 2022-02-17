@@ -56,7 +56,7 @@ cryptfs_create_enc_rootfs() {
 	echo -n ledge > pfile
 	printf 'YES\n' | cryptsetup --type luks --cipher aes-xts-plain --hash sha256 --use-random --key-file pfile --uuid=${ROOT_UUID} luksFormat ${ROOT_BLK}
 
-	printf 'ledge\ny\n' |  clevis luks bind -d ${ROOT_BLK} tpm2 '{"pcr_ids":"0,1,2,3,4,5,6,7"}' -s 1
+	printf 'ledge\ny\n' |  clevis luks bind -d ${ROOT_BLK} tpm2 '{"pcr_ids":"7"}' -s 1
 	#cryptsetup luksDump ${ROOT_BLK}
 
 	clevis luks pass -d ${ROOT_BLK} -s 1| cryptsetup luksOpen --key-file - ${ROOT_BLK} rootfs
