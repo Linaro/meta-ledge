@@ -5,7 +5,7 @@ HOMEPAGE = ""
 LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=cd95ab417e23b94f381dafc453d70c30"
 
-DEPENDS = "optee-client optee-os python3-pycrypto-native"
+DEPENDS = "optee-client python3-pycrypto-native"
 DEPENDS += "python3-pycryptodomex-native python3-pycrypto-native"
 
 inherit python3native

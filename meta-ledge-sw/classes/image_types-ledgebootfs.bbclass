@@ -8,7 +8,6 @@ do_image_ledgebootfs[depends] += " \
         e2fsprogs-native:do_populate_sysroot \
         dosfstools-native:do_populate_sysroot \
         virtual/kernel:do_deploy \
-	edk2-efi-prebuild-fw:do_deploy \
         ledge-initramfs:do_image_complete \
         "
 
