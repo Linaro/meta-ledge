@@ -1,9 +1,9 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
-# 3.9
+# 3.14
 SRC_URI = "git://github.com/OP-TEE/optee_test.git"
 
-PV="3.9.0+git${SRCPV}"
-SRCREV_ledgecommon = "f461e1d47fcc82eaa67508a3d796c11b7d26656e"
+PV="3.14.0+git${SRCPV}"
+SRCREV_ledgecommon = "f2eb88affbb7f028561b4fd5cbd049d5d704f741"
 
 DEPENDS_append_ledgecommon += "python3-pycryptodomex-native python3-pycrypto-native"
 
