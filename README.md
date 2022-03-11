@@ -1,6 +1,6 @@
 # LEDGE Reference Platform
 
-meta-ledge is the layer that implements the LEDGE reference platform (LEFGE RP).
+meta-ledge is the layer that implements the LEDGE reference platform (LEDGE RP).
 LEDGE RP is designed to be a secure minimal distro that can be built upon. It
 aims to be 'secure by default' saving vendors from having to do the same potentially
 error prone integration themselves.
