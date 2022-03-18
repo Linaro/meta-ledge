@@ -1,6 +1,6 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
-COMPATIBLE_MACHINE = "ledge-qemuarm64"
+COMPATIBLE_MACHINE = "(ledge-qemuarm64|ledge-qemuarm)"
 
 # 3.14
 PV="3.14.0+git${SRCPV}"
