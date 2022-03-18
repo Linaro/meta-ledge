@@ -23,7 +23,7 @@ PACKAGE_INSTALL = " \
    kernel-module-dm-crypt \
    kernel-module-tpm-tis \
    kernel-module-tpm-tis-core \
-   optee-client \
+   ${@bb.utils.contains("MACHINE_FEATURES", "optee", "optee-client", "", d)} \
    e2fsprogs-mke2fs \
    tpm2-abrmd \
    tpm2-tss \
