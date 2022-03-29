@@ -2,9 +2,10 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
 COMPATIBLE_MACHINE = "(ledge-qemuarm64|ledge-qemuarm)"
 
-# 3.14
-PV="3.14.0+git${SRCPV}"
-SRCREV_ledgecommon = "06e1b32f6a7028e039c625b07cfc25fda0c17d53"
+# 3.16
+PV="3.146.0+git${SRCPV}"
+SRCREV_ledgecommon = "945704e6433e31753fb6c3f05e1ce61673dec1d6"
+SRC_URI += " file://pr302.patch "
 
 DEPENDS_append_ledgecommon += "python3-pycryptodomex-native python3-pycrypto-native"
 
