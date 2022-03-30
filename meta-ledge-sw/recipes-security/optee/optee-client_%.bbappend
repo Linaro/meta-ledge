@@ -2,11 +2,20 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
 COMPATIBLE_MACHINE = "(ledge-qemuarm64|ledge-qemuarm)"
 
-# 3.14
-PV="3.14.0+git${SRCPV}"
-SRCREV_ledgecommon = "06e1b32f6a7028e039c625b07cfc25fda0c17d53"
+# 3.16
+PV="3.16.0+git${SRCPV}"
+SRCREV_ledgecommon = "06db73b3f3fdb8d23eceaedbc46c49c0b45fd1e2"
 
 DEPENDS_append_ledgecommon += "python3-pycryptodomex-native python3-pycrypto-native"
+
+SRC_URI_append = " \
+file://0001-libckteec-add-support-for-ECDH-derive.patch \
+	file://0002-tee-supplicant-introduce-struct-tee_supplicant_param.patch \
+	file://0003-tee-supplicant-refactor-argument-parsing-in-main.patch \
+	file://0004-tee-supplicant-rpmb-introduce-readn-wrapper-to-the-r.patch \
+	file://0005-tee-supplicant-rpmb-read-CID-in-one-go.patch \
+	file://0006-tee-supplicant-add-rpmb-cid-command-line-option.patch \
+	"
 
 EXTRA_OECMAKE_append = " \
     -DRPMB_EMU=0 \

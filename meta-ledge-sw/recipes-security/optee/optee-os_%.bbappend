@@ -1,9 +1,11 @@
 
-# 3.14
-PV="3.14.0+git${SRCPV}"
-SRCREV_ledgecommon = "d21befa5e53eae9db469eba1685f5aa5c6f92c2f"
+# 3.16
+PV="3.16.0+git${SRCPV}"
+SRCREV_ledgecommon = "d0b742d1564834dac903f906168d7357063d5459"
 
 COMPATIBLE_MACHINE = "(ledge-qemuarm64|ledge-qemuarm)"
+
+DEPENDS_append += "python3-cryptography-native "
 
 SRC_URI_remove = " \
     file://0001-libutils-provide-empty-__getauxval-implementation.patch \

@@ -1,0 +1,78 @@
+From 179d212d6aed75267e580e00b924f9e50cf4a609 Mon Sep 17 00:00:00 2001
+From: Jerome Forissier <jerome.forissier@linaro.org>
+Date: Fri, 18 Mar 2022 10:55:43 +0100
+Subject: [PATCH 4/6] tee-supplicant: rpmb: introduce readn() wrapper to the
+ read() syscall
+
+read_cid() obtains the ID of the eMMC device by reading from sysfs with
+the read() function. Two bytes are read at a time but short reads (i.e.,
+when only one byte is returned) and EINTR are not handled. Although I
+*think* these situation cannot happen with sysfs, I was unable to find
+any guarantee that it is the case. Therefore, introduce a readn()
+function which does exactly that.
+
+Signed-off-by: Jerome Forissier <jerome.forissier@linaro.org>
+Reviewed-by: Etienne Carriere <etienne.carriere@linaro.org>
+Acked-by: Jens Wiklander <jens.wiklander@linaro.org>
+---
+ tee-supplicant/src/rpmb.c | 37 ++++++++++++++++++++++++++++++++++---
+ 1 file changed, 34 insertions(+), 3 deletions(-)
+
+diff --git a/tee-supplicant/src/rpmb.c b/tee-supplicant/src/rpmb.c
+index 7418e23..a95c60b 100644
+--- a/tee-supplicant/src/rpmb.c
++++ b/tee-supplicant/src/rpmb.c
+@@ -201,6 +201,35 @@ static void close_mmc_fd(int fd)
+ 	close(fd);
+ }
+ 
++/*
++ * Read @n bytes from @fd, takes care of short reads and EINTR.
++ * Adapted from “Advanced Programming In the UNIX Environment” by W. Richard
++ * Stevens and Stephen A. Rago, 2013, 3rd Edition, Addison-Wesley
++ * (EINTR handling was added)
++ */
++static ssize_t readn(int fd, void *ptr, size_t n)
++{
++	size_t nleft = n;
++	ssize_t nread = 0;
++	uint8_t *p = ptr;
++
++	while (nleft > 0) {
++		if ((nread = read(fd, p, nleft)) < 0) {
++			if (errno == EINTR)
++				continue;
++			if (nleft == n)
++				return -1; /* error, nothing read, return -1 */
++			else
++				break; /* error, return amount read so far */
++		} else if (nread == 0) {
++			break; /* EOF */
++		}
++		nleft -= nread;
++		p += nread;
++	}
++	return n - nleft; /* return >= 0 */
++}
++
+ /* Device Identification (CID) register is 16 bytes. It is read from sysfs. */
+ static uint32_t read_cid(uint16_t dev_id, uint8_t *cid)
+ {
+@@ -220,9 +249,11 @@ static uint32_t read_cid(uint16_t dev_id, uint8_t *cid)
+ 	}
+ 
+ 	for (i = 0; i < 16; i++) {
+-		st = read(fd, hex, 2);
+-		if (st < 0) {
+-			EMSG("Read CID error (%s)", strerror(errno));
++		st = readn(fd, hex, 2);
++		if (st != 2) {
++			EMSG("Read CID error");
++			if (errno)
++				EMSG("%s", strerror(errno));
+ 			res = TEEC_ERROR_NO_DATA;
+ 			goto err;
+ 		}
+-- 
+2.25.1
+
