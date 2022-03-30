@@ -75,6 +75,7 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	lvm2-scripts \
 	lvm2-udevrules \
 	lz4 \
+	mmc-utils \
 	modemmanager \
 	mozjs \
 	mpfr \
