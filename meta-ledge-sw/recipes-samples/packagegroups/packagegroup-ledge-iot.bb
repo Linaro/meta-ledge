@@ -86,6 +86,7 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	npth \
 	nss \
 	openldap \
+	opensc \
 	openssl \
 	ostree \
 	p11-kit \
