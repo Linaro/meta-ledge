@@ -75,6 +75,7 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	lvm2-scripts \
 	lvm2-udevrules \
 	lz4 \
+	mmc-utils \
 	modemmanager \
 	mozjs \
 	mpfr \
@@ -86,6 +87,7 @@ RDEPENDS_packagegroup-ledge-iot = "\
 	npth \
 	nss \
 	openldap \
+	opensc \
 	openssl \
 	ostree \
 	p11-kit \
