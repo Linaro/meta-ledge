@@ -13,7 +13,7 @@
 ARG_MNT_TARGET=$1
 ARG_ROOT=$2
 
-function atexit {
+atexit () {
 	# Do not leave tee-supplicant running. The rootfs init (systemd) will
 	# take care of starting it to its taste.
 	[ "$SUPP_PID" ] && kill $SUPP_PID
