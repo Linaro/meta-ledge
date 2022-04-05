@@ -13,7 +13,7 @@
 ARG_MNT_TARGET=$1
 ARG_ROOT=$2
 
-function atexit {
+atexit () {
 	# Do not leave tee-supplicant running. The rootfs init (systemd) will
 	# take care of starting it to its taste.
 	[ "$SUPP_PID" ] && kill $SUPP_PID
@@ -23,7 +23,16 @@ trap atexit EXIT
 
 /usr/sbin/rngd
 modprobe tpm_tis
-tee-supplicant &
+rpmb_cid () {
+  for f in /sys/class/mmc_host/mmc*/mmc*\:*/cid; do
+    [ "$CID" ] && { echo $0: WARNING: multiple eMMC devices found! >&2; return ; }
+    # POSIX shells don't expand globbing patterns that match no file
+    [ -e $f ] || return
+    CID=$(cat $f)
+  done
+  [ "$CID" ] && echo --rpmb-cid $CID
+}
+tee-supplicant $(rpmb-cid)&
 SUPP_PID=$!
 modprobe tpm_ftpm_tee
 
