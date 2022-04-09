@@ -16,5 +16,5 @@ CORE_IMAGE_BASE_INSTALL += " \
 EXTRA_USERS_PARAMS = "\
     useradd -P ledge ledge; \
     groupadd wheel; \
-    usermod -a -G sudo,wheel,adm ledge; \
+    usermod -a -G sudo,wheel,adm${@bb.utils.contains("MACHINE_FEATURES", "optee", ",teeclnt", "", d)} ledge; \
     "

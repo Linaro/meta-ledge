@@ -1,0 +1,1 @@
+KERNEL=="tee[0-9]*", MODE="0660", OWNER="root", GROUP="teeclnt"
