@@ -16,6 +16,7 @@ file://0001-libckteec-add-support-for-ECDH-derive.patch \
 	file://0005-tee-supplicant-rpmb-read-CID-in-one-go.patch \
 	file://0006-tee-supplicant-add-rpmb-cid-command-line-option.patch \
 	file://create-tee-supplicant-env \
+	file://optee-udev.rules \
 	"
 
 EXTRA_OECMAKE_append = " \
@@ -24,7 +25,21 @@ EXTRA_OECMAKE_append = " \
 
 do_install_append() {
 	install -D -p -m0755 ${WORKDIR}/create-tee-supplicant-env ${D}${sbindir}/create-tee-supplicant-env
-	sed -i "s|^ExecStart=.*$|EnvironmentFile=-@localstatedir@/run/tee-supplicant.env\nExecStartPre=@sbindir@/create-tee-supplicant-env @localstatedir@/run/tee-supplicant.env\nExecStart=@sbindir@/tee-supplicant $RPMB_CID $OPTARGS|" ${D}${systemd_system_unitdir}/tee-supplicant.service
+	sed -i "s|^ExecStart=.*$|User=tee\nGroup=tee\nEnvironmentFile=-@localstatedir@/run/tee-supplicant.env\nExecStartPre=@sbindir@/create-tee-supplicant-env @localstatedir@/run/tee-supplicant.env\nExecStart=@sbindir@/tee-supplicant $RPMB_CID $OPTARGS|" ${D}${systemd_system_unitdir}/tee-supplicant.service
 	sed -i -e s:@sbindir@:${sbindir}:g \
 	       -e s:@localstatedir@:${localstatedir}:g ${D}${systemd_system_unitdir}/tee-supplicant.service
+	install -d ${D}${sysconfdir}/udev/rules.d
+	install -m 0644 ${WORKDIR}/optee-udev.rules ${D}${sysconfdir}/udev/rules.d/optee.rules
+	install -d -m770 -o root -g tee ${D}${localstatedir}/lib/tee
 }
+
+inherit useradd
+
+USERADD_PACKAGES = "${PN}"
+# Create groups 'tee' and 'teeclnt'. Permissions are set elsewhere on
+# /dev/teepriv0 and /dev/tee0 so that tee-supplicant should run as a user that
+# is a member of the 'tee' group, and TEE client applications should runs as a
+# user that is a member of the 'teeclnt' group.
+GROUPADD_PARAM_${PN} = "--system tee; --system teeclnt"
+# Create user 'tee' member of group 'tee' to run tee-supplicant
+USERADD_PARAM_${PN} = "--system -d / -M -s /bin/nologin -c 'User for tee-supplicant' -g tee tee"
