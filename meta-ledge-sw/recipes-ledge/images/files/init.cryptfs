@@ -25,9 +25,12 @@ trap atexit EXIT
 modprobe tpm_tis
 rpmb_cid () {
   for f in /sys/class/mmc_host/mmc*/mmc*\:*/cid; do
-    [ "$CID" ] && { echo $0: WARNING: multiple eMMC devices found! >&2; return ; }
     # POSIX shells don't expand globbing patterns that match no file
     [ -e $f ] || return
+    devtype=$(echo $f | sed 's/cid/type/')
+    [ ! -e $devtype ] && continue
+    [ "$(cat $devtype)" != "MMC" ] && continue
+    [ "$CID" ] && { echo $0: WARNING: multiple eMMC devices found! >&2; return ; }
     CID=$(cat $f)
   done
   [ "$CID" ] && echo --rpmb-cid $CID

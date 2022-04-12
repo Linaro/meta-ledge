@@ -11,9 +11,12 @@
 [ "$1" ] || { echo Usage: $0 FILE >&2; exit 1; }
 
 for f in /sys/class/mmc_host/mmc*/mmc*\:*/cid; do
-  [ "$CID" ] && { echo $0: Multiple eMMC devices found, not chosing one automatically >&2; exit 2; }
   # POSIX shells don't expand globbing patterns that match no file
   [ -e $f ] || exit 0
+  devtype=$(echo $f | sed 's/cid/type/')
+  [ ! -e $devtype ] && continue
+  [ "$(cat $devtype)" != "MMC" ] && continue
+  [ "$CID" ] && { echo $0: Multiple eMMC devices found, not chosing one automatically >&2; exit 2; }
   CID=$(cat $f)
 done
 [ "$CID" ] && echo RPMB_CID="--rpmb-cid $CID" >$1
