@@ -11,11 +11,11 @@ include linux-ledge-sign.inc
 
 PR = "r4.ledge"
 
-LEDGE_KVERSION = "5.15"
+LEDGE_KVERSION = "5.15.34"
 
 # Stable kernel URL
 SRC_URI = "https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-${LEDGE_KVERSION}.tar.xz;name=kernel"
-SRC_URI[kernel.sha256sum] = "57b2cf6991910e3b67a1b3490022e8a0674b6965c74c12da1e99d138d1991ee8"
+SRC_URI[kernel.sha256sum] = "a7514685392f0f89b337fa252a10a004c6a97d23e8d1126059c8e373398fdb69"
 
 # force SOURCE_DATE_EPOCH for build reproductible
 # SOURCE_DATE_EPOCH = "1557103378"
