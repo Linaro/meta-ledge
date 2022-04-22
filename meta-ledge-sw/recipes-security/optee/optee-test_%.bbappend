@@ -18,3 +18,4 @@ EXTRA_OEMAKE_append = " LIBGCC_LOCATE_CFLAGS=--sysroot=${STAGING_DIR_HOST} \
                     "
 
 SRC_URI_append_arm = " file://0001-Correct-support-of-32bits.patch "
+SRC_URI_append = " file://0001-regression_6000.c-detect-available-storage-IDs-at-ru.patch "
