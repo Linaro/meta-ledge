@@ -13,14 +13,6 @@
 ARG_MNT_TARGET=$1
 ARG_ROOT=$2
 
-atexit () {
-	# Do not leave tee-supplicant running. The rootfs init (systemd) will
-	# take care of starting it to its taste.
-	[ "$SUPP_PID" ] && kill $SUPP_PID
-}
-
-trap atexit EXIT
-
 /usr/sbin/rngd
 modprobe tpm_tis
 rpmb_cid () {
@@ -36,7 +28,6 @@ rpmb_cid () {
   [ "$CID" ] && echo --rpmb-cid $CID
 }
 tee-supplicant $(rpmb_cid)&
-SUPP_PID=$!
 modprobe tpm_ftpm_tee
 
 

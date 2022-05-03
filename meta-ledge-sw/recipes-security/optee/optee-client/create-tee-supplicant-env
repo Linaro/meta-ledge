@@ -7,8 +7,18 @@
 # storage.
 # No file is generated if no device is found (not an error) or if multiple
 # eMMCs are found (which is an error).
+# This script is called by the systemd tee-supplicant.service as an
+# ExecStartPre entry just before starting the tee-supplicant process.
 
 [ "$1" ] || { echo Usage: $0 FILE >&2; exit 1; }
+
+# Take care of killing the instance of tee-supplicant started by init.cryptfs
+# in the initramfs, which is not suitable for later use because it cannot
+# load Trusted Applications from the root fs. This instance cannot be killed
+# much sooner either, because the kernel's tpm_ftpm_tee driver needs a running
+# supplicant to be able to access RPMB secure storage.
+SUPP_PID=$(pgrep tee-supplicant)
+[ "$SUPP_PID" ] && kill $SUPP_PID
 
 for f in /sys/class/mmc_host/mmc*/mmc*\:*/cid; do
   # POSIX shells don't expand globbing patterns that match no file
