@@ -13,7 +13,14 @@
 ARG_MNT_TARGET=$1
 ARG_ROOT=$2
 
-/usr/sbin/rngd
+atexit () {
+  [ "$RNGD_PID" ] && kill $RNGD_PID
+}
+
+trap atexit EXIT
+
+/usr/sbin/rngd -f&
+RNGD_PID=$!
 modprobe tpm_tis
 rpmb_cid () {
   for f in /sys/class/mmc_host/mmc*/mmc*\:*/cid; do
