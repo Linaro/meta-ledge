@@ -29,6 +29,7 @@ SRC_URI += " \
     file://0002-KERNEL-stm32mp157-dts-add-ftpm-support.patch \
     file://0003-rk3399-rock-pi-4.dtsi-enable-imx219-isp.patch \
     file://0004-rk3399-rock-pi-4.dtsi-add-optee.patch \
+    file://0005-add-optee-reserve-memory.patch \
 "
 
 PV = "mainline-5.15"
