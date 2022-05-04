@@ -40,7 +40,6 @@ cryptfs_create_enc_rootfs() {
 	if [ -z "${ROOT_BLK}" ]; then
 		echo "No rootfs with label rootfs check you /proc/cmdline:"
 		cat /proc/cmdline
-		sleep 120
 		/sbin/reboot
 		return 1
 	fi
@@ -92,7 +91,6 @@ if [ $? -ne 0 ]; then
 	if [ -z "${ROOT_BLK}" ]; then
 		echo "No blk dev matching root=UUID=${uuid} check your /proc/cmdline:"
 		cat /proc/cmdline
-		sleep 120
 		/sbin/reboot
 		exit 1
 	fi
