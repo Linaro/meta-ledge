@@ -13,7 +13,14 @@
 ARG_MNT_TARGET=$1
 ARG_ROOT=$2
 
-/usr/sbin/rngd
+atexit () {
+  [ "$RNGD_PID" ] && kill $RNGD_PID
+}
+
+trap atexit EXIT
+
+/usr/sbin/rngd -f&
+RNGD_PID=$!
 modprobe tpm_tis
 rpmb_cid () {
   for f in /sys/class/mmc_host/mmc*/mmc*\:*/cid; do
@@ -40,7 +47,6 @@ cryptfs_create_enc_rootfs() {
 	if [ -z "${ROOT_BLK}" ]; then
 		echo "No rootfs with label rootfs check you /proc/cmdline:"
 		cat /proc/cmdline
-		sleep 120
 		/sbin/reboot
 		return 1
 	fi
@@ -92,7 +98,6 @@ if [ $? -ne 0 ]; then
 	if [ -z "${ROOT_BLK}" ]; then
 		echo "No blk dev matching root=UUID=${uuid} check your /proc/cmdline:"
 		cat /proc/cmdline
-		sleep 120
 		/sbin/reboot
 		exit 1
 	fi
